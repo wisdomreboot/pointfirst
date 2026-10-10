@@ -46,7 +46,7 @@ The Anatomy cards, the Plan checklist and the lexicon are plain Markdown files. 
 
 ## Host your own copy
 
-Fork this repository and turn on GitHub Pages, or serve the files from any static host. The `index.html` file also works on its own, opened from disk in Chrome or Edge.
+Fork this repository and turn on GitHub Pages, or serve the files from any static host. If you host it elsewhere, change the address in the page's `canonical`, `og:url` and `og:image` tags, and in `robots.txt` and `sitemap.xml`. The `index.html` file also works on its own, opened from disk in Chrome or Edge.
 
 ## The deal
 

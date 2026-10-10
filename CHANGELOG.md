@@ -6,6 +6,7 @@ The version number is shown in the command palette under "About Point First". It
 
 - The Wisdom Reboot mark sits beside the name in the top bar and opens jonathandutoit.com in a new tab, so a link never pulls you away from a draft.
 - The Library and the welcome page say who made Point First.
+- The W mark is now the favicon and home-screen icon, and the page carries a proper description, share image and search details for when the link is shared or found.
 - The Anatomy and Plan files no longer show up in the Library as if they were essays. Only the lexicon was being left out before.
 
 ## 1.0.5 (2026-10-10)
