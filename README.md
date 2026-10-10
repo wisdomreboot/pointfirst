@@ -30,6 +30,33 @@ Everything runs in your browser. There is no server, no account and no tracking.
 - **Find and Replace,** with a map of matches.
 - **Version history,** kept before anything replaces text.
 - **Publish** as Markdown or HTML.
+- **Notes:** write `%% a note to yourself %%` anywhere, as in Obsidian. Notes stay in the file, sit shaded on the page, and are left out of the word count, the checks, the ownership meter and Publish.
+- **Smart punctuation:** `...` becomes `…` and quotes curl as you type, but never inside code or a link's address. Backspace straight after puts back what you typed. Two hyphens can become an em dash if you turn that on.
+
+## Keyboard
+
+Ctrl on Windows and Linux, Cmd on a Mac. Every command is also in the palette.
+
+| Keys | Does |
+|---|---|
+| Ctrl K | Command palette: every command and every essay |
+| Ctrl O | Open an essay by name |
+| Ctrl S | Save |
+| Ctrl F | Find and replace |
+| Ctrl / | Add a note, turn the selection into one, or remove a note's markers |
+| Alt 1, 2, 3 | Library, Write, Revise |
+| Alt W | Look up the word at the cursor |
+| Alt Shift W | Open the Words tab |
+| `*` `_` `~` or `` ` `` with text selected | Wrap the selection |
+| Enter in a list | Continue the list; on an empty item, end it |
+| Tab, Shift Tab in a list | Indent, outdent |
+| Esc | Close whatever is open |
+
+Shortcuts follow the letter, not the key's position, so they work on Dvorak and other layouts.
+
+## Section breaks
+
+Use `* * *` on its own line, or `---` with a blank line above it. A line of dashes straight under text turns that text into a heading in Obsidian, Ghost and GitHub; Point First shows it the same way and flags it in the Lexicon.
 
 ## Word lists
 

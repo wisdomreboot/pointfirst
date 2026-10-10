@@ -2,6 +2,27 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.0.8 (2026-10-11)
+
+Notes
+- Write `%% a note to yourself %%` anywhere in a draft, the same syntax Obsidian uses for comments. Ctrl or Cmd + / opens a note at the cursor, turns a selection into one, or, inside a note, removes its markers and keeps the words.
+- Notes sit on a faint band in lighter text, so they read as asides without relying on colour.
+- The coach treats notes as absent: they don't count as words, never trigger a check, and don't touch the ownership meter. Publish already left them out.
+- An "N notes" link beside the word count in Revise lists them; pick one to jump to it. The palette has Add a note and Go to a note.
+
+Section breaks that survive Obsidian
+- A line of dashes straight under text is a heading in Obsidian, Ghost and GitHub, not a break. Publish now shows it the same way, and the Lexicon flags it as a Heading trap with the fix: a blank line above the dashes, or `* * *`.
+
+Smart punctuation
+- As you type, `...` becomes `…`, straight quotes curl the right way, and apostrophes turn into ’. Never inside inline or fenced code, a link's address, a web address or an HTML tag. Backspace straight after a change puts back what you typed.
+- Two hyphens can become an em dash. It starts off, since the Lexicon questions em dashes; turn it on in the palette if you want it. `---` on a line of its own always stays as typed.
+- Smart punctuation itself can be turned off in the palette. Both settings travel with the folder.
+- The checks read curly apostrophes and the ellipsis character the same as their plain forms, so "it’s" matches the lexicon like "it's", and … ends a sentence like ... does.
+
+Keyboard
+- Alt+W now follows the letter W on every layout. On a Mac it used to depend on where the W key sits on a QWERTY keyboard, so it missed on Dvorak; Option+W, which a Mac types as ∑, now counts as W.
+- The README lists every shortcut.
+
 ## 1.0.7 (2026-10-11)
 
 A security pass. Nothing changes in how Point First looks or works.
