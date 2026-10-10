@@ -44,9 +44,13 @@ Point First copies the data lists into `.pointfirst/word-lists` and three editab
 
 The Anatomy cards, the Plan checklist and the lexicon are plain Markdown files. Keep your own `pointfirst-anatomy.md`, `pointfirst-plan.md` or `pointfirst-lexicon.md` at the top level of your folder and Point First uses yours instead of the built-in one. **Make these cards yours** in the Anatomy pane saves the built-in cards there as a starting point. Delete the file to go back.
 
+## Security
+
+Point First runs only code published in this repository and can connect to nothing but its own address; the browser enforces both. See [SECURITY.md](SECURITY.md) for what it can and cannot reach, and how to report a problem.
+
 ## Host your own copy
 
-Fork this repository and turn on GitHub Pages, or serve the files from any static host. If you host it elsewhere, change the address in the page's `canonical`, `og:url` and `og:image` tags, and in `robots.txt` and `sitemap.xml`. The `index.html` file also works on its own, opened from disk in Chrome or Edge.
+Fork this repository and turn on GitHub Pages, or serve the files from any static host. If you host it elsewhere, change the address in the page's `canonical`, `og:url` and `og:image` tags, and in `robots.txt` and `sitemap.xml`. If you change the inline script in `index.html`, run `python3 tools/csp.py index.html` to refresh the security policy, or the browser will refuse to run it. The `index.html` file also works on its own, opened from disk in Chrome or Edge.
 
 ## The deal
 

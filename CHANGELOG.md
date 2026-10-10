@@ -2,6 +2,15 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.0.7 (2026-10-11)
+
+A security pass. Nothing changes in how Point First looks or works.
+- The browser now runs only Point First's own code. The page's security policy names the one inline script by its fingerprint, so code slipped into the page some other way is refused. Point First could already connect to nothing but its own address; that stays.
+- Links and images in Publish keep only web, mail and in-page addresses. An essay file carrying a `javascript:` link, for example from a shared folder, now gets a harmless `#` instead.
+- Publish formatting can no longer reach inside a link's address, so a crafted address can't break out of it.
+- Adding word lists refuses a zip that would unpack to more than any word list needs, so a malformed or hostile zip can't fill the folder or freeze the tab.
+- Point First's own records and settings files are checked before use. A damaged or crafted file is ignored instead of hanging the Library or breaking a view.
+
 ## 1.0.6 (2026-10-10)
 
 - The Wisdom Reboot mark sits beside the name in the top bar and opens jonathandutoit.com in a new tab, so a link never pulls you away from a draft.

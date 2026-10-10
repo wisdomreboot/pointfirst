@@ -2,7 +2,7 @@
    Keeps the app itself, so it opens without a connection.
    Essays never pass through here. They live in the folder the writer connects.
    Word lists are not cached either. They live in that folder too. */
-const CACHE='pointfirst-v3';
+const CACHE='pointfirst-v4';
 /* Install: cache the page under both its addresses, then take over without waiting. */
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html'])));self.skipWaiting()});
 /* Activate: delete caches from older versions, then serve the open tabs straight away. */
