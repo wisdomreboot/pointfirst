@@ -26,7 +26,7 @@ Everything runs in your browser. There is no server, no account and no tracking.
 
 **Also included**
 
-- **Ownership tracking:** every character is tagged as typed or pasted, and a meter shows how much of the draft is yours.
+- **Ownership tracking:** every character is tagged as written here or not, and a meter shows how much of the draft is yours. The rule: anything not written inside Point First is not yours until you claim it. Pasted text, an essay written in another app, and a change made to an essay outside Point First all count as not yours. Rewrite it, or select it and choose Claim.
 - **Find and Replace,** with a map of matches.
 - **Version history,** kept before anything replaces text.
 - **Publish** as Markdown or HTML.

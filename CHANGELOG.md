@@ -2,6 +2,17 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.0.9 (2026-10-12)
+
+Not yours until you claim it
+- One rule for the ownership meter: anything not written inside Point First is not yours until you claim it. Until now, text that arrived from outside without a paste counted as typed.
+- A change made to an essay in another app (Obsidian, a sync, an AI tool) now counts as not yours. The parts you wrote here keep their marks; only what changed is tinted.
+- An essay Point First has never saved, such as one written in Obsidian, opens as 0% yours. Opening it still never writes to it.
+- Text that comes back from a version in History, or from the disk copy after a clash, counts the same way: what differs from your current draft is not yours until you claim it.
+- To claim, select the text and choose Claim (Ctrl or Cmd + A first for the whole essay), or rewrite it.
+- Every saved essay now keeps its record in `.pointfirst/records`, so outside changes can always be told apart from your own writing. Essays saved by earlier versions, which kept no record when fully typed, are trusted as yours the first time you open them and get a record then.
+- The Library's "% yours" reads the same way, so an essay edited elsewhere shows it there too.
+
 ## 1.0.8 (2026-10-11)
 
 Notes
