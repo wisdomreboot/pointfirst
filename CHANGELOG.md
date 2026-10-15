@@ -2,6 +2,17 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.1.0 (2026-10-16)
+
+A page that shows structure, not syntax
+- The page is now a real Markdown editor. Headings are set in the display face at their own sizes, bold is bold, italic is italic, a link reads as its words, quotes carry a rule, lists keep their shape when a line wraps, and `* * *` sits as a centred break.
+- Markdown marks show only where the cursor is. Move into a bold word and its stars appear; move on and they step back. A heading's hashes show while the cursor is on its line. A link's address shows while the cursor is in the link.
+- The file is unchanged: still plain Markdown, character for character, so Obsidian, GitHub and Ghost read it exactly as before.
+- Ctrl or Cmd + B and I make the selection bold or italic, or undo it if it already is. With nothing selected, they open an empty pair with the cursor inside. They follow the letter, so Dvorak works.
+- Everything else carries over: the lenses, X-ray, the Pasted view and Claim, notes, Find and Replace, the word popover, dimming, typewriter scrolling, forward only, smart punctuation and list continuation.
+- Typing is faster on long essays.
+- The editor is CodeMirror 6, built into the file so Point First still works offline. `tools/codemirror/build.sh` rebuilds it.
+
 ## 1.0.9 (2026-10-12)
 
 Not yours until you claim it
