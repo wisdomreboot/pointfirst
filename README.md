@@ -8,7 +8,7 @@ Open it at **https://pointfirst.jonathandutoit.com**
 
 Point First is one HTML file for writing essays in your own voice. It reads and saves plain Markdown files in a folder you choose, such as your essays folder in Obsidian, and coaches while you write. It never generates, rewrites or suggests prose. It asks. The writer writes.
 
-Everything runs in your browser. There is no server, no account and no tracking. Point First works only in a folder you connect: your essays, their history, Point First's own records and its word lists all live there, so clearing the browser loses nothing. It needs a browser that can open a folder: Chrome or Edge on a computer.
+Everything runs in your browser. There is no server, no account and no cookies. The page counts its own visits (see Page-view count below), and nothing you write is ever sent anywhere. Point First works only in a folder you connect: your essays, their history, Point First's own records and its word lists all live there, so clearing the browser loses nothing. It needs a browser that can open a folder: Chrome or Edge on a computer.
 
 **Three rooms**
 
@@ -75,9 +75,15 @@ The Anatomy cards, the Plan checklist and the lexicon are plain Markdown files. 
 
 Point First runs only code published in this repository and can connect to nothing but its own address; the browser enforces both. See [SECURITY.md](SECURITY.md) for what it can and cannot reach, and how to report a problem.
 
+## Page-view count
+
+Each time the page opens, it tells [GoatCounter](https://www.goatcounter.com), a cookie-free counting service, that it was opened. It sends the page address (never anything after `#`), the site you came from, the page title and your screen size. Nothing you write, nothing about your folder and none of your settings is sent, and nothing is stored on your device to recognise you. GoatCounter receives your IP address and browser name with the request, as every website does; it says it holds them only in memory, for up to 8 hours, to tell one visit from the next, and never writes them to disk.
+
+The count does not run on your own computer's addresses or when the file is opened from disk, and you can switch it off in any browser by opening the page once with `#toggle-goatcounter` at the end of its address. The counter is GoatCounter's published `count.v5.js` (ISC licence), kept unchanged inside `index.html`; `tools/check.py` confirms it still matches the published file.
+
 ## Host your own copy
 
-Fork this repository and turn on GitHub Pages, or serve the files from any static host. If you host it elsewhere, change the address in the page's `canonical`, `og:url` and `og:image` tags, and in `robots.txt` and `sitemap.xml`. If you change the inline script in `index.html`, run `python3 tools/csp.py index.html` to refresh the security policy, or the browser will refuse to run it. The `index.html` file also works on its own, opened from disk in Chrome or Edge.
+Fork this repository and turn on GitHub Pages, or serve the files from any static host. If you host it elsewhere, change the address in the page's `canonical`, `og:url` and `og:image` tags, and in `robots.txt` and `sitemap.xml`. If you change the inline script in `index.html`, run `python3 tools/csp.py index.html` to refresh the security policy, or the browser will refuse to run it. The `index.html` file also works on its own, opened from disk in Chrome or Edge. Change or remove the `data-goatcounter` address in `index.html` and in its security policy, or your visitors are counted on mine.
 
 ## The deal
 
