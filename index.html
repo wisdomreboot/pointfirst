@@ -6,7 +6,7 @@
      script hashed below, and Point First may connect only to its own address. After
      editing the inline script, run  python3 tools/csp.py index.html  (or the app will
      stop running). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Tnsk7htmViwzhGBE6FXW5ftaDe6cC0vVoiBn7ypzupk=' 'sha256-MtGJbopLFltMgAdY0p/Emc3NnXkT7NWyo82X6o3/4Hk='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Tnsk7htmViwzhGBE6FXW5ftaDe6cC0vVoiBn7ypzupk=' 'sha256-70i5lpTlJopfBd6YFCRGySEgTOxbNpiN60QNW9DsiRQ='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Point First: a writing desk that never writes for you</title>
 <meta name="description" content="Point First is a free writing desk that coaches while you write and never writes for you. Your essays stay as plain Markdown files in your own folder.">
 <meta name="author" content="Jonathan du Toit">
@@ -472,6 +472,28 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .pal-foot{padding:8px 18px;border-top:1px solid var(--line-soft);font-size:12.5px;color:var(--faint)}
 /* History: versions on the left, the difference on the right.
    Added text is underlined, removed text struck through. Readable without colour. */
+/* Shortcuts: every key Point First answers to, in groups, with a filter on top.
+   Keys are drawn as key caps, so the sheet reads without colour. */
+.keys{position:fixed;inset:0;z-index:72;background:rgba(20,18,14,.32);display:flex;justify-content:center;align-items:flex-start;padding-block:5vh;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.keys[hidden]{display:none}
+.keys-in{width:min(980px,100%);max-height:90vh;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.28);display:flex;flex-direction:column;overflow:hidden}
+.keys-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px 14px 22px;border-bottom:1px solid var(--line)}
+.keys-head h2{font-family:var(--display);font-size:19px;font-weight:700;margin:0}
+#keysQ{flex:1;min-width:180px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font-family:var(--body);font-size:15px;outline:none}
+#keysQ:focus{border-color:var(--accent)}
+.keys-body{overflow:auto;padding:6px 22px 22px;columns:2 380px;column-gap:40px}
+.kgroup{break-inside:avoid;padding-top:16px}
+.kgroup h3{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 6px}
+.krow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:4px 16px;padding:6px 0;border-bottom:1px solid var(--line-soft)}
+.krow .kd{font-size:15px;line-height:1.4;color:var(--ink);min-width:0}
+.krow .kn{display:block;font-size:12.5px;color:var(--ink-soft);line-height:1.4}
+.krow .kk{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:baseline;gap:4px;text-align:right}
+.krow .kor{font-size:12px;color:var(--faint);margin:0 2px}
+kbd.kc{display:inline-block;min-width:1.7em;text-align:center;font-family:var(--mono);font-size:11.5px;line-height:1;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:4px 6px}
+code.kc{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var(--panel);border-radius:4px;padding:2px 6px;white-space:pre}
+.kempty{padding:24px 0;color:var(--ink-soft);font-size:15px}
+.keys-foot{padding:9px 22px;border-top:1px solid var(--line-soft);font-size:12.5px;color:var(--faint)}
+@media (max-width:640px){.keys{padding-block:0}.keys-in{max-height:100vh;border-radius:0}.keys-body{columns:1}}
 .hist{position:fixed;inset:0;z-index:65;background:rgba(20,18,14,.32);display:flex;justify-content:center;padding:4vh 3vw}
 .hist[hidden]{display:none}
 .hist-in{width:min(1120px,100%);background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.28);display:flex;flex-direction:column;overflow:hidden}
@@ -867,7 +889,7 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 <div class="pal" id="pal" hidden role="dialog" aria-label="Command palette"><div class="pal-in">
   <input id="palIn" type="text" autocomplete="off" spellcheck="false" aria-label="Command or essay">
   <div class="pal-list" id="palList" role="listbox"></div>
-  <div class="pal-foot">Arrows to move, Enter to run, Esc to close</div></div></div>
+  <div class="pal-foot" id="palFoot">Arrows to move, Enter to run, Esc to close</div></div></div>
 <!-- Publish: copy or download the essay as Markdown or converted HTML, with a preview. -->
 <div class="pub" id="pub" hidden role="dialog" aria-label="Publish"><div class="pub-in">
   <div class="pub-head"><h2>Publish</h2><div class="pubseg" role="group" aria-label="Format"><button data-fmt="md">Markdown</button><button data-fmt="html">HTML</button></div><span class="spacer"></span><button class="tbtn" id="pubClose">Close</button></div>
@@ -877,6 +899,12 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 <div class="hist" id="hist" hidden role="dialog" aria-label="History"><div class="hist-in">
   <div class="hist-head"><h2 id="histTitle">History</h2><button class="tbtn" id="histClose">Close</button></div>
   <div class="hist-body"><ol class="hist-list" id="histList"></ol><div class="hist-view"><div class="hist-bar" id="histBar"></div><div class="hist-diff" id="histDiff"></div></div></div>
+</div></div>
+<!-- Shortcuts: every key, grouped, with a filter. Filled by script. -->
+<div class="keys" id="keys" hidden role="dialog" aria-label="Keyboard shortcuts"><div class="keys-in">
+  <div class="keys-head"><h2>Shortcuts</h2><input id="keysQ" type="search" placeholder="Find one, for example bold" autocomplete="off" spellcheck="false" aria-label="Find a shortcut"><button class="tbtn" id="keysClose">Close</button></div>
+  <div class="keys-body" id="keysBody"></div>
+  <div class="keys-foot" id="keysFoot"></div>
 </div></div>
 <!-- Find and Replace: a floating bar and a map of matches down the right edge. -->
 <div class="findbar" id="findbar" hidden role="dialog" aria-label="Find and replace">
@@ -2972,7 +3000,7 @@ const FS_OK=typeof window.showDirectoryPicker==='function';
 /* The hidden back room inside the writer's folder.
    The dot keeps it out of the file list and out of Obsidian's view. */
 const SIDE='.pointfirst';
-const PF_VERSION='1.1.0';
+const PF_VERSION='1.1.1';
 /* Tiny key-value store in IndexedDB.
    Holds what localStorage cannot: the folder handle, and browser copies of word lists.
    A failed read comes back empty, never an error. */
@@ -3450,6 +3478,9 @@ document.addEventListener('mousedown',e=>{if(!$('#files').hidden&&!e.target.clos
    (and Option+Shift+W „), so those count as W too.
    Alt keys match the physical key: on a Mac, Option changes the character typed. */
 document.addEventListener('keydown',e=>{const mod=e.metaKey||e.ctrlKey;
+  /* The Shortcuts sheet: Ctrl or Cmd + ? anywhere, or ? alone outside any text field. Esc closes it. */
+  if(!$('#keys').hidden&&e.key==='Escape'){e.preventDefault();closeKeys();return}
+  if(e.key==='?'&&!e.altKey&&(mod||!(editor.hasFocus||e.target.closest('input,textarea,select,[contenteditable="true"]')))){e.preventDefault();if($('#keys').hidden)openKeys();else closeKeys();return}
   if(mod&&!e.altKey&&e.key==='/'&&room!=='library'){e.preventDefault();toggleNote();return}
   if(mod&&!e.altKey&&!e.shiftKey&&editor.hasFocus&&room!=='library'&&!xray&&/^[bi]$/i.test(e.key)){e.preventDefault();toggleWrap(e.key.toLowerCase()==='b'?'**':'*');return}
   if(e.altKey&&!mod&&/^[wW∑„]$/.test(e.key)){e.preventDefault();if(e.shiftKey)openWordsTab(true);else openQuick();return}
@@ -4148,6 +4179,93 @@ function takeNewFm(){const f=newFm;newFm='---\nstatus: drafting\n---\n';return f
 const isMac=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent);
 /* Modifier key shown in shortcut labels. */
 const MOD=isMac?'⌘':'Ctrl';
+/* Alt on Windows and Linux, Option on a Mac. */
+const ALT=isMac?'⌥':'Alt';
+
+/* ===== shortcuts: every key Point First answers to =====
+   One list. The Shortcuts sheet is drawn from it, and the palette takes its key hints
+   from it. A new shortcut goes in here as well as in its handler, or the sheet will not show it.
+   Each row: id, what it does, the keys (several ways are alternatives), and a note.
+   A key written as text (in typed:true rows) is something you type, not press together. */
+function shortcutGroups(){const M=MOD,A=ALT,S='Shift';
+  const redo=isMac?[[M,S,'Z']]:[[M,'Y'],[M,S,'Z']];
+  const word=isMac?A:M;
+  return[
+  {title:'Format',rows:[
+    {id:'bold',d:'Bold',k:[[M,'B']],n:'With nothing selected, opens ** ** with the cursor inside.'},
+    {id:'italic',d:'Italic',k:[[M,'I']],n:'Press again to take it off.'},
+    {id:'note',d:'Note to yourself',k:[[M,'/']],n:'Makes %% a note %%. Notes stay in the file and never publish.'},
+    {id:'wrap',d:'Wrap a selection',typed:true,k:[['*'],['_'],['`'],['~']],n:'Select words, then type the mark. * twice makes bold, ~ twice strikethrough.'}]},
+  {title:'Markdown as you type',rows:[
+    {d:'Heading',typed:true,k:[['# '],['## '],['### ']],n:'At the start of a line. More hashes, smaller heading.'},
+    {d:'Bold, italic',typed:true,k:[['**bold**'],['*italic*']]},
+    {d:'List',typed:true,k:[['- '],['1. ']],n:'Enter carries the list on. Enter on an empty item ends it.'},
+    {d:'Task',typed:true,k:[['- [ ] ']]},
+    {d:'Quote',typed:true,k:[['> ']]},
+    {d:'Link',typed:true,k:[['[words](https://…)']],n:'The address hides when the cursor leaves the link.'},
+    {d:'Code',typed:true,k:[['`code`']]},
+    {d:'Highlight',typed:true,k:[['==words==']]},
+    {d:'Scene break',typed:true,k:[['* * *']],n:'On a line of its own, with a blank line above. Safe in Obsidian, Ghost and GitHub.'},
+    {d:'Note',typed:true,k:[['%% note %%']]}]},
+  {title:'Lists',rows:[
+    {d:'Next item',k:[['Enter']],n:'Inside a list, the next bullet or number appears.'},
+    {d:'Indent an item',k:[['Tab']]},
+    {d:'Outdent an item',k:[[S,'Tab']]}]},
+  {title:'Typing',rows:[
+    {d:'Ellipsis',typed:true,k:[['...']],n:'Becomes …'},
+    {d:'Curly quotes',typed:true,k:[['"'],["'"]],n:'Curl the right way, and ’ in words like it’s.'},
+    {d:'Put back what you typed',k:[['Backspace']],n:'Straight after one of these changes.'},
+    {d:'Em dash',typed:true,k:[['--']],n:'Only if you turn it on in the palette. Off by default.'}]},
+  {title:'Edit',rows:[
+    {d:'Undo',k:[[M,'Z']]},
+    {d:'Redo',k:redo},
+    {d:'Select all',k:[[M,'A']]},
+    {d:'Jump a word',k:[[word,'←'],[word,'→']]},
+    {d:'Select as you move',k:[[S,'←'],[S,'→'],[S,word,'→']]},
+    {d:'Delete a word',k:[[word,'Backspace']]},
+    {d:'Start or end of the line',k:isMac?[[M,'←'],[M,'→']]:[['Home'],['End']]},
+    {d:'Top or end of the essay',k:isMac?[[M,'↑'],[M,'↓']]:[[M,'Home'],[M,'End']]}]},
+  {title:'Find',rows:[
+    {id:'find',d:'Find and replace',k:[[M,'F']],n:'Selected words fill the box.'},
+    {d:'Next match',k:[['Enter']]},
+    {d:'Previous match',k:[[S,'Enter']]},
+    {d:'Replace this match',k:[['Enter']],n:'In the Replace box.'},
+    {d:'Close',k:[['Esc']]}]},
+  {title:'Words',rows:[
+    {id:'quick',d:'Look up the word at the cursor',k:[[A,'W']],n:'Follows the letter W, so Dvorak works.'},
+    {id:'words',d:'Open the Words pane',k:[[A,S,'W']]},
+    {d:'Use a word',k:[['1–9'],['Enter']],n:'In the word popover. The number beside each word picks it.'},
+    {d:'Move through the words',k:[['↑'],['↓']]},
+    {d:'Next list',k:[['Tab']],n:'Synonyms, related words and more, when the word lists are in your folder.'},
+    {d:'Close the popover',k:[['Esc']]}]},
+  {title:'Move around',rows:[
+    {id:'library',d:'Library',k:[[A,'1']]},
+    {id:'write',d:'Write',k:[[A,'2']]},
+    {id:'revise',d:'Revise',k:[[A,'3']]},
+    {id:'palette',d:'Every action, by name',k:[[M,'K']],n:'Type a few letters of what you want.'},
+    {id:'open',d:'Open an essay',k:[[M,'O']]},
+    {id:'save',d:'Save now',k:[[M,'S']],n:'Point First also saves as you write.'},
+    {id:'keys',d:'This list',k:[[M,'?'],['?']],n:'? on its own works when you are not typing in the page.'},
+    {d:'Close a panel or menu',k:[['Esc']]},
+    {d:'Step through versions',k:[['↑'],['↓']],n:'In History.'}]}
+  ]}
+/* The keys for one shortcut, as plain text for the palette: "Ctrl B". */
+function keyHint(id){for(const g of shortcutGroups())for(const r of g.rows)if(r.id===id)return r.k[0].join(' ');return''}
+/* Draws one key or typed sequence as caps or code. */
+function keyCaps(combo,typed){if(typed)return`<code class="kc">${esc(combo.join(''))}</code>`;
+  return combo.map(k=>`<kbd class="kc">${esc(k)}</kbd>`).join('')}
+/* Fills the sheet, keeping only rows that match the filter. Words in any order. */
+function renderKeys(){const q=($('#keysQ').value||'').trim().toLowerCase(),terms=q.split(/\s+/).filter(Boolean);
+  const hit=(g,r)=>{const hay=(g.title+' '+r.d+' '+(r.n||'')+' '+r.k.map(c=>c.join(' ')).join(' ')).toLowerCase();return terms.every(t=>hay.includes(t))};
+  let html='';
+  for(const g of shortcutGroups()){const rows=g.rows.filter(r=>hit(g,r));if(!rows.length)continue;
+    html+=`<section class="kgroup"><h3>${esc(g.title)}</h3>`+rows.map(r=>`<div class="krow"><div class="kd">${esc(r.d)}${r.n?`<span class="kn">${esc(r.n)}</span>`:''}</div><div class="kk">${r.k.map(c=>keyCaps(c,r.typed)).join('<span class="kor">or</span>')}</div></div>`).join('')+'</section>'}
+  $('#keysBody').innerHTML=html||`<p class="kempty">Nothing matches “${esc(q)}”. Try a plainer word, like bold, undo or find.</p>`}
+/* Opens the Shortcuts sheet, filter focused. Closes the palette first if it is open. */
+function openKeys(){if(!$('#pal').hidden)closePal();$('#keys').hidden=false;$('#keysQ').value='';
+  $('#keysFoot').textContent=`${MOD} ? opens this list from anywhere. ${MOD} K finds any action by name.`;renderKeys();$('#keysQ').focus()}
+/* Closes the sheet and hands focus back to the page. */
+function closeKeys(){if($('#keys').hidden)return;$('#keys').hidden=true;if(room!=='library')editor.focus()}
 
 /* Frontmatter: read and write one key, leave every other line as it was.
    Reads one key, quotes stripped. Empty string when the key is missing. */
@@ -4491,10 +4609,13 @@ function paletteCommands(){const C=[];const add=(label,group,run,keys)=>C.push({
   
     /* Lens and coach commands need Revise. rv moves there quietly. */
     const rv=()=>{if(room!=='revise')setRoom('revise',true)};
-  add('Library','Go to',()=>setRoom('library'),'Alt 1');add('Write','Go to',()=>setRoom('write'),'Alt 2');add('Revise','Go to',()=>setRoom('revise'),'Alt 3');
-  add('New essay','Essay',()=>newEssay());add('Save','Essay',()=>saveCommand(),MOD+' S');add('Copy as Markdown','Essay',()=>$('#copyBtn').click());
+  add('Library','Go to',()=>setRoom('library'),keyHint('library'));add('Write','Go to',()=>setRoom('write'),keyHint('write'));add('Revise','Go to',()=>setRoom('revise'),keyHint('revise'));
+  add('Keyboard shortcuts','Point First',()=>openKeys(),keyHint('keys'));
+  add('Open an essay','Essay',()=>openPal('open'),keyHint('open'));
+  add('Bold','Format',()=>{if(room==='library')return;editor.focus();toggleWrap('**')},keyHint('bold'));add('Italic','Format',()=>{if(room==='library')return;editor.focus();toggleWrap('*')},keyHint('italic'));
+  add('New essay','Essay',()=>newEssay());add('Save','Essay',()=>saveCommand(),keyHint('save'));add('Copy as Markdown','Essay',()=>$('#copyBtn').click());
   add('History of this essay','Essay',()=>openHistory());
-  if(room!=='library'){add('Add a note','Notes',()=>toggleNote(),MOD+' /');add('Go to a note','Notes',()=>openPal('notes'))}
+  if(room!=='library'){add('Add a note','Notes',()=>toggleNote(),keyHint('note'));add('Go to a note','Notes',()=>openPal('notes'))}
   
     /* Stage and target for the open essay. */
     STAGES.forEach(([k,l])=>add('Move to '+l,'Stage',()=>setStage(curEntry(),k)));
@@ -4507,15 +4628,15 @@ function paletteCommands(){const C=[];const add=(label,group,run,keys)=>C.push({
   add('Claim the selection as yours','Lens',()=>$('#claimBtn').click());
   
     /* Words and the coach panes. */
-    add('Look up the word at the cursor','Words',()=>{if(room==='library')setRoom('write',true);editor.focus();openQuick()},'Alt W');
-  add('Open Words','Words',()=>{rv();openWordsTab(true)},'Alt Shift W');
+    add('Look up the word at the cursor','Words',()=>{if(room==='library')setRoom('write',true);editor.focus();openQuick()},keyHint('quick'));
+  add('Open Words','Words',()=>{rv();openWordsTab(true)},keyHint('words'));
   [['Voice','tab-voice'],['Lexicon','tab-lex'],['Words','tab-words'],['Anatomy','tab-anat'],['Plan','tab-struct']].forEach(([l,id])=>add('Coach: '+l,'Coach',()=>{rv();$('#'+id).click()}));
   add('Voice: personal','Coach',()=>setMode('personal'));add('Voice: impersonal','Coach',()=>setMode('impersonal'));
   
     /* View, publishing, and Write focus modes. */
     THEMES.forEach(([k,l])=>add('Theme: '+l,'View',()=>{theme=k;applyTheme(k)}));
   add('Publish as Markdown','Essay',()=>openPublish('md'));add('Publish as HTML','Essay',()=>openPublish('html'));
-  add('Find and replace','Essay',()=>openFind(),'Ctrl F');
+  add('Find and replace','Essay',()=>openFind(),keyHint('find'));
   add('About Point First','Point First',()=>toast('Point First '+PF_VERSION+'. The folder holds your work; this file is just the desk.',4000));
   [['off','Dim: off'],['sentence','Dim: sentence'],['paragraph','Dim: paragraph']].forEach(([k,l])=>add(l,'Write',()=>{fx.dim=k;saveFx();if(room!=='write')setRoom('write')}));
   add(fx.type?'Typewriter: off':'Typewriter: on','Write',()=>{fx.type=!fx.type;saveFx()});
@@ -4667,6 +4788,10 @@ function shellInit(){
     /* Top bar essay: stage menu with a folder, Library without one. A second click closes. */
     $('#docid').addEventListener('click',e=>{if(dirState!=='ready'){setRoom('library');return}const m=$('#smenu');if(!m.hidden){m.hidden=true;return}openStageMenu(e.currentTarget,curEntry())});
   $('#histBtn').addEventListener('click',()=>openHistory());
+  $('#keysQ').addEventListener('input',renderKeys);$('#keysClose').addEventListener('click',closeKeys);
+  $('#keys').addEventListener('mousedown',e=>{if(e.target.id==='keys')closeKeys()});
+  $('#palFoot').textContent=`Arrows to move, Enter to run, Esc to close. ${MOD} ? lists every shortcut.`;
+  $('#cmdBtn').title=`Every action, by name (${MOD} K). Every shortcut: ${MOD} ?`;
   $('#histClose').addEventListener('click',closeHistory);
   $('#hist').addEventListener('mousedown',e=>{if(e.target.id==='hist')closeHistory()});
   

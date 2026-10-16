@@ -2,6 +2,14 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.1.1 (2026-10-16)
+
+Shortcuts
+- Ctrl or Cmd + ? opens a list of every shortcut: formatting, Markdown you can type, lists, smart punctuation, editing, Find, Words and moving around. Press ? on its own when you are not typing in the page. It is in the palette too, as Keyboard shortcuts.
+- Type in the box at the top to narrow it: "bold" shows bold.
+- Mac shows ⌘ and ⌥, Windows and Linux show Ctrl and Alt.
+- The palette now has Bold, Italic and Open an essay, and takes its key hints from the same list, so the two always agree.
+
 ## 1.1.0 (2026-10-16)
 
 A page that shows structure, not syntax
