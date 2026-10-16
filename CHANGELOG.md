@@ -2,6 +2,13 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.1.2 (2026-10-17)
+
+Page-view count
+- Point First counts its visits through GoatCounter, which uses no cookies and stores nothing on your device. Each page open sends the page address (never anything after #), the referring site, the page title and the screen size. Nothing you write is sent. It skips your own computer's addresses and the file opened from disk, and #toggle-goatcounter at the end of the address switches it off in that browser. The README and SECURITY.md now say so, in place of "no tracking".
+- The first attempt linked GoatCounter's script from its server. The page's security policy refuses that, so nothing was counted, and opened from disk the link broke. The counter is now GoatCounter's pinned version 5, unchanged, inside index.html, and the policy allows the count to reach pointfirst.goatcounter.com and nowhere else.
+- A check, tools/check.py, now runs on every pull request: the page boots cleanly under its policy, the counter is still the published file, a real page load sends one count with nothing from after #, and local or from-disk copies send none.
+
 ## 1.1.1 (2026-10-16)
 
 Shortcuts
