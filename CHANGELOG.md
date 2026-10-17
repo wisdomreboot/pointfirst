@@ -2,12 +2,27 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
-## 1.1.2 (2026-10-17)
+## 1.4.0 (2026-10-17)
 
-Page-view count
-- Point First counts its visits through GoatCounter, which uses no cookies and stores nothing on your device. Each page open sends the page address (never anything after #), the referring site, the page title and the screen size. Nothing you write is sent. It skips your own computer's addresses and the file opened from disk, and #toggle-goatcounter at the end of the address switches it off in that browser. The README and SECURITY.md now say so, in place of "no tracking".
-- The first attempt linked GoatCounter's script from its server. The page's security policy refuses that, so nothing was counted, and opened from disk the link broke. The counter is now GoatCounter's pinned version 5, unchanged, inside index.html, and the policy allows the count to reach pointfirst.goatcounter.com and nowhere else.
-- A check, tools/check.py, now runs on every pull request: the page boots cleanly under its policy, the counter is still the published file, a real page load sends one count with nothing from after #, and local or from-disk copies send none.
+Your files, with other apps around
+- Point First and Obsidian (or a sync app, or a second Point First tab) can now share an essay without stepping on each other. When you come back to Point First, it looks at the open essay's file. Changed in another app while you had nothing unsaved here: the new version loads where you left off, and what you had goes to History. Changed while you had unsaved words: you choose which to keep, as before. Nothing is overwritten.
+- Rename or move an essay in Obsidian while it is open, or while Point First is closed, and Point First follows it by its id. Before, it carried on under the old name and could make a second copy.
+- Delete an essay outside Point First while it is open, and Point First says so and never writes it back on its own. Your words are kept, on the page and in its History. Put it back restores it in place, with its history still linked. Close it lets it go.
+- A folder that can't be reached (moved, renamed, or a sync drive such as pCloud offline) is named as such. Nothing is ever taken as deleted while the folder itself is out of reach. Your words stay in the browser, and Try again picks up where you were once the folder is back.
+- A sync app that touches a file's timestamp without changing its words no longer shows as a change made outside.
+- With Point First open in two tabs, a reload could pair one essay's unsaved words with the other essay's file and write them into it. The browser's copy of your draft and the record of which essay it belongs to are now kept together, so that can't happen. When another tab saves the essay you have open, the new version appears at once. The first time a second tab opens, a note says so.
+- A save that fails (a sync lock, a full disk) is tried again a few times, further apart each time. The word beside the essay in the top bar now says where your words are: saved means saved in your folder, never only in this browser. It says "not saved", "paused", "needs a choice", "not in folder" or "kept here" when that is the truth.
+- History never thins its safety versions: those kept before a disk version loads, before an overwrite or a restore, during a conflict, and around a delete made outside.
+- Fewer writes into a synced folder: the daily word count goes to the folder at most once a minute, and when you leave the tab, instead of after every pause.
+
+Fixed
+- Library: showing archived essays, then deleting the last one outside Point First, left the Library stuck in an empty archived view until a refresh. The Library button now always leads back to every essay, and the archived view closes itself when nothing is archived.
+- Library: right after archiving an essay from its row, it reappeared under Not staged by its file name. It now leaves the list at once.
+- A new essay's file was named the moment you paused while typing its title, so a pause halfway gave "Half a.md". The file is named once the title is finished, or once the essay has 25 words.
+- Lists: Enter on an empty item now leaves a blank line before the next paragraph, so Markdown keeps that paragraph out of the list. An empty nested item steps out one level first. Enter just after the bullet of an item with words no longer removes the bullet.
+- Typing with an input method (Japanese, Chinese, Korean, or accents made with dead keys): Enter that confirms a word no longer starts a list item, leaves the title, opens an essay from Find an essay, or runs Find. Arrow keys that choose a word no longer jump to the title.
+- Switching rooms closes whatever was open over the old one: Find, the palette, the shortcuts list, History, Publish, the file list.
+- The version shown in the app had stayed at 1.1.2 since the page-view change. It now matches this changelog.
 
 ## 1.3.0 (2026-10-17)
 
@@ -32,6 +47,13 @@ Links, the way Obsidian and Ghost make them
 - Typing `[` over a selection wraps it as a link too, beside `*`, `_`, `` ` `` and `~`.
 - An essay with no title takes its suggested file name from the first line's words, without link addresses or notes.
 - The palette moves to Ctrl or Cmd + P, Obsidian's palette key. Ctrl O still opens an essay by name, as Obsidian's quick switcher does.
+
+## 1.1.2 (2026-10-17)
+
+Page-view count
+- Point First counts its visits through GoatCounter, which uses no cookies and stores nothing on your device. Each page open sends the page address (never anything after #), the referring site, the page title and the screen size. Nothing you write is sent. It skips your own computer's addresses and the file opened from disk, and #toggle-goatcounter at the end of the address switches it off in that browser. The README and SECURITY.md now say so, in place of "no tracking".
+- The first attempt linked GoatCounter's script from its server. The page's security policy refuses that, so nothing was counted, and opened from disk the link broke. The counter is now GoatCounter's pinned version 5, unchanged, inside index.html, and the policy allows the count to reach pointfirst.goatcounter.com and nowhere else.
+- A check, tools/check.py, now runs on every pull request: the page boots cleanly under its policy, the counter is still the published file, a real page load sends one count with nothing from after #, and local or from-disk copies send none.
 
 ## 1.1.1 (2026-10-16)
 

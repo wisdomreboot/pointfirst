@@ -1,0 +1,21 @@
+import sys; sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+from h2 import go, check, ESSAY
+async def suite(c):
+    a = await c.tab()
+    await a.fs('write', 'alpha.md', ESSAY('Alpha', 'Original words. %% a private note %% See [the source](https://example.com).', 'aaaa11'))
+    await a.connect(); await a.open('Alpha')
+    await a.type(' Added later.'); await a.settle()
+    await a.ev("openHistory()"); await a.wait(800)
+    items = await a.ev("[...document.querySelectorAll('#histList .hs')].map(x=>x.textContent)")
+    check('H1 History lists the opened version', any('When you opened it' in x for x in items), items)
+    idx = await a.ev("histSnaps.findIndex(s=>s.why==='opened')")
+    await a.ev(f"restoreSnap({idx})"); await a.wait(1200)
+    disk = await a.read('alpha.md') or ''
+    check('H1 restore puts the old words back on disk', 'Added later.' not in disk and 'Original words.' in disk, disk)
+    files = await a.fs('list')
+    check('H1 the replaced text is kept as a version', any('before-restore' in f for f in files), [f for f in files if 'history' in f])
+    await a.ev("openPublish('md')"); await a.wait(500)
+    md = await a.ev("pubData&&pubData.md||''")
+    check('H2 Publish leaves the note out and keeps the link', 'private note' not in md and '[the source](https://example.com)' in md, md[:200])
+    await a.ev("closePub()")
+go(suite)

@@ -29,6 +29,7 @@ Everything runs in your browser. There is no server, no account and no cookies. 
 - **Ownership tracking:** every character is tagged as written here or not, and a meter shows how much of the draft is yours. The rule: anything not written inside Point First is not yours until you claim it. Pasted text, an essay written in another app, and a change made to an essay outside Point First all count as not yours. Rewrite it, or select it and choose Claim.
 - **Find and Replace,** with a map of matches.
 - **Version history,** kept before anything replaces text.
+- **Safe beside other apps:** edit an essay in Obsidian and Point First shows the new version when you come back, keeping what you had in History. Rename or move an essay and Point First follows it. Delete one and Point First never writes it back unless you choose Put it back. If the folder can't be reached, say a sync drive is offline, nothing is taken as deleted and your words wait in the browser until it returns.
 - **Publish** as Markdown or HTML.
 - **Notes:** write `%% a note to yourself %%` anywhere, as in Obsidian. Notes stay in the file, sit shaded on the page, and are left out of the word count, the checks, the ownership meter and Publish.
 - **Smart punctuation:** `...` becomes `…` and quotes curl as you type, but never inside code or a link's address. Backspace straight after puts back what you typed. Two hyphens can become an em dash if you turn that on.
@@ -94,6 +95,8 @@ The count does not run on your own computer's addresses or when the file is open
 ## Host your own copy
 
 Fork this repository and turn on GitHub Pages, or serve the files from any static host. If you host it elsewhere, change the address in the page's `canonical`, `og:url` and `og:image` tags, and in `robots.txt` and `sitemap.xml`. If you change the inline script in `index.html`, run `python3 tools/csp.py index.html` to refresh the security policy, or the browser will refuse to run it. The `index.html` file also works on its own, opened from disk in Chrome or Edge. Change or remove the `data-goatcounter` address in `index.html` and in its security policy, or your visitors are counted on mine.
+
+Before releasing a change, run `python3 tools/tests/run_all.py`. It drives the real page in a headless browser against a simulated folder that can be edited, renamed, deleted, taken offline or made to refuse writes, and checks that nothing written is lost or overwritten, that the app never gets stuck, and that writing stays smooth.
 
 ## The deal
 
