@@ -9,6 +9,15 @@ Page-view count
 - The first attempt linked GoatCounter's script from its server. The page's security policy refuses that, so nothing was counted, and opened from disk the link broke. The counter is now GoatCounter's pinned version 5, unchanged, inside index.html, and the policy allows the count to reach pointfirst.goatcounter.com and nowhere else.
 - A check, tools/check.py, now runs on every pull request: the page boots cleanly under its policy, the counter is still the published file, a real page load sends one count with nothing from after #, and local or from-disk copies send none.
 
+## 1.2.0 (2026-10-17)
+
+Links, the way Obsidian and Ghost make them
+- Ctrl or Cmd + K makes a link. Selected words become `[words]()` with the cursor ready for the address. A selected address becomes `[](address)` with the cursor where the words go. With nothing selected you get `[]()`.
+- Paste a web address over selected words and they become a link. Only the address counts as pasted; the words keep their marks.
+- Typing `[` over a selection wraps it as a link too, beside `*`, `_`, `` ` `` and `~`.
+- An essay with no title takes its suggested file name from the first line's words, without link addresses or notes.
+- The palette moves to Ctrl or Cmd + P, Obsidian's palette key. Ctrl O still opens an essay by name, as Obsidian's quick switcher does.
+
 ## 1.1.1 (2026-10-16)
 
 Shortcuts

@@ -39,20 +39,24 @@ Ctrl on Windows and Linux, Cmd on a Mac. Every command is also in the palette.
 
 | Keys | Does |
 |---|---|
-| Ctrl K | Command palette: every command and every essay |
+| Ctrl P | Command palette: every command and every essay |
 | Ctrl O | Open an essay by name |
+| Ctrl B, Ctrl I | Bold, italic; press again to take it off |
+| Ctrl K | Link: selected words become `[words]()`, ready for the address |
+| Paste an address over selected words | Link them |
+| Ctrl ? | Every shortcut, in one list |
 | Ctrl S | Save |
 | Ctrl F | Find and replace |
 | Ctrl / | Add a note, turn the selection into one, or remove a note's markers |
 | Alt 1, 2, 3 | Library, Write, Revise |
 | Alt W | Look up the word at the cursor |
 | Alt Shift W | Open the Words tab |
-| `*` `_` `~` or `` ` `` with text selected | Wrap the selection |
+| `*` `_` `~` `` ` `` or `[` with text selected | Wrap the selection; `[` makes it a link |
 | Enter in a list | Continue the list; on an empty item, end it |
 | Tab, Shift Tab in a list | Indent, outdent |
 | Esc | Close whatever is open |
 
-Shortcuts follow the letter, not the key's position, so they work on Dvorak and other layouts.
+Shortcuts follow the letter, not the key's position, so they work on Dvorak and other layouts. Where Obsidian and Ghost share a key, Point First uses the same one.
 
 ## Section breaks
 
