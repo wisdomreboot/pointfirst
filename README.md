@@ -35,20 +35,26 @@ Everything runs in your browser. There is no server, no account and no cookies. 
 
 ## Keyboard
 
-Ctrl on Windows and Linux, Cmd on a Mac. Every command is also in the palette.
+Ctrl on Windows and Linux, Cmd on a Mac. Where Obsidian, Ghost, Word and Google Docs agree on a key, Point First uses that key. Shortcuts follow the letter, not the key's position, so they work on Dvorak and other layouts. Ctrl ? lists them all inside the app.
 
 | Keys | Does |
 |---|---|
 | Ctrl P | Command palette: every command and every essay |
 | Ctrl O | Open an essay by name |
+| Ctrl S | Save (Point First also saves as you write) |
+| Ctrl ? | Every shortcut, in one list |
 | Ctrl B, Ctrl I | Bold, italic; press again to take it off |
 | Ctrl K | Link: selected words become `[words]()`, ready for the address |
 | Paste an address over selected words | Link them |
-| Ctrl ? | Every shortcut, in one list |
-| Ctrl S | Save |
-| Ctrl F | Find and replace |
 | Ctrl / | Add a note, turn the selection into one, or remove a note's markers |
+| Ctrl F | Find (in the Library, find an essay) |
+| Ctrl H, or Cmd Option F on a Mac | Replace |
+| Enter, Ctrl G or F3 | Next match; add Shift for the previous one |
+| Ctrl Z, Ctrl Y or Ctrl Shift Z | Undo, redo |
 | Alt 1, 2, 3 | Library, Write, Revise |
+| N | New essay, in the Library |
+| Up, Down | Move between essays in the Library |
+| Enter in the title | Go to the page; Up on the page's first line goes back |
 | Alt W | Look up the word at the cursor |
 | Alt Shift W | Open the Words tab |
 | `*` `_` `~` `` ` `` or `[` with text selected | Wrap the selection; `[` makes it a link |
@@ -56,7 +62,7 @@ Ctrl on Windows and Linux, Cmd on a Mac. Every command is also in the palette.
 | Tab, Shift Tab in a list | Indent, outdent |
 | Esc | Close whatever is open |
 
-Shortcuts follow the letter, not the key's position, so they work on Dvorak and other layouts. Where Obsidian and Ghost share a key, Point First uses the same one.
+Ctrl N can't be used for a new essay: Chrome keeps it for a new window.
 
 ## Section breaks
 

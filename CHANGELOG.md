@@ -9,6 +9,21 @@ Page-view count
 - The first attempt linked GoatCounter's script from its server. The page's security policy refuses that, so nothing was counted, and opened from disk the link broke. The counter is now GoatCounter's pinned version 5, unchanged, inside index.html, and the policy allows the count to reach pointfirst.goatcounter.com and nowhere else.
 - A check, tools/check.py, now runs on every pull request: the page boots cleanly under its policy, the counter is still the published file, a real page load sends one count with nothing from after #, and local or from-disk copies send none.
 
+## 1.3.0 (2026-10-17)
+
+Counts read prose only
+- Web addresses no longer count as words, and no longer count for or against the ownership meter. `[these words](https://…)` counts as "these words". An essay full of sources reads as yours when the prose is. The Library's % yours, word counts and reading grade follow the same rule.
+
+Keys everyone already knows
+- Replace: Ctrl H on Windows and Linux, Cmd Option F on a Mac (Cmd H hides the app there), as in Obsidian, Word and Google Docs. Find opens with the cursor in Replace.
+- Next and previous match: Ctrl or Cmd + G and F3, with Shift for back, as well as Enter in the Find box.
+- Library: Ctrl or Cmd + F finds an essay. Down goes from the find box to the list, Up and Down move between essays, Enter opens one. N starts a new essay. (Ctrl N can't be used: Chrome keeps it for a new window.)
+- Title and page: Enter or Down in the title goes to the start of the page. Up on the page's first line goes back to the title.
+- The shortcuts list, the palette and the README show all of these.
+
+Fixed
+- Leaving an essay written outside Point First (by New essay, or by opening another) could do nothing the first time. Point First tried to keep a closing version in History, which needed to write an id into the file first. An essay Point First has never saved now keeps no closing version: its file is already that version, and opening or leaving it never writes to it.
+
 ## 1.2.0 (2026-10-17)
 
 Links, the way Obsidian and Ghost make them
