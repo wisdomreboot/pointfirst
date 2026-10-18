@@ -2,6 +2,22 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.5.0 (2026-10-18)
+
+Tables
+- A table in an essay now shows as a table: a quiet grid with the heading row on a faint band, columns aligned by the colons in its dash line, and bold, links and code working inside cells. Move the cursor into it, or click a cell, and it opens to its Markdown for editing, the same way bold opens to its stars. Move on and it becomes a table again.
+- Tab goes to the next cell and selects what is in it; Shift+Tab goes back. Tab past the last cell adds a row. Enter adds a row under the one you are in. Enter on an empty last row ends the table, with a blank line after it, the way an empty list item ends a list.
+- Insert table, in the palette, starts a blank two-column table with blank lines around it, the first heading selected.
+- Arrow keys stop at a table instead of passing over it.
+- The file keeps every table exactly as typed. Point First never re-spaces one, so a table moves between Point First, Obsidian, Ghost and Backchat unchanged. Publish already made real HTML tables.
+- The shortcuts list has a Tables group.
+
+Counting
+- List bullets and lines of dashes no longer count as words. A table's words count; its pipes and dash line do not. In Revise, each table row reads as its own sentence instead of running on into the next.
+
+Writing
+- Tab in a paragraph now does nothing, instead of moving the cursor out of the essay. In a list it still indents. Esc then Tab leaves the page, for anyone using the keyboard to move around.
+
 ## 1.4.0 (2026-10-17)
 
 Your files, with other apps around

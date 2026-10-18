@@ -16,7 +16,7 @@ import functools, http.server, os, socket, socketserver, subprocess, sys, thread
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.abspath(os.path.join(HERE, '..', '..'))
-SUITES = ['s_files', 's_tabs', 's_tabs2', 's_more', 's_ui', 's_write', 's_upgrade', 's_hist']
+SUITES = ['s_files', 's_tabs', 's_tabs2', 's_more', 's_ui', 's_write', 's_upgrade', 's_hist', 's_tables']
 
 class Quiet(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *a): pass

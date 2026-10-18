@@ -32,6 +32,7 @@ Everything runs in your browser. There is no server, no account and no cookies. 
 - **Safe beside other apps:** edit an essay in Obsidian and Point First shows the new version when you come back, keeping what you had in History. Rename or move an essay and Point First follows it. Delete one and Point First never writes it back unless you choose Put it back. If the folder can't be reached, say a sync drive is offline, nothing is taken as deleted and your words wait in the browser until it returns.
 - **Publish** as Markdown or HTML.
 - **Notes:** write `%% a note to yourself %%` anywhere, as in Obsidian. Notes stay in the file, sit shaded on the page, and are left out of the word count, the checks, the ownership meter and Publish.
+- **Tables:** a table shows as a table and opens to its Markdown when the cursor goes in. Tab moves between cells, Enter adds a row. The file keeps it exactly as typed.
 - **Smart punctuation:** `...` becomes `…` and quotes curl as you type, but never inside code or a link's address. Backspace straight after puts back what you typed. Two hyphens can become an em dash if you turn that on.
 
 ## Keyboard
