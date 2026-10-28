@@ -6,7 +6,7 @@
      scripts hashed below, and Point First may connect only to its own address and its
      page-view counter. After editing an inline script, run  python3 tools/csp.py index.html
      (or the app will stop running). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nkOR9cGMsk3kM7bvMdix8che5BxvCtJ0soZkFoBjclo=' 'sha256-aijZWJUa+M/T+YvI5Ex0SN++ta+X7X6WbHxYW9SpTI8=' 'sha256-N4JwZU1SkdetRPgIJlS9LDDd8yMeAwTBQOeS85wBHBE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pointfirst.goatcounter.com; connect-src 'self' https://pointfirst.goatcounter.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nkOR9cGMsk3kM7bvMdix8che5BxvCtJ0soZkFoBjclo=' 'sha256-aijZWJUa+M/T+YvI5Ex0SN++ta+X7X6WbHxYW9SpTI8=' 'sha256-jwqZcp13KBArVH7eFvgmC66xeJM7gjsrivD9KNuSW4A='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pointfirst.goatcounter.com; connect-src 'self' https://pointfirst.goatcounter.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Point First: a writing desk that never writes for you</title>
 <meta name="description" content="Point First is a free writing desk that coaches while you write and never writes for you. Your essays stay as plain Markdown files in your own folder.">
 <meta name="author" content="Jonathan du Toit">
@@ -575,6 +575,14 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .openers{margin:8px 0 0 19px;display:flex;flex-direction:column;gap:3px;border-left:2px solid var(--accent-soft);padding-left:12px}
 .op{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);line-height:1.45}
 .op b{color:var(--accent-ink);font-weight:600}
+/* The skim test: openings on the left edge, endings in full ink, a wrapped line indented under its
+   opening. Paragraphs sit apart. A word shared across the break between sentences is underlined. */
+.skim .op{cursor:pointer;padding-left:1.4em;text-indent:-1.4em}
+.skim .op:hover{color:var(--ink)}
+.skim .op.para{margin-top:9px}
+.skim .op-gap{color:var(--faint)}
+.skim .op-end{color:var(--ink)}
+.skim .op u{text-decoration-thickness:1.5px;text-underline-offset:3px}
 /* Lexicon pane: counts by severity, then groups of flagged phrases.
    Each phrase shows its better word beside it, and how often it appears. */
 .lexsum{display:flex;gap:8px;margin-bottom:16px}
@@ -699,12 +707,12 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .stop.empty .sl{color:var(--faint)}
 .stop[aria-pressed="true"] .disc{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 .stop[aria-pressed="true"] .sl{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
-/* One row per essay: title, progress, words, grade, share yours, last edited, stage.
+/* One row per essay: title, progress, words, share yours, last edited, stage.
    The open essay's title is underlined, not tinted. */
 .lgroup{margin:0 0 30px}
 .lgroup h2{font-family:var(--display);font-size:19px;font-weight:700;margin:0 0 6px;display:flex;gap:10px;align-items:baseline}
 .lgroup h2 span{font-family:var(--body);font-weight:400;font-size:15px;color:var(--faint)}
-.lrow{display:grid;grid-template-columns:minmax(0,1fr) 96px 110px 64px 74px 44px 108px;align-items:center;gap:14px;padding:11px 10px;border-top:1px solid var(--line-soft);border-radius:8px}
+.lrow{display:grid;grid-template-columns:minmax(0,1fr) 96px 110px 74px 44px 108px;align-items:center;gap:14px;padding:11px 10px;border-top:1px solid var(--line-soft);border-radius:8px}
 .lrow:hover{background:var(--surface)}
 .lr-open{all:unset;cursor:pointer;min-width:0;display:block}
 .lr-open:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:4px}
@@ -715,7 +723,7 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .lr-prog i{display:block;height:100%;background:var(--ink-soft)}
 .lr-prog:empty{background:transparent}
 .lr-prog.done i{background:var(--ink)}
-.lr-n,.lr-g,.lr-o,.lr-d{font-size:14px;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lr-n,.lr-o,.lr-d{font-size:14px;color:var(--ink-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
 .lr-n small{color:var(--faint);font-size:13px}
 .lr-d{text-align:right}
 .lr-stage{justify-self:end;border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:4px 12px;font-family:var(--body);font-size:13.5px;color:var(--ink)}
@@ -728,7 +736,7 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .lwelcome p{font-size:18px;line-height:1.6;color:var(--ink-soft);margin:0}
 .lwelcome .lnote{font-size:14.5px;margin-top:16px;color:var(--faint)}
 /* Narrow screens: rows keep the title, the count and the stage. Smaller stops. */
-@media (max-width:880px){.lrow{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}.lr-prog,.lr-g,.lr-o,.lr-d{display:none}.lr-n{grid-row:2;grid-column:1}.lr-stage{grid-row:1/3;grid-column:2}
+@media (max-width:880px){.lrow{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}.lr-prog,.lr-o,.lr-d{display:none}.lr-n{grid-row:2;grid-column:1}.lr-stage{grid-row:1/3;grid-column:2}
   .stop .disc{width:32px;height:32px;font-size:14px}.stageline::before{top:15px}.stop .sl{font-size:13px}.docid{max-width:40vw}.top .stat{display:none}}
 /* Stage menu. The current stage has a dot beside it. */
 .smenu{position:fixed;z-index:58;width:236px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px}
@@ -920,10 +928,10 @@ code.kc{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var
 .syn-all #editor .sx{text-decoration-line:underline;text-decoration-thickness:1.5px;text-underline-offset:4px}
 .sx-noun{text-decoration-style:solid}.sx-verb{text-decoration-style:double}.sx-adj{text-decoration-style:dotted}.sx-adv{text-decoration-style:wavy}.sx-conj{text-decoration-style:dashed}
 .syn-all #editor .sx-noun{text-decoration-color:var(--accent)}.syn-all #editor .sx-verb{text-decoration-color:var(--crit)}.syn-all #editor .sx-adj{text-decoration-color:var(--good)}.syn-all #editor .sx-adv{text-decoration-color:var(--warn)}.syn-all #editor .sx-conj{text-decoration-color:var(--faint)}
-/* Difficulty lens. Hard sentences get a light shade.
-   Very hard ones get a stronger shade and a wavy underline. */
-.lens-grade #editor mark.gr-h{background:var(--mk-u)}
-.lens-grade #editor mark.gr-v{background:var(--mk-a);text-decoration:underline wavy var(--crit);text-underline-offset:5px}
+/* Runway lens. A long runway gets a light shade.
+   A very long one gets a stronger shade and a wavy underline. */
+.lens-runway #editor mark.rw-h{background:var(--mk-u)}
+.lens-runway #editor mark.rw-v{background:var(--mk-a);text-decoration:underline wavy var(--crit);text-underline-offset:5px}
 /* Words: a thesaurus that leans plain.
    The bar shows how common a word is.
    Plain words get a bold tag, Lexicon words a dashed one. */
@@ -1087,7 +1095,7 @@ code.kc{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var
       <p class="meta-line" id="fileinfo">Private draft · nothing leaves this computer · the desk never writes for you</p>
       <!-- Revise tools. Hidden in Write. -->
       <div class="rtools" id="rtools" role="toolbar" aria-label="Revise tools">
-        <button class="tbtn" id="lensBtn" aria-haspopup="menu" aria-pressed="true" title="Choose what shows under your words: marks, word classes, sentence difficulty, or nothing">Lens: Marks</button>
+        <button class="tbtn" id="lensBtn" aria-haspopup="menu" aria-pressed="true" title="Choose what shows under your words: marks, word classes, runways, or nothing">Lens: Marks</button>
         <button class="tbtn" id="xrayBtn" aria-pressed="false" title="Strip the words away and see only your punctuation">X-ray</button>
         <button class="tbtn" id="ownBtn" aria-pressed="false" title="Tint the text that was not written here: pasted in, or changed in another app. Rewrite it in your own words, or select it and Claim, and the tint clears.">Pasted</button>
         <button class="tbtn" id="claimBtn" title="Select text you have made your own, then Claim to clear its tint">Claim</button>
@@ -1163,7 +1171,7 @@ code.kc{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var
 <div class="lensmenu" id="lensMenu" hidden role="menu" aria-label="Lens">
   <button role="menuitemradio" data-lens="marks"><b>Marks</b><span>Lexicon, zombie nouns and the prose checks</span></button>
   <button role="menuitemradio" data-lens="syntax"><b>Word classes</b><span>Nouns, verbs, adjectives, adverbs, joins</span></button>
-  <button role="menuitemradio" data-lens="grade"><b>Difficulty</b><span>Hard and very hard sentences</span></button>
+  <button role="menuitemradio" data-lens="runway"><b>Runway</b><span>Words held before the verb</span></button>
   <button role="menuitemradio" data-lens="off"><b>Plain</b><span>Nothing under your words</span></button>
 </div>
 <!-- Stage menu: an essay's stage and word target. Filled by script. -->
@@ -1307,7 +1315,7 @@ const LEX=[
 
 /* ===== prose engine: part-of-speech tagger and prose checks =====
    Word-Smith: a hand-written part-of-speech tagger plus prose checks. Passive voice,
-   misused words, loose pronouns, repetition, dialogue, readability grade.
+   misused words, loose pronouns, repetition, dialogue. Point First adds the runway.
    Ported, not fetched: it runs offline with no dependencies.
    Its own comments explain each rule.
    
@@ -1546,8 +1554,8 @@ const LINKING_VERBS = new Set(`seem seems seemed appear appears appeared
 // single letters, so those are handled by length; this set covers the
 // multi-letter cases. Without it, "Dr. Smith said it" opens a false
 // sentence at "Smith", and the loose-pronoun check downstream then fires
-// on perfectly anchored mid-sentence pronouns, while the rhythm grade is
-// computed on half-sentences.
+// on perfectly anchored mid-sentence pronouns, while the runway is
+// measured on half-sentences.
 const ABBREVIATIONS = new Set(`mr mrs ms dr prof rev gen sen rep hon st mt
 	ft vs etc al cf ca approx dept est fig vol ch pp no op ed inc ltd co
 	corp univ assn bros jan feb mar apr jun jul aug sep sept oct nov dec
@@ -2053,29 +2061,265 @@ function isVaguePronoun(t, next) {
 	return true;
 }
 
-function countSyllables(word) {
-	// THE ACCENTS ARE VOWELS (A482): stripped as "not a–z", café was "caf",
-	// one syllable, and résumé "rsum". A final é or ë is spoken (ca-fé,
-	// Zo-ë), so it becomes a vowel pair the silent-e rule below cannot eat;
-	// a diaeresis opens a new syllable (na-ïve), so a consonant is put in
-	// front of it; then the marks go and the English rules run as before.
-	let w = String(word).toLowerCase()
-		.replace(/[éë]$/, 'ey')
-		.replace(/([aeiouy])([äëïöü])/g, '$1h$2')
-		.normalize('NFD').replace(/\p{M}/gu, '')
-		.replace(/[^a-z]/g, '');
-	if (!w) {
-		// Spoken length of a figure grows with its digits: "1984" is five
-		// syllables out loud. Digits+1, capped, tracks that well enough
-		// for a grade that averages over sentences anyway.
-		const d = String(word).replace(/[^0-9]/g, '').length;
-		return d ? Math.min(6, d + 1) : 0;
+// ── The runway ──────────────────────────────────────────────────────────────
+// How many words a reader holds before the main verb arrives. Until subject and
+// verb meet, nothing in a sentence has happened yet: an opening phrase, a long
+// subject, or a clause wedged between subject and verb all make the reader wait.
+// Written for Point First, not part of Word-Smith.
+
+// Common verbs, base forms and irregular pasts. The tagger's own lexicon is
+// small, so a present-tense verb it does not know ("memory represents",
+// "materials fail") falls through to a noun, and the runway would run on to some
+// later verb. These let the runway see them, in a verb's slot only.
+const RUNWAY_VERBS = new Set(`abandon absorb accelerate accept access accommodate accompany accomplish
+	account accumulate accuse achieve acknowledge acquire act adapt add
+	address adjust admire admit adopt advance advise advocate affect afford
+	age agree aim alarm alert align allocate allow alter amaze amend amount
+	amuse analyse analyze anchor announce annoy answer anticipate apologise
+	apologize appeal appear apply appoint appreciate approach approve argue
+	arise arose arrange arrest arrive ask assemble assert assess assign assist
+	assume assure ate attach attack attain attempt attend attract attribute
+	avoid await award awoke back bade bake balance ban bar bargain base bathe
+	battle bear beat become beg begin behave believe belong bend benefit bent
+	bet bind bit bite blame bled blend bless blew block blow board boast boil
+	book boost bore borrow bother bought bounce bow break breathe bred breed
+	bring broadcast broke brought build built burn burnt burst bury buy
+	calculate call calm campaign cancel capture care carry carve cast catch
+	caught cause cease celebrate challenge change charge chase chat check
+	cheer chew choose chose cite claim clarify classify clean clear climb
+	cling close clung coach collapse collect combine come comfort command
+	comment commit communicate compare compel compete compile complain
+	complete comply compose comprise compute conceal concede conceive
+	concentrate concern conclude condemn conduct confess confine confirm
+	conflict conform confront confuse connect consent consider consist
+	constitute construct consult consume contact contain contemplate contend
+	continue contradict contrast contribute control convert convey convince
+	cook cooperate coordinate cope copy correct correspond cost cough count
+	counter cover crack crash crawl create credit creep crept criticise
+	criticize cross crush cry cultivate cure curl cut damage dance dare deal
+	dealt debate decay deceive decide declare decline decorate decrease
+	dedicate deem defeat defend define delay delegate delete deliver demand
+	demonstrate deny depart depend depict deploy deposit derive descend
+	describe deserve design desire despise destroy detail detect determine
+	develop devise devote die differ dig diminish dine dip direct disagree
+	disappear disappoint discard discover discuss dismiss display dispose
+	dispute dissolve distinguish distort distribute disturb dive divert divide
+	do dominate donate double doubt dove download drag drain drank draw dream
+	dreamt dress drew drift drill drink drive drop drove drown dry dump dwell
+	dwelt earn ease eat echo edit educate elect elevate eliminate embrace
+	emerge emphasise emphasize employ enable encounter encourage end endorse
+	endure enforce engage enhance enjoy enlarge enquire ensure enter entertain
+	equip erode escape establish estimate evaluate evaporate evoke evolve
+	exaggerate examine exceed exchange excite exclude excuse execute exercise
+	exhaust exhibit exist expand expect experience experiment explain explode
+	exploit explore export expose express extend extract face facilitate fade
+	fail fall fancy fasten favor favour fear feature fed feed feel fell felt
+	fetch fight file fill finance find finish fire fit fix flash fled flee
+	flew float flood flourish flow flung fly focus fold follow forbade forbid
+	force forecast foresee forgave forget forgive forgot fork form formulate
+	foster found frame free freeze frighten froze fry fulfil fulfill function
+	fund gain gather gaze generate get give glance glow go govern grab grade
+	grant grasp greet grew grind grip grow guarantee guard guess guide halt
+	hand handle hang happen harm hate have head heal hear heat help hesitate
+	hid hide highlight hinder hint hire hit hold hope host house hung hunt
+	hurry hurt identify ignore illustrate imagine imitate implement imply
+	import impose impress improve include incorporate increase indicate induce
+	indulge infer influence inform inherit inhibit initiate injure insert
+	insist inspect inspire install instruct insult insure integrate intend
+	interact interest interfere interpret interrupt intervene introduce invade
+	invent invest investigate invite involve isolate issue join joke judge
+	jump justify keep kick kill kiss kneel knelt knock know label lack laid
+	land last laugh launch lay lead lean leap leapt learn leave lecture led
+	lend lent let lie lift light like limit linger link list listen lit live
+	load locate lock look loom lose lost love lower maintain make manage
+	manipulate manufacture march mark marry master match matter mean meant
+	measure meet melt mention merge met mind miss mix mock modify monitor
+	motivate mount mourn move multiply name narrow need neglect negotiate nod
+	note notice nurse obey object oblige observe obtain occupy occur offend
+	offer omit open operate oppose opt order organise organize originate
+	outline outweigh overcame overcome overlook owe own pack paid paint pair
+	panic park participate pass paste pause pay perceive perform permit
+	persist persuade pick picture place plan plant play plead please plunge
+	point polish ponder pose possess post postpone pour practice practise
+	praise pray preach precede predict prefer prepare prescribe present
+	preserve press presume pretend prevail prevent price print proceed process
+	produce profit program progress prohibit project promise promote prompt
+	pronounce propose prosecute protect protest prove provide provoke publish
+	pull pump punish purchase pursue push put qualify question quit quote race
+	raise ran rang range rank rate reach react read realise realize reason
+	reassure rebuild recall receive reckon recognise recognize recommend
+	reconcile record recover recruit reduce refer reflect reform refuse regain
+	regard register regret regulate reinforce reject relate relax release
+	relieve rely remain remark remember remind remove render renew rent repair
+	repeat replace reply report represent reproduce request require rescue
+	resemble reserve reside resign resist resolve resort respect respond rest
+	restore restrict result resume retain retire retreat retrieve return
+	reveal reverse review revise revive reward ride ring rise risk rode roll
+	rose rotate rub ruin rule run rush sacrifice sail sang sank sat satisfy
+	save saw say scan scare scatter schedule score scream scroll search secure
+	see seek seem seize select sell send sense sent separate serve set settle
+	shake shape share shed shift shine shone shook shoot shot shout show
+	showed shrank shrink shut sigh sign signal simplify sing sink sit sketch
+	skip slept slid slide slip slow slung smell smile smoke snap sold solve
+	sort sought sound span spare spat speak specialise specialize specify
+	speculate sped speed spell spend spent spill spilt spin split spoil spoke
+	sponsor spot sprang spread spring spun squeeze stab stack stage stand
+	stare start state stay steal steer stem step stick stimulate stir stole
+	stood stop store strengthen stress stretch strike strip strive strode
+	strove struck struggle stuck study stung submit succeed suck suffer
+	suggest suit summarise summarize supply support suppose suppress surprise
+	surround survey survive suspect suspend sustain swallow swam swear sweep
+	swept swim swing switch swore swung tackle take talk tap target taste
+	taught teach tear tell tempt tend term test testify thank think threaten
+	threw throw thrust tie tighten tip tire told tolerate top tore total touch
+	tour trace track trade train transfer transform translate transmit
+	transport trap travel treat tremble trigger trim trouble trust try turn
+	twist type undergo undermine understand understood undertake undertook
+	unite unveil update upgrade upheld upload upset urge use value vanish vary
+	venture view visit voice volunteer vote wait wake walk wander want warn
+	wash waste watch wave weaken wear weigh welcome wept whisper widen win
+	wind wipe wish withdraw withdrew witness woke won wonder wore work worry
+	wound wove wrap write wrote yell yield zoom`.split(/\s+/).filter(Boolean));
+
+// Is lw one of those verbs, or its -s form? "represents", "pushes", "carries".
+function runwayVerb(lw) {
+	if (RUNWAY_VERBS.has(lw)) return true;
+	const stems = lw.endsWith('ies') ? [lw.slice(0, -3) + 'y'] :
+		lw.endsWith('es') ? [lw.slice(0, -2), lw.slice(0, -1)] :
+		lw.endsWith('s') ? [lw.slice(0, -1)] : [];
+	return stems.some(s => RUNWAY_VERBS.has(s));
+}
+
+// Verb forms that never carry a clause on their own.
+const NON_FINITE = new Set(['be', 'been', 'being', 'having']);
+// Words ending in -ing that are not -ing forms.
+const NOT_ING = new Set(`bring sing ring sting string swing fling cling spring wring
+	sling thing king wing`.split(/\s+/).filter(Boolean));
+const isIng = (t) => /ing$/.test(t.lw) && !NOT_ING.has(t.lw);
+// Clause openers. Each brings a verb of its own that is not the main verb.
+const RELATIVES = new Set(['who', 'whom', 'whose', 'which']);
+const OPENING_CLAUSE = new Set(`when whenever while whereas whether if unless because
+	although though since as after before until till once where wherever what
+	whatever`.split(/\s+/).filter(Boolean));
+// Mid-sentence, the prepositions (after, since, as) are left out: "the vote
+// after the debate" has no clause in it.
+const INNER_CLAUSE = new Set(`when whenever while whereas whether if unless because
+	although though where wherever why how`.split(/\s+/).filter(Boolean));
+// After a comma, these start a second clause. The runway stops there.
+const NEW_CLAUSE = new Set(['and', 'but', 'or', 'so', 'yet', 'nor']);
+const CLAUSE_SUBJECTS = new Set(['i', 'you', 'we', 'they', 'he', 'she']);
+
+// A word the tagger guessed at: not in the lexicon, so a noun by default or a
+// modifier by its neighbours ("the grade counts" tags grade as a modifier).
+const guessedTag = (t) => (t.tag === 'NOUN' || t.tag === 'ADJ') && !POS_LEX[t.lw];
+// What can stand right before a verb as the end of its subject.
+const subjectEnd = (t) => t.tag === 'NOUN' || t.tag === 'PRON' || guessedTag(t) ||
+	(t.tag === 'VERB' && isIng(t));
+
+// A sentence that opens on a verb phrase: "Seeing the accident…", "To integrate…",
+// "Being born…", "Written in 1990, …". Participles and gerunds, not commands.
+function opensOnVerbPhrase(toks) {
+	const t0 = toks[0], t1 = toks[1];
+	if (t0.tag === 'TO') return !!t1 && t1.tag === 'VERB';
+	if (t0.lw === 'being' || t0.lw === 'having') return true;
+	if (t0.tag !== 'VERB') return false;
+	if (isIng(t0)) return true;
+	if (!isPastParticiple(t0)) return false;
+	// "Read the notes" is a command; "Set in Rome, the novel…" describes.
+	return POS_LEX[t0.lw] !== 'VERB' || !t1 || t1.tag === 'PREP' || t1.tag === 'ADV';
+}
+
+// The runway of one sentence, from its tagged tokens. `text` is what the
+// token offsets point into. Returns { n, verb, verbal }: n words come before
+// the main verb, and verbal says the subject itself is a verb phrase
+// ("Seeing the accident from the window… compromised"). Returns null for a
+// question, a fragment, or a sentence whose verb this tagger cannot find:
+// better no answer than a runway that runs on into the next clause.
+function findRunway(toks, text) {
+	const n = toks.length;
+	if (n < 4) return null;
+	if (/^\s*\?/.test(text.slice(toks[n - 1].to, toks[n - 1].to + 4))) return null;
+	const between = (a, b) => text.slice(a.to, b.from);
+	const BREAK = /[,;:()\u2013\u2014]/;
+	const breaks = (a, b) => BREAK.test(between(a, b));
+
+	// Can toks[i] carry the main clause? inPhrase: still inside an opening verb
+	// phrase, where a participle after a noun is describing it ("the building
+	// located one block away") rather than acting.
+	const finiteAt = (i, inPhrase) => {
+		const t = toks[i];
+		if (t.tag === 'AUX' || t.tag === 'MOD') return !NON_FINITE.has(t.lw);
+		let p = i - 1;
+		while (p >= 0 && toks[p].tag === 'ADV') p--;
+		const pv = p >= 0 ? toks[p] : null;
+		// A verb the tagger did not know, in a verb's slot: right after the end
+		// of a subject, not inside a prepositional phrase ("plans like business
+		// plans"), not a name. Across a comma only an -s verb with something
+		// after it: "colons, converts to".
+		if (pv && guessedTag(t) && !/^\p{Lu}/u.test(t.w) && runwayVerb(t.lw) && subjectEnd(pv)) {
+			const inPrepPhrase = toks.slice(Math.max(0, i - 3), i).some(x => x.tag === 'PREP' && !BREAK.test(text.slice(x.to, t.from)));
+			const nx = toks[i + 1];
+			if ((!inPrepPhrase || pv.tag === 'PRON') &&
+				(!breaks(pv, t) || (/s$/.test(t.lw) && nx && /^(DET|PRON|PREP|TO|ADV|NUM)$/.test(nx.tag)))) return true;
+		}
+		if (t.tag !== 'VERB' || isIng(t)) return false;
+		if (!pv) return true;
+		if (pv.lw === 'to') return false;                                    // "to not let"
+		if (pv.tag === 'AUX' || pv.tag === 'MOD' || NON_FINITE.has(pv.lw)) return false;
+		if (pv.tag === 'DET' || pv.tag === 'PREP' ||
+			(pv.tag === 'ADJ' && POS_LEX[pv.lw] === 'ADJ')) return false;    // "the main point"
+		if (pv.tag === 'VERB' && !isIng(pv) && isPastParticiple(t)) return false;   // "feel compelled"
+		if (pv.tag === 'PRON' && p > 0 && toks[p - 1].tag === 'VERB') return false; // "let you fail"
+		if (inPhrase && isPastParticiple(t) && (pv.tag === 'NOUN' || pv.tag === 'VERB')) {
+			const nx = toks[i + 1];
+			if (!nx || nx.tag === 'PREP' || nx.tag === 'ADV' || nx.tag === 'NUM' || nx.lw === 'one') return false;
+		}
+		return true;
+	};
+
+	const t0 = toks[0];
+	const verbal = opensOnVerbPhrase(toks);
+	// An opening clause has its own verb: "When we read, …", "That he left…".
+	let skip = (OPENING_CLAUSE.has(t0.lw) && t0.tag !== 'DET') ||
+		(t0.lw === 'that' && t0.tag === 'CONJ') || t0.lw === 'what' || t0.lw === 'whatever';
+	// Commands and inversions put the verb first: "Cut the clause", "Had I known".
+	const command = guessedTag(t0) && RUNWAY_VERBS.has(t0.lw) && /^(DET|PRON|PREP|ADV|NUM|TO)$/.test(toks[1].tag);
+	if (!verbal && !skip && (t0.tag === 'AUX' || t0.tag === 'MOD' || t0.tag === 'VERB' || command)) {
+		return { n: 0, verb: t0, verbal: false };
 	}
-	if (w.length <= 3) return 1;
-	w = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
-	w = w.replace(/^y/, '');
-	const groups = w.match(/[aeiouy]{1,2}/g);
-	return groups ? groups.length : 1;
+	// skip: a clause has opened, and its verb is not the main one.
+	// aside: a clause set off by a comma (", who…,"), passed over to the next comma.
+	let inPhrase = verbal, aside = false;
+	for (let i = 1; i < n; i++) {
+		const t = toks[i], pr = toks[i - 1];
+		if (breaks(pr, t)) {
+			// A semicolon, a colon, or ", and" starts another clause before this
+			// one's verb was found. Stop rather than guess.
+			if (/[;:]/.test(between(pr, t)) || NEW_CLAUSE.has(t.lw)) return null;
+			skip = false; inPhrase = false; aside = false;
+		}
+		const nx = toks[i + 1];
+		const opens = RELATIVES.has(t.lw) || INNER_CLAUSE.has(t.lw) ||
+			(t.lw === 'that' && (t.tag === 'CONJ' || pr.tag === 'VERB' || (nx && /^(VERB|AUX|MOD|ADV)$/.test(nx.tag)))) ||
+			(CLAUSE_SUBJECTS.has(t.lw) && pr.tag === 'NOUN' && !breaks(pr, t));   // "every sentence we read"
+		if (opens) {
+			const afterBreak = breaks(pr, t) || (pr.tag === 'ADV' && i > 1 && breaks(toks[i - 2], pr));
+			if (afterBreak) aside = true; else skip = true;
+			continue;
+		}
+		if (aside || !finiteAt(i, inPhrase)) continue;
+		if (skip) {
+			// Pass over that clause's verb group: "was missing", "can start".
+			let j = i + 1;
+			if (t.tag === 'AUX' || t.tag === 'MOD') {
+				while (j < n && /^(AUX|MOD|ADV)$/.test(toks[j].tag) && !breaks(toks[j - 1], toks[j])) j++;
+				if (j < n && toks[j].tag === 'VERB' && !breaks(toks[j - 1], toks[j])) j++;
+			}
+			i = j - 1; skip = false; continue;
+		}
+		return { n: i, verb: t, verbal: verbal && inPhrase };
+	}
+	return null;
 }
 
 // Sentence ranges within one line. Markdown paragraphs are normally a single
@@ -2099,8 +2343,8 @@ function wsSentences(text) {
 		// the previous "sentence" ended in an abbreviation, an initial or a
 		// decimal ("Dr.", "J.", "3."), or this one opens in lowercase. A
 		// capital letter is what an actual sentence start looks like.
-		// Splitting at "Dr. Smith" halves the sentence and halves the
-		// rhythm grade with it.
+		// Splitting at "Dr. Smith" halves the sentence and cuts its
+		// runway short.
 		const prev = out.length ? out[out.length - 1] : null;
 		if (prev) {
 			const tail = text.slice(prev.from, prev.to);
@@ -2116,21 +2360,6 @@ function wsSentences(text) {
 		out.push({ from, to, text: raw.trim() });
 	}
 	return out;
-}
-
-// Flesch-Kincaid grade level. Below ~9 reads easily; the Hemingway app calls
-// 10–13 hard and 14+ very hard, which is where the two tints come from.
-function fkGrade(words, sentences, syllables) {
-	if (!words || !sentences) return 0;
-	return 0.39 * (words / sentences) + 11.8 * (syllables / words) - 15.59;
-}
-
-// Grade for one sentence, from its own tokens.
-function sentenceGrade(tokens) {
-	if (!tokens.length) return 0;
-	let syl = 0;
-	for (const t of tokens) syl += countSyllables(t.w);
-	return fkGrade(tokens.length, 1, syl);
 }
 
 const REPETITION_STOPWORDS = new Set(`the a an and or but if then than that this
@@ -2211,7 +2440,7 @@ function findRepetitions(tokens, windowSize, minLength) {
 	}
 	return hits;
 }
-return {POS_LEX,tokenizeLine,tagTokens,posBucket,FILLER_STRONG,FILLER_SOFT,findPassive,findMisused,isVaguePronoun,countSyllables,wsSentences,sentenceGrade,fkGrade,REPETITION_STOPWORDS,findDialogue,findRepetitions};
+return {POS_LEX,tokenizeLine,tagTokens,posBucket,FILLER_STRONG,FILLER_SOFT,findPassive,findMisused,isVaguePronoun,findRunway,wsSentences,REPETITION_STOPWORDS,findDialogue,findRepetitions};
 })();
 /* Word-Smith's filler words join the lexicon.
    Highlighted, listed and ignorable like the rest.
@@ -2295,7 +2524,7 @@ function findRare(text){if(!R.freq)return[];const out=[];const re=/(^|[^\p{L}’
   return out}
 /* First-person words. In impersonal mode the writer should be absent. */
 const FIRST=/\b(?:I|me|my|mine|myself|we|us|our|ours|ourselves)\b/g;
-/* Rough sentence split on . ! and ?, for rhythm and openers.
+/* Rough sentence split on . ! and ?, for rhythm.
    Fragments with no letters drop out. */
 function splitSentences(t){return t.replace(/\s+/g,' ').match(/[^.!?…]+[.!?…]*/g)?.map(s=>s.trim()).filter(s=>/[a-z]/i.test(s))||[]}
 /* Word tokens, for counts. A token needs a letter: a list bullet or a line of dashes is not a word. */
@@ -2317,8 +2546,8 @@ function maskTables(t){if(t.indexOf('|')<0)return t;const L=t.split('\n'),isDeli
 /* What the coach counts as prose: the draft with notes and web addresses blanked to spaces.
    A link keeps its words and loses its brackets and address: [these words](https://…)
    counts as "these words". Images, bare addresses and <https://…> drop out entirely.
-   Same length as the draft, so every position still lines up. Word counts, the checks,
-   the reading grade and the ownership meter all read this. An address is a reference,
+   Same length as the draft, so every position still lines up. Word counts, the checks
+   and the ownership meter all read this. An address is a reference,
    not writing, so it never counts for or against how much of an essay is yours. */
 const blank=m=>m.replace(/[^\n]/g,' ');
 function maskProse(t){t=maskTables(maskNotes(t));if(!/[\[(<]|:\/\//.test(t))return t;
@@ -2328,10 +2557,33 @@ function maskProse(t){t=maskTables(maskNotes(t));if(!/[\[(<]|:\/\//.test(t))retu
     .replace(/<(?:https?:\/\/|mailto:)[^>\s]+>/g,blank)
     .replace(/\b(?:https?:\/\/|www\.)[^\s)>\]]+/g,blank)}
 function noteRanges(t){const out=[];if(t.indexOf('%%')<0)return out;NOTE_RE.lastIndex=0;let m;while((m=NOTE_RE.exec(t)))out.push({s:m.index,e:m.index+m[0].length,text:m[0].slice(2,-2).trim()});return out}
+/* The skim test's lines: each sentence's first words and its last, in order.
+   Opening: the first five words. Ending: the last quarter, two to six words, never repeating the opening.
+   A blank line starts a new group. A heading, code or a table breaks the chain. Within the chain, a word an
+   ending shares with the next opening is marked in both (same rough stem as threads, common words
+   skipped), so a sentence that starts where the last one stopped shows it. Positions point into the
+   draft, so a click can find the sentence. raw is the unmasked draft: a line whose pipes the
+   prose mask took away was a table row. */
+function skimRows(text,raw){const rawLines=(raw==null?text:raw).split('\n');let li=-1;const rows=[],key=w=>repKey(w.toLowerCase().replace(/’/g,"'")),
+    content=w=>{const k=key(w);return k.length>=3&&!WS.REPETITION_STOPWORDS.has(w.toLowerCase().replace(/[^a-z']/g,''))?k:''};
+  let pos=0,fence=false,para=true,chain=false;
+  for(const ln of text.split('\n')){const at=pos;pos+=ln.length+1;li++;
+    if(/^\s*(```|~~~)/.test(ln)){fence=!fence;para=true;chain=false;continue}
+    if(fence||!ln.trim()){para=true;continue}
+    if(/^\s{0,3}#{1,6}\s/.test(ln)||/^\s*([-*_])(\s*\1){2,}\s*$/.test(ln)||(rawLines[li]||'').includes('|')&&!ln.includes('|')){para=true;chain=false;continue}
+    const lead=(/^\s*(?:>\s*)*(?:(?:[-*+]|\d+[.)])\s+)?/.exec(ln)||[''])[0],line=ln.slice(lead.length);
+    for(const se of WS.wsSentences(line)){const t=se.text,w=t.split(/\s+/).filter(Boolean);if(!/\p{L}/u.test(t))continue;
+      const n=w.length,o=Math.min(5,n),k=Math.min(6,Math.max(2,Math.round(n/4))),e0=Math.max(o,n-k);
+      rows.push({s:at+lead.length+se.from,e:at+lead.length+se.to,open:w.slice(0,o),end:w.slice(e0),gap:e0>o,para,chain,mo:new Set(),me:new Set()});
+      para=false;chain=true}}
+  for(let i=1;i<rows.length;i++){const a=rows[i-1],b=rows[i];if(!b.chain)continue;
+    const ka=new Map(a.end.map((w,j)=>[content(w),j])),kb=new Map(b.open.map((w,j)=>[content(w),j]));
+    for(const [k,j] of ka)if(k&&kb.has(k)){a.me.add(j);b.mo.add(kb.get(k))}}
+  return rows}
 /* The numbers behind the meters and the Revise panes, recomputed on every refresh.
    Burstiness is the spread of sentence lengths over their mean: 0.75 or more scores 100.
    Clutter is internal marks per sentence. Reading time assumes 200 words a minute. */
-function analyze(text,mode){text=maskProse(text);
+function analyze(text,mode){const raw=text;text=maskProse(text);
   const wc=words(text).length,sents=splitSentences(text);
   const lens=sents.map(s=>words(s).length).filter(n=>n>0);
   const mean=lens.length?lens.reduce((a,b)=>a+b,0)/lens.length:0;
@@ -2340,7 +2592,7 @@ function analyze(text,mode){text=maskProse(text);
   const P=proseRun(text);const zom=findZombies(text);const nom=zom.map(z=>z.w);const rare=findRare(text);
   const internal=(text.match(/[,;:()—–]/g)||[]).length;
   const clutter=sents.length?internal/sents.length:0;
-  return {wc,sents,lens,mean,burst,openers:sents.map(s=>s.split(/\s+/).slice(0,5).join(' ')),
+  return {wc,sents,lens,mean,burst,skim:skimRows(text,raw),
     nom,zom,rare,passive:P.passive.map(x=>x.w),P,first:(text.match(FIRST)||[]),clutter,
     readMin:Math.max(1,Math.round(wc/200)),mode};
 }
@@ -2394,14 +2646,14 @@ const repKey=lw=>{const w=lw.replace(/[^a-z']/g,'');const st=w.replace(/(ing|ed|
 /* The last prose run, kept on the exact text. */
 let proseCache={text:null};
 /* Runs every prose check over the whole draft: passive, misused words, loose pronouns,
-   doubled words, echoes, threads, sentence grades, quoted words.
+   doubled words, echoes, threads, runways, quoted words.
    Cached on the exact text. It runs on every refresh. */
 function proseRun(text){if(proseCache.text===text)return proseCache;
-  const D=tagDoc(text);const P={text,passive:[],doubled:[],misused:[],pron:[],echoes:[],threads:[],sents:[],quoted:0,words:D.toks.length,grade:0};
-  let syl=0,nSent=0,nWordsInSent=0;
+  const D=tagDoc(text);const P={text,passive:[],doubled:[],misused:[],pron:[],echoes:[],threads:[],sents:[],quoted:0,words:D.toks.length};
   
-    /* Line by line: passive, misused words, loose pronouns, sentence grades, quoted words. */
-    for(const L of D.lines){
+    /* Line by line: passive, misused words, loose pronouns, runways, quoted words. */
+    let fence=false;
+    for(const L of D.lines){if(/^\s*(```|~~~)/.test(L.text))fence=!fence;
     WS.findPassive(L.toks).forEach(r=>P.passive.push({s:r.from,e:r.to,w:text.slice(r.from,r.to)}));
     WS.findMisused(L.toks).forEach(r=>{const ph=text.slice(r.from,r.to);P.misused.push({s:r.from,e:r.to,w:ph,alt:misAlt(ph)})});
     findAuPairs(L.toks).forEach(r=>P.misused.push({s:r.from,e:r.to,w:text.slice(r.from,r.to),alt:r.alt}));
@@ -2409,9 +2661,14 @@ function proseRun(text){if(proseCache.text===text)return proseCache;
       /* Loose pronouns. The label carries up to five words, stopping at the next sentence. */
       for(let i=0;i<L.toks.length;i++){const t=L.toks[i];if(WS.isVaguePronoun(t,L.toks[i+1]||null)){
       let k=i+1;while(k<L.toks.length&&k<i+5&&!L.toks[k].first)k++;const tail=L.toks.slice(i,k).map(x=>x.w).join(' ');P.pron.push({s:t.from,e:t.to,w:t.w,label:tail})}}
-    for(const se of WS.wsSentences(L.masked)){const st=WS.tokenizeLine(se.text);if(st.length<4)continue;
-      let sy=0;st.forEach(x=>sy+=WS.countSyllables(x.w));syl+=sy;nSent++;nWordsInSent+=st.length;
-      const g=WS.fkGrade(st.length,1,sy);P.sents.push({s:L.from+se.from,e:L.from+se.to,grade:g,words:st.length,label:st.slice(0,6).map(x=>x.w).join(' ')})}
+    /* Runways, sentence by sentence, from the tagged words inside each sentence of four words or more.
+       Code blocks and headings have none. rw is the number of words before the main verb, null when
+       the tagger can't find one; rs to rwEnd spans those words; verbal marks a verb phrase as the subject. */
+    let ti=0;
+    if(!fence&&!/^\s{0,3}#{1,6}\s/.test(L.text))for(const se of WS.wsSentences(L.masked)){const s=L.from+se.from,e=L.from+se.to;
+      while(ti<L.toks.length&&L.toks[ti].from<s)ti++;let tj=ti;while(tj<L.toks.length&&L.toks[tj].to<=e)tj++;
+      const st=L.toks.slice(ti,tj);ti=tj;if(st.length<4)continue;const r=WS.findRunway(st,text);
+      P.sents.push({s,e,words:st.length,label:st.slice(0,6).map(x=>x.w).join(' '),rw:r?r.n:null,rs:st[0].from,rwEnd:r&&r.n?st[r.n-1].to:st[0].from,verbal:!!(r&&r.verbal)})}
     for(const q of WS.findDialogue(L.text))P.quoted+=WS.tokenizeLine(L.text.slice(q.from,q.to)).length}
   /* doubled words across the whole draft, only when nothing but spaces or a line break sits between them */
   for(let i=1;i<D.toks.length;i++){const a=D.toks[i-1],b=D.toks[i];
@@ -2427,9 +2684,6 @@ function proseRun(text){if(proseCache.text===text)return proseCache;
   
     /* Echoes: a repeat within fifty words. Threaded Key Terms and ignored words are not echoes. */
     WS.findRepetitions(D.toks,50,5).forEach(r=>{const t=byFrom.get(r.from);if(!t)return;const w=t.lw.replace(/[^a-z']/g,'');if(R.ignore.has(w)||isThread(repKey(t.lw)))return;P.echoes.push({s:r.from,e:r.to,w:t.w})});
-  
-    /* One grade for the whole draft, from every sentence of four words or more. */
-    P.grade=nSent?WS.fkGrade(nWordsInSent,nSent,syl):0;
   proseCache=P;return P}
 /* Names and reasons for the prose-check marks.
    Negative ids keep them clear of the CATS indexes. -1 to -3 are named in catName. */
@@ -2459,8 +2713,8 @@ function proseRanges(text){const P=proseRun(text),out=[];
   return out}
 
 /* ===== lenses: what the page shows under your words =====
-   The four lenses and their menu labels: Marks, Word classes, Difficulty, Plain. */
-const LENSES={marks:'Marks',syntax:'Word classes',grade:'Difficulty',off:'Plain'};
+   The four lenses and their menu labels: Marks, Word classes, Runway, Plain. */
+const LENSES={marks:'Marks',syntax:'Word classes',runway:'Runway',off:'Plain'};
 /* The word classes the lens can single out, each with its button label and caption.
    All tells the classes apart by underline style, so hue is never the only signal. */
 const SYN=Object.assign(Object.create(null),{all:['All','Every class at once. The line style tells them apart: solid nouns, double verbs, dotted adjectives, wavy adverbs, dashed joins.'],
@@ -2471,7 +2725,7 @@ const SYN=Object.assign(Object.create(null),{all:['All','Every class at once. Th
   conj:['Joins','Conjunctions and prepositions: the clause machinery. Dense runs mean long, tangled sentences.']});
 /* The chosen lens and word class, remembered between visits.
    Older saves stored only highlights on or off. On becomes Marks. */
-let lens=store.get('ww:lens',store.get('ww:hl',true)?'marks':'off'),synClass=store.get('ww:syn','verb');if(typeof synClass!=='string'||!(synClass in SYN))synClass='verb';
+let lens=store.get('ww:lens',store.get('ww:hl',true)?'marks':'off'),synClass=store.get('ww:syn','verb');if(lens==='grade')lens='runway';if(!(lens in LENSES))lens='marks';if(typeof synClass!=='string'||!(synClass in SYN))synClass='verb';
 /* Which room is open: Library, Write or Revise. Remembered between visits.
    First visit: Library if this browser holds no draft, Write if it does. */
 let room=store.get('ww:room',(store.get('ww:session',null)||store.get('ww:draft',null))===null?'library':'write');
@@ -2489,24 +2743,30 @@ let fwdBypass=false;
 function renderSyntax(text){const D=tagDoc(text),segs=[];
   for(const t of D.toks){const b=WS.posBucket(t.tag||'');if(b)segs.push({s:t.from,e:t.to,cls:'sx sx-'+b})}
   ED.overlay(segs)}
-/* Paints the Difficulty lens: sentences of grade 10 and up get marked.
-   Two strengths. Hard is 10 to 13, very hard is 14 and up. */
-function renderGrade(text){const P=proseRun(text),segs=[];let pos=0;
-  for(const s of P.sents){if(s.grade<10||s.s<pos)continue;segs.push({s:s.s,e:s.e,tag:'mark',cls:s.grade>=14?'gr-v':'gr-h'});pos=s.e}
+/* How long a runway has to be before it shows. Long: 12 words or more, or a verb phrase as
+   the subject from 6 ("Seeing the accident from…", "To integrate the…"). Very long: 20 and up.
+   0 for a sentence that is fine, or whose verb the tagger can't find. */
+const RW_LONG=12,RW_VERY=20,RW_VERBAL=6;
+const rwLevel=x=>x.rw==null?0:x.rw>=RW_VERY?2:(x.rw>=RW_LONG||(x.verbal&&x.rw>=RW_VERBAL))?1:0;
+/* Paints the Runway lens: in each sentence that has one, the words a reader holds before the verb.
+   Two strengths. Long gets a shade; very long a stronger shade and an underline.
+   It reads the prose as the checks do (notes and addresses masked), so it shares their prose run. */
+function renderRunway(text){const P=proseRun(maskProse(text)),segs=[];
+  for(const x of P.sents){const l=rwLevel(x);if(l)segs.push({s:x.rs,e:x.rwEnd,tag:'mark',cls:l===2?'rw-v':'rw-h'})}
   ED.overlay(segs)}
 /* The caption strip for the active lens. Word classes: a class picker and what to look for.
-   Difficulty: the draft's grade and how many sentences are hard. Hidden otherwise,
+   Runway: what a runway is and how many are long. Hidden otherwise,
    and hidden under X-ray or the Pasted view. */
 function renderLensBar(){const bar=$('#lensbar');if(!bar)return;
   if(effLens()==='syntax'&&!xray&&!ownView){bar.hidden=false;
     bar.innerHTML=`<div class="synseg" role="group" aria-label="Word class">${Object.keys(SYN).map(k=>`<button data-syn="${k}" aria-pressed="${synClass===k}"><span class="sxs sx-${k==='all'?'noun':k}">${SYN[k][0]}</span></button>`).join('')}</div><p class="lenscap">${SYN[synClass][1]}</p>`;
     bar.querySelectorAll('[data-syn]').forEach(b=>b.onclick=()=>{synClass=b.dataset.syn;store.set('ww:syn',synClass);applyLens()})}
-  else if(effLens()==='grade'&&!xray&&!ownView){bar.hidden=false;const P=proseRun(editor.value);const h=P.sents.filter(s=>s.grade>=10&&s.grade<14).length,v=P.sents.filter(s=>s.grade>=14).length;
-    bar.innerHTML=`<p class="lenscap"><b>Grade ${P.grade?P.grade.toFixed(1):'–'}</b> for the draft. Tinted: ${h} hard sentence${h===1?'':'s'} (grade 10 to 13). Tinted and underlined: ${v} very hard (14 and up). Sentences under four words are skipped. A grade is years of schooling a reader needs; long sentences and long words push it up.</p>`}
+  else if(effLens()==='runway'&&!xray&&!ownView){bar.hidden=false;const P=proseRun(maskProse(editor.value));const h=P.sents.filter(x=>rwLevel(x)===1).length,v=P.sents.filter(x=>rwLevel(x)===2).length;
+    bar.innerHTML=`<p class="lenscap"><b>${h+v} long runway${h+v===1?'':'s'}.</b> A runway is the words a reader holds before the verb arrives. Tinted: ${h} long, ${RW_LONG} words or more, or a verb phrase as the subject. Tinted and underlined: ${v} very long, ${RW_VERY} and up. Questions, fragments and sentences whose verb the tagger can't find stay plain.</p>`}
   else{bar.hidden=true;bar.innerHTML=''}}
 /* Puts the lens in force: root classes for CSS, button and menu state, then a repaint. */
 function applyLens(){const root=document.documentElement;
-  const L=effLens();root.classList.toggle('hl-on',L==='marks');root.classList.toggle('lens-syntax',L==='syntax');root.classList.toggle('lens-grade',L==='grade');
+  const L=effLens();root.classList.toggle('hl-on',L==='marks');root.classList.toggle('lens-syntax',L==='syntax');root.classList.toggle('lens-runway',L==='runway');
   Object.keys(SYN).forEach(k=>root.classList.toggle('syn-'+k,L==='syntax'&&synClass===k));
   const b=$('#lensBtn');if(b){b.textContent='Lens: '+LENSES[lens];b.setAttribute('aria-pressed',String(lens!=='off'))}
   $$('#lensMenu [data-lens]').forEach(x=>x.setAttribute('aria-checked',String(x.dataset.lens===lens)));
@@ -2552,7 +2812,7 @@ function renderScore(){
     :'<div class="scap">Write something, then hit X-ray. The words vanish and only your punctuation is left.</div>';
 }
 /* Lays the current view over the words.
-   Precedence: X-ray, Pasted, Write focus, Word classes, Difficulty, then Marks.
+   Precedence: X-ray, Pasted, Write focus, Word classes, Runway, then Marks.
    Colour, background, underline only. Write shows the page and nothing else. */
 function renderBackdrop(text,filter){
   document.documentElement.classList.toggle('dimming',!xray&&!ownView&&typeof focusOn==='function'&&focusOn());
@@ -2561,7 +2821,7 @@ function renderBackdrop(text,filter){
   if(typeof focusOn==='function'&&focusOn()){renderFocus(text);return}
   if(room==='write'){ED.overlay([]);return}
   if(effLens()==='syntax'){renderSyntax(text);return}
-  if(effLens()==='grade'){renderGrade(text);return}
+  if(effLens()==='runway'){renderRunway(text);return}
   const segs=[];hits.forEach((r,idx)=>{if(sevPass(r.sev,filter))segs.push({s:r.s,e:r.e,tag:'mark',attrs:{'data-s':r.sev,'data-i':String(idx)}})});
   ED.overlay(segs);
 }
@@ -2595,7 +2855,7 @@ function renderVoice(a){
     /* The checks, in the order the pane lists them.
        Rare words appears only when frequency.txt is loaded. */
     const items=[
-    {name:'The skim test',lvl:'ok',count:a.sents.length+' openers',why:'Read the first words of each sentence. Do they name a small, related set of characters? If the Topics wander, the reader loses the thread.',custom:a.sents.length?'<div class="openers">'+a.openers.slice(0,800).map(o=>{const p=o.split(' ');return `<div class="op"><b>${esc(p.slice(0,2).join(' '))}</b> ${esc(p.slice(2).join(' '))}</div>`}).join('')+'</div>':''},
+    {name:'The skim test',lvl:'ok',count:a.skim.length+' sentence'+(a.skim.length===1?'':'s'),why:'Each sentence\'s first words, then its last. Down the left: one thread of characters, or a crowd? From each ending into the next opening: does the next sentence start where the last one ended? A word they share is underlined. The endings alone are what a reader keeps. Click a line to find it.',custom:a.skim.length?'<div class="openers skim">'+a.skim.slice(0,800).map(r=>{const wd=(w,j,m)=>m.has(j)?'<u>'+esc(w)+'</u>':esc(w);return `<div class="op${r.para&&r!==a.skim[0]?' para':''}" data-s="${r.s}" data-e="${r.e}"><b>${r.open.slice(0,2).map((w,j)=>wd(w,j,r.mo)).join(' ')}</b> ${r.open.slice(2).map((w,j)=>wd(w,j+2,r.mo)).join(' ')}${r.end.length?(r.gap?'<span class="op-gap"> … </span>':' ')+'<span class="op-end">'+r.end.map((w,j)=>wd(w,j,r.me)).join(' ')+'</span>':''}</div>`}).join('')+'</div>':''},
     (()=>{const st=a.zom.filter(z=>z.strong);return{name:'Zombie nouns',lvl:st.length>4?'crit':st.length>1||a.zom.length>8?'warn':'ok',count:st.length+' strong · '+a.zom.length,
       why:'Actions hidden inside nouns drain the verb. Strong ones sit in the zombie pattern: after a light verb (make a decision), before "of" (the implementation of), or after "there is". Free those first: the doer in the subject, the action in the verb. A noun on its own may be a term doing honest work; add it to your lexicon as ignore.'+(R.nom?'':' <b>Using a rough suffix guess.</b> Drop nominalizations.txt into your folder for the real list and the verb behind each noun.'),
       hits:zchips(a.zom)}})(),
@@ -2606,9 +2866,10 @@ function renderVoice(a){
     {name:'Echoes and threads',lvl:a.P.echoes.length>6?'warn':'ok',count:a.P.echoes.length+' echo'+(a.P.echoes.length===1?'':'es')+' · '+a.P.threads.length+' thread'+(a.P.threads.length===1?'':'s'),
       why:'An echo is an uncommon word repeated within fifty words by accident. A thread is a Key Term carried through three or more paragraphs on purpose, which the method asks for: repeat the exact term, never a synonym. Threads are never counted as echoes, and the list of them is your argument\'s vocabulary.',
       hits:jchips(a.P.echoes.map(x=>({...x,label:x.w})),12,false),custom:a.P.threads.length?'<div class="openers">'+a.P.threads.map(o=>`<div class="op"><b>${esc(o.w)}</b> ${o.n} times across ${o.lines.size} paragraphs</div>`).join('')+'</div>':''},
-    (()=>{const S=a.P.sents,hs=S.filter(x=>x.grade>=10),r=S.length?hs.length/S.length:0;return{name:'Hard sentences',lvl:r>0.35?'crit':r>0.15?'warn':'ok',count:hs.length+' · grade '+(a.P.grade?a.P.grade.toFixed(1):'–'),
-      why:'Flesch-Kincaid grade, sentence by sentence: roughly the years of schooling a reader needs. 10 to 13 is hard, 14 and up very hard. Long sentences and long words push it up. Lens · Difficulty tints them on the page.',
-      hits:jchips(hs.slice().sort((x,y)=>y.grade-x.grade).map(x=>({...x,label:x.label+'… '+Math.round(x.grade)})),10,false)}})(),
+    (()=>{const S=a.P.sents.filter(x=>x.rw!=null),L=S.filter(x=>rwLevel(x)),V=S.filter(x=>x.verbal&&x.rw>=RW_VERBAL),r=S.length?L.length/S.length:0;
+      return{name:'Long runways',lvl:r>0.2?'crit':(r>0.08||L.some(x=>rwLevel(x)===2))?'warn':'ok',count:L.length+' of '+S.length,
+      why:'The words a reader holds before the verb arrives. Until subject and verb meet, nothing in a sentence has happened, so a long opening, a long subject or a clause wedged between them makes the reader wait. Hardest of all is a subject that is itself a verb phrase: <i>Seeing the accident from the window…</i> Lens · Runway shades them on the page.',
+      hits:(L.some(x=>x.rw>=RW_LONG)?'<span class="hitlab">Longest</span>'+jchips(L.filter(x=>x.rw>=RW_LONG).sort((x,y)=>y.rw-x.rw).map(x=>({s:x.rs,e:x.rwEnd,label:x.label+'… '+x.rw})),10,false):'')+(V.length?'<span class="hitlab">Verb phrase as subject</span>'+jchips(V.map(x=>({s:x.rs,e:x.rwEnd,label:x.label+'…'})),8,false):'')}})(),
     ...(R.freq?[{name:'Rare words',lvl:a.wc&&a.rare.length/a.wc*100>4?'crit':a.wc&&a.rare.length/a.wc*100>1.5?'warn':'ok',count:String(a.rare.length),why:'Words most readers meet less than about once in a few million. Some are exactly the right word. Most are a thesaurus showing, or a model reaching. Names are skipped; add terms of art to your lexicon as ignore.',hits:jchips(a.rare.map(r=>({...r,label:r.w})),14,false)}]:[]),
     {name:'Sentence clutter',lvl:a.clutter>2?'crit':a.clutter>1.3?'warn':'ok',count:a.clutter.toFixed(1)+' /sentence',why:'Marks between full stops. McCarthy stripped Arthur\'s essay to its punctuation to see the skeleton. Every comma, semicolon or dash is a clause the reader must hold, so of each one ask: do you need it? Fewer marks reads clearer. Hit X-ray in the top bar to see yours.',hits:''},
     {name:'Quoted words',lvl:'ok',count:(a.P.words?Math.round(a.P.quoted/a.P.words*100):0)+'%',why:'Words inside quotation marks: other people\'s voices. Evidence earns its place; a page that is mostly quotes is a scrapbook, not an argument.'},
@@ -3216,7 +3477,7 @@ function titlesize(){doctitle.style.height='auto';doctitle.style.height=doctitle
 function refresh(){const a=analyze(editor.value,mode);
   $('#m-words').textContent=a.wc;$('#m-sent').textContent=a.sents.length;$('#m-avg').textContent=Math.round(a.mean)||0;
   $('#hstat').innerHTML=`<b>${a.wc}</b> words · ${a.readMin} min`;updNoteStat();
-  scan(editor.value);renderBackdrop(editor.value,sevFilter);renderVoice(a);renderYou(a);renderLex();updOwn();if(lens==='grade')renderLensBar();
+  scan(editor.value);renderBackdrop(editor.value,sevFilter);renderVoice(a);renderYou(a);renderLex();updOwn();if(lens==='runway')renderLensBar();
 }
 /* Keeps the browser copy of the session half a second after the last change (persistSession).
    Then passes the change on to the folder save, which keeps its own timer. */
@@ -3354,7 +3615,7 @@ const FS_OK=typeof window.showDirectoryPicker==='function';
 /* The hidden back room inside the writer's folder.
    The dot keeps it out of the file list and out of Obsidian's view. */
 const SIDE='.pointfirst';
-const PF_VERSION='1.5.0';
+const PF_VERSION='1.6.0';
 /* Tiny key-value store in IndexedDB.
    Holds what localStorage cannot: the folder handle, and browser copies of word lists.
    A failed read comes back empty, never an error. */
@@ -4769,7 +5030,7 @@ function wordsInit(){
   window.addEventListener('focus',()=>{if(dirState==='ready')loadResources(false)});
   
     /* Voice checks: a click on a hit selects that text in the draft. */
-    $('#voiceChecks').addEventListener('click',e=>{const h=e.target.closest('.hit[data-s]');if(h)selectInDraft(+h.dataset.s,+h.dataset.e)});
+    $('#voiceChecks').addEventListener('click',e=>{const h=e.target.closest('.hit[data-s],.op[data-s]');if(h)selectInDraft(+h.dataset.s,+h.dataset.e)});
 }
 
 /* ===== shell: three rooms (Library, Write, Revise), one palette =====
@@ -5010,12 +5271,7 @@ let libFilter=store.get('ww:libStage','');if(typeof libFilter!=='string'||(libFi
 /* Every essay file in the folder. The writer's lexicon file is not an essay. */
 /* Essays only: the lexicon, Anatomy and Plan files live beside them but are not essays. */
 function essayFiles(){return fileIndex.filter(f=>{const n=f.path.split('/').pop();return !RES_FILES.lex.test(n)&&!RES_FILES.anat.test(n)&&!RES_FILES.plan.test(n)})}
-/* Flesch-Kincaid grade for a whole essay, for its Library row.
-   Headings and sentences under four words are left out. */
-function quickGrade(body){body=maskProse(body);let syl=0,ns=0,nw=0;for(const line of body.split('\n')){if(!line.trim()||/^\s*#/.test(line))continue;
-  for(const se of WS.wsSentences(maskForTagging(line))){const st=WS.tokenizeLine(se.text);if(st.length<4)continue;ns++;nw+=st.length;st.forEach(x=>syl+=WS.countSyllables(x.w))}}
-  return ns?WS.fkGrade(nw,ns,syl):0}
-/* One essay's Library stats: title, stage, target, words, grade, % yours, lead line.
+/* One essay's Library stats: title, stage, target, words, % yours, lead line.
    % yours comes from the record only when the record matches the file text exactly.
    A stale record would give a wrong number, so none is shown. */
 async function libStatsFor(entry){const f=await entry.handle.getFile();const c=libCache.get(entry.path);if(c&&c.mtime===f.lastModified)return c;
@@ -5024,7 +5280,7 @@ async function libStatsFor(entry){const f=await entry.handle.getFile();const c=l
     const mt=maskProse(p.body);let o=0,t=0;for(let i=0;i<mt.length;i++){if(/\s/.test(mt[i]))continue;t++;if(!fl[i])o++}own=t?Math.round(o/t*100):null}
     else if(!idOf(p.fm))own=countWords(p.body)?0:null}catch(_){}
   const lead=maskNotes(p.body).split('\n').map(s=>s.trim()).find(s=>s&&!/^[#>|`-]/.test(s))||'';
-  const v={mtime:f.lastModified,title:p.title,stage:stageOf(p.fm),target:parseInt(fmGet(p.fm,'target'),10)||0,words:countWords(p.body),grade:quickGrade(p.body),own,lead:lead.replace(/[*_`[\]]/g,'').slice(0,160)};
+  const v={mtime:f.lastModified,title:p.title,stage:stageOf(p.fm),target:parseInt(fmGet(p.fm,'target'),10)||0,words:countWords(p.body),own,lead:lead.replace(/[*_`[\]]/g,'').slice(0,160)};
   libCache.set(entry.path,v);return v}
 /* Reads stats for every essay, 24 files at a time.
    Re-indexes the folder when forced, empty, or older than 20 seconds. */
@@ -5033,7 +5289,7 @@ async function libLoad(force){if(dirState!=='ready')return;
   const list=essayFiles();for(let i=0;i<list.length;i+=24)await Promise.all(list.slice(i,i+24).map(f=>libStatsFor(f).catch(()=>null)));
   libLoaded=Date.now()}
 /* One essay's row data. The open essay uses the live page, not the file on disk. */
-function libItem(f){const c=libCache.get(f.path)||{title:stem(f.path),stage:'',target:0,words:0,grade:0,own:null,lead:'',mtime:f.mtime};
+function libItem(f){const c=libCache.get(f.path)||{title:stem(f.path),stage:'',target:0,words:0,own:null,lead:'',mtime:f.mtime};
   if(cur&&cur.path===f.path){const st=ownStats();return{...c,title:(doctitle.value||'').trim()||stem(f.path),stage:stageOf(cur.fm),target:curTarget(),words:countWords(editor.value),own:st.tot?st.pct:c.own,mtime:Math.max(c.mtime||0,lastDiskSave||0),isCur:true}}
   return c}
 /* Bars for words typed on each of the last seven days, today marked.
@@ -5093,7 +5349,7 @@ function paintLibrary(){const el=$('#library');if(!el||room!=='library'||dirStat
   
     /* Search repaints on each key, then puts focus and caret back. */
     const fi=$('#libFind');fi.oninput=()=>{libQ=fi.value;const pos=fi.selectionStart;paintLibrary();const n=$('#libFind');n.focus();n.setSelectionRange(pos,pos)}}
-/* One Library row: title, folder and lead line, progress to target, words, grade,
+/* One Library row: title, folder and lead line, progress to target, words,
    % yours, last edited, and the stage button. */
 function rowHtml(x){const v=x.v,f=x.f;const pct=v.target?Math.min(100,Math.round(v.words/v.target*100)):0;
   const sl=f.path.lastIndexOf('/');const folder=sl>0?f.path.slice(0,sl):'';
@@ -5101,7 +5357,6 @@ function rowHtml(x){const v=x.v,f=x.f;const pct=v.target?Math.min(100,Math.round
     <button class="lr-open" data-act="open"><span class="lr-t">${esc(v.title||stem(f.path))}</span><span class="lr-x">${esc(folder?folder+'/ ':'')}${esc(v.lead||'Empty')}</span></button>
     <span class="lr-prog${pct>=100?' done':''}" title="${v.target?v.words.toLocaleString()+' of '+v.target.toLocaleString()+' words':'No target set'}">${v.target?`<i style="width:${pct}%"></i>`:''}</span>
     <span class="lr-n">${v.words.toLocaleString()}${v.target?`<small> of ${v.target.toLocaleString()}</small>`:'<small> words</small>'}</span>
-    <span class="lr-g" title="Reading grade: years of schooling a reader needs">${v.grade?'grade '+Math.round(v.grade):''}</span>
     <span class="lr-o" title="Share of the text you wrote here, rather than pasted or brought in from another app">${v.own!=null?v.own+'% yours':''}</span>
     <span class="lr-d" title="Last edited">${ago(v.mtime)}</span>
     <button class="lr-stage" data-act="stage" aria-haspopup="menu">${esc(STAGE_NAME[v.stage]||'No stage')}</button></div>`}

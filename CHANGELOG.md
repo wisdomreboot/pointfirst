@@ -2,6 +2,22 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.6.0 (2026-10-28)
+
+The runway replaces the reading grade
+- The Difficulty lens, the Hard sentences check and the grade in the Library are gone. They scored sentences with Flesch-Kincaid, which counts syllables and words, so they measured length, not how hard a sentence is to read. Two 32-word sentences, one a sixth grader reads with ease and one most readers need twice, both scored 15.0.
+- In their place: the Runway lens, and Long runways in Voice. A runway is the words a reader holds before the main verb arrives: an opening phrase, the subject, anything wedged between subject and verb. Until subject and verb meet, nothing in the sentence has happened.
+- The lens shades the runway itself, not the whole sentence. It shades a runway of 12 words or more, or from 6 when the subject is itself a verb phrase ("Seeing the accident from the window…"). 20 and up is underlined too.
+- Long runways lists the longest, then the sentences whose subject is a verb phrase. Click one to select its runway in the draft.
+- Questions, fragments, headings, notes and code have no runway. Neither does a sentence whose verb the tagger can't find: no answer is better than a wrong one.
+- A lens left on Difficulty opens on Runway.
+
+The skim test, finished
+- Each line now shows a sentence's first words and its last. Read down the left for the thread. Read each ending into the next opening to see whether the next sentence starts where the last one ended. Read the endings alone for what a reader keeps.
+- A word an ending shares with the next opening is underlined in both. A blank line starts a new group; a heading, code or a table breaks the chain.
+- Click a line to select its sentence in the draft.
+- Tables, notes and code are not sentences here.
+
 ## 1.5.0 (2026-10-18)
 
 Tables
