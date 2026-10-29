@@ -6,7 +6,7 @@
      scripts hashed below, and Point First may connect only to its own address and its
      page-view counter. After editing an inline script, run  python3 tools/csp.py index.html
      (or the app will stop running). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nkOR9cGMsk3kM7bvMdix8che5BxvCtJ0soZkFoBjclo=' 'sha256-aijZWJUa+M/T+YvI5Ex0SN++ta+X7X6WbHxYW9SpTI8=' 'sha256-QB5ShY1K3IY5GE6mIuPC6QmCg2F29STnCLLgVJJ+EKQ='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pointfirst.goatcounter.com; connect-src 'self' https://pointfirst.goatcounter.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nkOR9cGMsk3kM7bvMdix8che5BxvCtJ0soZkFoBjclo=' 'sha256-aijZWJUa+M/T+YvI5Ex0SN++ta+X7X6WbHxYW9SpTI8=' 'sha256-+/U+ceQjp3kpUO1pCpbsllyuuHn0Owde30bP53V3SNM='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pointfirst.goatcounter.com; connect-src 'self' https://pointfirst.goatcounter.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Point First: a writing desk that never writes for you</title>
 <meta name="description" content="Point First is a free writing desk that coaches while you write and never writes for you. Your essays stay as plain Markdown files in your own folder.">
 <meta name="author" content="Jonathan du Toit">
@@ -418,7 +418,9 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .save{font-family:var(--mono);font-size:11px;color:var(--good);min-width:52px;text-align:right}
 /* The writing column: one measure, about 44rem, centred, scrolling on its own. */
 .work{display:flex;flex:1;min-height:0}
-.editor-wrap{flex:1;min-width:0;display:flex;justify-content:center;overflow-y:auto;padding:min(6vh,54px) 24px 40vh}
+/* The page column takes its own height, not the window's (align-items), so what is pinned inside
+   it stays pinned all the way down the essay. */
+.editor-wrap{--wrap-pt:min(6vh,54px);flex:1;min-width:0;display:flex;justify-content:center;align-items:flex-start;overflow-y:auto;padding:var(--wrap-pt) 24px 40vh}
 .stage{width:100%;max-width:44rem}
 /* Title field and the file line beneath it. */
 #doctitle{width:100%;border:0;background:transparent;color:var(--ink);font-family:var(--display);font-weight:700;font-size:clamp(26px,4vw,38px);letter-spacing:-.015em;line-height:1.16;margin:0 0 4px;padding:0;text-wrap:balance;resize:none;overflow:hidden;display:block}
@@ -659,10 +661,14 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .docid .stg{flex:none;font-family:var(--body);font-size:12.5px;border:1px solid var(--line);border-radius:20px;padding:1px 9px;color:var(--ink-soft);background:var(--surface)}
 .kbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 9px;font-family:var(--mono);font-size:11.5px;color:var(--ink-soft)}
 .kbtn:hover{border-color:var(--ink-soft);color:var(--ink)}
-.rtools{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid var(--line-soft)}
+/* The Revise tools stay in reach as the page scrolls: pinned to the top on the paper's own colour,
+   with a little air above them once pinned. The negative margin keeps that air out of the resting layout.
+   A pinned box stops at the scroll area's padding, so top reaches back over it to the very edge. */
+.rhead{position:sticky;top:calc(-1 * var(--wrap-pt,0px));z-index:5;background:var(--paper);padding-top:8px;margin:-8px 0 18px;border-bottom:1px solid var(--line-soft)}
+.rtools{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-bottom:12px}
 .rtools .spacer{flex:1}
 /* What each room hides. Write keeps only the page. Library replaces the work area. */
-.room-write .coach,.room-write .rtools,.room-write .lensbar,.room-write #coachBtn,.room-library #coachBtn,.room-write #ownstat{display:none!important}
+.room-write .coach,.room-write .rhead,.room-write .rtools,.room-write .lensbar,.room-write #coachBtn,.room-library #coachBtn,.room-write #ownstat{display:none!important}
 .room-library .work{display:none}
 /* Write room: more air above the title, quieter chrome.
    Typing fades the top bar. Moving the mouse brings it back. */
@@ -911,10 +917,11 @@ code.kc{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var
 .lensmenu button b{display:block;font-family:var(--body);font-size:15px;font-weight:500;color:var(--ink)}
 .lensmenu button span{display:block;font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:1px}
 .lensmenu button[aria-checked="true"]::before{content:"";position:absolute;left:11px;top:15px;width:9px;height:9px;border-radius:50%;background:var(--ink)}
-/* Lens bar: the options for the current lens, pinned above the page as it scrolls.
+/* The lens's picker sits in the pinned tools; its caption sits below them and scrolls away.
    The chosen word class is outlined in ink as well as shaded. */
-.lensbar{position:sticky;top:0;z-index:4;background:var(--paper);border-bottom:1px solid var(--line-soft);padding:8px 0 10px;margin:0 0 14px}
-.lensbar[hidden]{display:none}
+.lenspick{padding:0 0 12px}
+.lenspick[hidden],.lensbar[hidden]{display:none}
+.lensbar{margin:-6px 0 18px}
 .synseg{display:flex;flex-wrap:wrap;gap:5px}
 .synseg button{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:4px 11px;font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
 .synseg button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);background:var(--panel);box-shadow:inset 0 0 0 1px var(--ink)}
@@ -932,6 +939,13 @@ code.kc{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var
    A very long one gets a stronger shade and a wavy underline. */
 .lens-runway #editor mark.rw-h{background:var(--mk-u)}
 .lens-runway #editor mark.rw-v{background:var(--mk-a);text-decoration:underline wavy var(--crit);text-underline-offset:5px}
+/* Skim: what a skimming reader takes stays in full ink and the rest fades, as in Word classes, so
+   the difference is light and dark, never hue. Links fade with their words. A word an ending hands
+   to the next opening is underlined in both. */
+.lens-skim #editor .cm-content{color:color-mix(in srgb,var(--ink) 26%,transparent)}
+.lens-skim #editor .cm-link{color:inherit}
+.lens-skim #editor .sk{color:var(--ink)}
+.lens-skim #editor .sk-link{color:var(--ink);text-decoration-line:underline;text-decoration-thickness:1.5px;text-underline-offset:4px}
 /* Words: a thesaurus that leans plain.
    The bar shows how common a word is.
    Plain words get a bold tag, Lexicon words a dashed one. */
@@ -1021,7 +1035,7 @@ code.kc{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var
 @media (max-width:880px){
   .coach{position:fixed;top:0;right:0;bottom:0;width:min(430px,92vw);z-index:30;box-shadow:-12px 0 40px rgba(20,18,14,.22);transform:translateX(100%);transition:transform .24s ease}
   .coach.open{transform:none}.scrim.show{opacity:1;pointer-events:auto}
-  .editor-wrap{padding:30px 18px 40vh}.edtype{font-size:18px}
+  .editor-wrap{--wrap-pt:30px;padding:var(--wrap-pt) 18px 40vh}.edtype{font-size:18px}
 }
 @media (min-width:881px){.scrim{display:none}.only-mobile{display:none}}
 /* Reduced motion: no transitions or animations anywhere. */
@@ -1093,9 +1107,11 @@ code.kc{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var
     <div class="editor-wrap"><div class="stage">
       <textarea id="doctitle" rows="1" placeholder="Title" spellcheck="true" aria-label="Essay title"></textarea>
       <p class="meta-line" id="fileinfo">Private draft · nothing leaves this computer · the desk never writes for you</p>
-      <!-- Revise tools. Hidden in Write. -->
+      <!-- Revise tools, and the current lens's picker under them, pinned above the page as it
+           scrolls. The lens caption below them is read once and scrolls away. Hidden in Write. -->
+      <div class="rhead" id="rhead">
       <div class="rtools" id="rtools" role="toolbar" aria-label="Revise tools">
-        <button class="tbtn" id="lensBtn" aria-haspopup="menu" aria-pressed="true" title="Choose what shows under your words: marks, word classes, runways, or nothing">Lens: Marks</button>
+        <button class="tbtn" id="lensBtn" aria-haspopup="menu" aria-pressed="true" title="Choose what shows under your words: the skim, marks, word classes, runways, or nothing">Lens: Marks</button>
         <button class="tbtn" id="xrayBtn" aria-pressed="false" title="Strip the words away and see only your punctuation">X-ray</button>
         <button class="tbtn" id="ownBtn" aria-pressed="false" title="Tint the text that was not written here: pasted in, or changed in another app. Rewrite it in your own words, or select it and Claim, and the tint clears.">Pasted</button>
         <button class="tbtn" id="claimBtn" title="Select text you have made your own, then Claim to clear its tint">Claim</button>
@@ -1104,6 +1120,8 @@ code.kc{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var
         <span class="spacer"></span>
         <button class="tbtn" id="pubBtn" title="Copy or download this essay as Markdown or HTML">Publish</button>
         <button class="tbtn" id="histBtn" title="Earlier versions of this essay: compare and restore">History</button>
+      </div>
+      <div class="lenspick" id="lenspick" hidden></div>
       </div>
       <div class="lensbar" id="lensbar" hidden></div>
       <!-- The editor. CodeMirror fills #editor when the script runs.
@@ -1169,6 +1187,7 @@ code.kc{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var
 </div>
 <!-- Lens menu: what shows under the words. -->
 <div class="lensmenu" id="lensMenu" hidden role="menu" aria-label="Lens">
+  <button role="menuitemradio" data-lens="skim"><b>Skim</b><span>What a reader takes from a skim</span></button>
   <button role="menuitemradio" data-lens="marks"><b>Marks</b><span>Lexicon, zombie nouns and the prose checks</span></button>
   <button role="menuitemradio" data-lens="syntax"><b>Word classes</b><span>Nouns, verbs, adjectives, adverbs, joins</span></button>
   <button role="menuitemradio" data-lens="runway"><b>Runway</b><span>Words held before the verb</span></button>
@@ -1260,7 +1279,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 /* Settings that live in the folder too, mirrored to .pointfirst/settings.json.
    A browser wipe loses nothing. */
-const SETTINGS_KEYS=new Set(['ww:theme','ww:lens','ww:syn','ww:focus','ww:sev','ww:wsort','ww:wrel','ww:libStage','ww:mode','ww:pubTo','ww:smart']);
+const SETTINGS_KEYS=new Set(['ww:theme','ww:lens','ww:syn','ww:skim','ww:focus','ww:sev','ww:wsort','ww:wrel','ww:libStage','ww:mode','ww:pubTo','ww:smart']);
 /* Thin wrapper over localStorage. JSON in, JSON out, the default when missing or unreadable.
    Storage errors are swallowed. A settings key also queues a write to the folder. */
 const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}if(SETTINGS_KEYS.has(k)&&typeof scheduleSettings==='function')scheduleSettings()}};
@@ -3494,6 +3513,8 @@ function maskProse(t){t=maskTables(maskNotes(t));if(!/[\[(<]|:\/\//.test(t))retu
 function noteRanges(t){const out=[];if(t.indexOf('%%')<0)return out;NOTE_RE.lastIndex=0;let m;while((m=NOTE_RE.exec(t)))out.push({s:m.index,e:m.index+m[0].length,text:m[0].slice(2,-2).trim()});return out}
 /* The skim test's lines: each sentence's first words and its last, in order.
    Opening: the first five words. Ending: the last quarter, two to six words, never repeating the opening.
+   para marks the first sentence of a paragraph, item the first of a list item; ow and ew are where the
+   opening and ending words sit in the draft, for the Skim lens.
    A blank line starts a new group. A heading, code or a table breaks the chain. Within the chain, a word an
    ending shares with the next opening is marked in both (same rough stem as threads, common words
    skipped), so a sentence that starts where the last one stopped shows it. Positions point into the
@@ -3506,11 +3527,12 @@ function skimRows(text,raw){const rawLines=(raw==null?text:raw).split('\n');let 
     if(/^\s*(```|~~~)/.test(ln)){fence=!fence;para=true;chain=false;continue}
     if(fence||!ln.trim()){para=true;continue}
     if(/^\s{0,3}#{1,6}\s/.test(ln)||/^\s*([-*_])(\s*\1){2,}\s*$/.test(ln)||(rawLines[li]||'').includes('|')&&!ln.includes('|')){para=true;chain=false;continue}
-    const lead=(/^\s*(?:>\s*)*(?:(?:[-*+]|\d+[.)])\s+)?/.exec(ln)||[''])[0],line=ln.slice(lead.length);
+    const lead=(/^\s*(?:>\s*)*(?:(?:[-*+]|\d+[.)])\s+)?/.exec(ln)||[''])[0],line=ln.slice(lead.length),item=/(?:[-*+]|\d+[.)])\s+$/.test(lead);let first=true;
     for(const se of WS.wsSentences(line)){const t=se.text,w=t.split(/\s+/).filter(Boolean);if(!/\p{L}/u.test(t))continue;
       const n=w.length,o=Math.min(5,n),k=Math.min(6,Math.max(2,Math.round(n/4))),e0=Math.max(o,n-k);
-      rows.push({s:at+lead.length+se.from,e:at+lead.length+se.to,open:w.slice(0,o),end:w.slice(e0),gap:e0>o,para,chain,mo:new Set(),me:new Set()});
-      para=false;chain=true}}
+      const base=at+lead.length+se.from,pos=[...t.matchAll(/\S+/g)].map(m=>[base+m.index,base+m.index+m[0].length]);
+      rows.push({s:at+lead.length+se.from,e:at+lead.length+se.to,open:w.slice(0,o),end:w.slice(e0),gap:e0>o,para,item:item&&first,chain,mo:new Set(),me:new Set(),ow:pos.slice(0,o),ew:pos.slice(e0)});
+      para=false;first=false;chain=true}}
   for(let i=1;i<rows.length;i++){const a=rows[i-1],b=rows[i];if(!b.chain)continue;
     const ka=new Map(a.end.map((w,j)=>[content(w),j])),kb=new Map(b.open.map((w,j)=>[content(w),j]));
     for(const [k,j] of ka)if(k&&kb.has(k)){a.me.add(j);b.mo.add(kb.get(k))}}
@@ -3650,8 +3672,12 @@ function proseRanges(text){const P=proseRun(text),out=[];
   return out}
 
 /* ===== lenses: what the page shows under your words =====
-   The four lenses and their menu labels: Marks, Word classes, Runway, Plain. */
-const LENSES={marks:'Marks',syntax:'Word classes',runway:'Runway',off:'Plain'};
+   The five lenses and their menu labels: Skim, Marks, Word classes, Runway, Plain. */
+const LENSES={skim:'Skim',marks:'Marks',syntax:'Word classes',runway:'Runway',off:'Plain'};
+/* The two ways the Skim lens reads, each with its button label and caption. Paragraphs is the skim
+   test the Anatomy names; Sentences is the Voice list's openings and endings, in place. */
+const SKIM=Object.assign(Object.create(null),{para:['Paragraphs',"Only the first sentence of each paragraph and list item stays dark: what a reader takes from a skim. Read them alone, top to bottom. If they tell the argument, the structure works. If they don't, the structure is hiding."],
+  sent:['Sentences',"Each sentence's first words and its last stay dark. The opening should carry what the reader already has, the ending what is new. Does each sentence start where the last one ended? A word an ending hands to the next opening is underlined in both."]});
 /* The word classes the lens can single out, each with its button label and caption.
    All tells the classes apart by underline style, so hue is never the only signal. */
 const SYN=Object.assign(Object.create(null),{all:['All','Every class at once. The line style tells them apart: solid nouns, double verbs, dotted adjectives, wavy adverbs, dashed joins.'],
@@ -3663,6 +3689,7 @@ const SYN=Object.assign(Object.create(null),{all:['All','Every class at once. Th
 /* The chosen lens and word class, remembered between visits.
    Older saves stored only highlights on or off. On becomes Marks. */
 let lens=store.get('ww:lens',store.get('ww:hl',true)?'marks':'off'),synClass=store.get('ww:syn','verb');if(lens==='grade')lens='runway';if(!(lens in LENSES))lens='marks';if(typeof synClass!=='string'||!(synClass in SYN))synClass='verb';
+let skimMode=store.get('ww:skim','para');if(typeof skimMode!=='string'||!(skimMode in SKIM))skimMode='para';
 /* Which room is open: Library, Write or Revise. Remembered between visits.
    First visit: Library if this browser holds no draft, Write if it does. */
 let room=store.get('ww:room',(store.get('ww:session',null)||store.get('ww:draft',null))===null?'library':'write');
@@ -3680,6 +3707,17 @@ let fwdBypass=false;
 function renderSyntax(text){const D=tagDoc(text),segs=[];
   for(const t of D.toks){const b=WS.posBucket(t.tag||'');if(b)segs.push({s:t.from,e:t.to,cls:'sx sx-'+b})}
   ED.overlay(segs)}
+/* Paints the Skim lens: what a skimming reader takes stays in full ink, and the rest fades.
+   Paragraphs: the first sentence of each paragraph and of each list item. Sentences: each sentence's
+   first words and its last, with a word an ending hands to the next opening underlined in both.
+   Headings keep their ink either way. It reads the prose as the skim test does. */
+function renderSkim(text){const rows=skimRows(maskProse(text),text),segs=[];
+  for(const r of rows){
+    if(skimMode==='para'){if(r.para||r.item)segs.push({s:r.s,e:r.e,cls:'sk'});continue}
+    for(const ws of [r.ow,r.ew])if(ws.length)segs.push({s:ws[0][0],e:ws[ws.length-1][1],cls:'sk'});
+    r.mo.forEach(j=>r.ow[j]&&segs.push({s:r.ow[j][0],e:r.ow[j][1],cls:'sk-link'}));
+    r.me.forEach(j=>r.ew[j]&&segs.push({s:r.ew[j][0],e:r.ew[j][1],cls:'sk-link'}))}
+  ED.overlay(segs)}
 /* How long a runway has to be before it shows. Long: 12 words or more, or a verb phrase as
    the subject from 6 ("Seeing the accident from…", "To integrate the…"). Very long: 20 and up.
    0 for a sentence that is fine, or whose verb the tagger can't find. */
@@ -3693,18 +3731,25 @@ function renderRunway(text){const P=proseRun(maskProse(text)),segs=[];
   for(const x of P.sents){const l=rwLevel(x);if(l)segs.push({s:x.rs,e:x.rwEnd,tag:'mark',cls:l===2?'rw-v':'rw-h'})}
   ED.overlay(segs)}
 /* The caption strip for the active lens. Word classes: a class picker and what to look for.
-   Runway: what a runway is and how many are long. Hidden otherwise,
+   Skim: paragraphs or sentences, and what to read for. Runway: what a runway is and how many
+   are long. Hidden otherwise,
    and hidden under X-ray or the Pasted view. */
-function renderLensBar(){const bar=$('#lensbar');if(!bar)return;
-  if(effLens()==='syntax'&&!xray&&!ownView){bar.hidden=false;
-    bar.innerHTML=`<div class="synseg" role="group" aria-label="Word class">${Object.keys(SYN).map(k=>`<button data-syn="${k}" aria-pressed="${synClass===k}"><span class="sxs sx-${k==='all'?'noun':k}">${SYN[k][0]}</span></button>`).join('')}</div><p class="lenscap">${SYN[synClass][1]}</p>`;
-    bar.querySelectorAll('[data-syn]').forEach(b=>b.onclick=()=>{synClass=b.dataset.syn;store.set('ww:syn',synClass);applyLens()})}
-  else if(effLens()==='runway'&&!xray&&!ownView){bar.hidden=false;const P=proseRun(maskProse(editor.value));const h=P.sents.filter(x=>rwLevel(x)===1).length,v=P.sents.filter(x=>rwLevel(x)===2).length;
-    bar.innerHTML=`<p class="lenscap"><b>${h+v} long runway${h+v===1?'':'s'}.</b> A runway is the words a reader holds before the verb arrives. Tinted: ${h} long, ${RW_LONG} words or more, or a verb phrase as the subject. Tinted and underlined: ${v} very long, ${RW_VERY} and up. Questions, fragments and sentences that read two ways stay plain.</p>`}
-  else{bar.hidden=true;bar.innerHTML=''}}
+function renderLensBar(){const bar=$('#lensbar'),pick=$('#lenspick');if(!bar||!pick)return;
+  /* pills go in the pinned tools, the caption below them */
+  const show=(pills,cap)=>{pick.hidden=!pills;pick.innerHTML=pills;bar.hidden=!cap;bar.innerHTML=cap};
+  if(effLens()==='syntax'&&!xray&&!ownView){
+    show(`<div class="synseg" role="group" aria-label="Word class">${Object.keys(SYN).map(k=>`<button data-syn="${k}" aria-pressed="${synClass===k}"><span class="sxs sx-${k==='all'?'noun':k}">${SYN[k][0]}</span></button>`).join('')}</div>`,`<p class="lenscap">${SYN[synClass][1]}</p>`);
+    pick.querySelectorAll('[data-syn]').forEach(b=>b.onclick=()=>{synClass=b.dataset.syn;store.set('ww:syn',synClass);applyLens()})}
+  else if(effLens()==='skim'&&!xray&&!ownView){const rows=skimRows(maskProse(editor.value),editor.value),np=rows.filter(r=>r.para).length,
+      n=skimMode==='para'?`${np} paragraph${np===1?'':'s'}.`:`${rows.length} sentence${rows.length===1?'':'s'}.`;
+    show(`<div class="synseg" role="group" aria-label="Skim by">${Object.keys(SKIM).map(k=>`<button data-skim="${k}" aria-pressed="${skimMode===k}">${SKIM[k][0]}</button>`).join('')}</div>`,`<p class="lenscap"><b>${n}</b> ${esc(SKIM[skimMode][1])}</p>`);
+    pick.querySelectorAll('[data-skim]').forEach(b=>b.onclick=()=>{skimMode=b.dataset.skim;store.set('ww:skim',skimMode);applyLens()})}
+  else if(effLens()==='runway'&&!xray&&!ownView){const P=proseRun(maskProse(editor.value));const h=P.sents.filter(x=>rwLevel(x)===1).length,v=P.sents.filter(x=>rwLevel(x)===2).length;
+    show('',`<p class="lenscap"><b>${h+v} long runway${h+v===1?'':'s'}.</b> A runway is the words a reader holds before the verb arrives. Tinted: ${h} long, ${RW_LONG} words or more, or a verb phrase as the subject. Tinted and underlined: ${v} very long, ${RW_VERY} and up. Questions, fragments and sentences that read two ways stay plain.</p>`)}
+  else show('','')}
 /* Puts the lens in force: root classes for CSS, button and menu state, then a repaint. */
 function applyLens(){const root=document.documentElement;
-  const L=effLens();root.classList.toggle('hl-on',L==='marks');root.classList.toggle('lens-syntax',L==='syntax');root.classList.toggle('lens-runway',L==='runway');
+  const L=effLens();root.classList.toggle('hl-on',L==='marks');root.classList.toggle('lens-syntax',L==='syntax');root.classList.toggle('lens-runway',L==='runway');root.classList.toggle('lens-skim',L==='skim');
   Object.keys(SYN).forEach(k=>root.classList.toggle('syn-'+k,L==='syntax'&&synClass===k));
   const b=$('#lensBtn');if(b){b.textContent='Lens: '+LENSES[lens];b.setAttribute('aria-pressed',String(lens!=='off'))}
   $$('#lensMenu [data-lens]').forEach(x=>x.setAttribute('aria-checked',String(x.dataset.lens===lens)));
@@ -3750,7 +3795,7 @@ function renderScore(){
     :'<div class="scap">Write something, then hit X-ray. The words vanish and only your punctuation is left.</div>';
 }
 /* Lays the current view over the words.
-   Precedence: X-ray, Pasted, Write focus, Word classes, Runway, then Marks.
+   Precedence: X-ray, Pasted, Write focus, Skim, Word classes, Runway, then Marks.
    Colour, background, underline only. Write shows the page and nothing else. */
 function renderBackdrop(text,filter){
   document.documentElement.classList.toggle('dimming',!xray&&!ownView&&typeof focusOn==='function'&&focusOn());
@@ -3758,6 +3803,7 @@ function renderBackdrop(text,filter){
   if(ownView){renderOwnBackdrop(text);return}
   if(typeof focusOn==='function'&&focusOn()){renderFocus(text);return}
   if(room==='write'){ED.overlay([]);return}
+  if(effLens()==='skim'){renderSkim(text);return}
   if(effLens()==='syntax'){renderSyntax(text);return}
   if(effLens()==='runway'){renderRunway(text);return}
   const segs=[];hits.forEach((r,idx)=>{if(sevPass(r.sev,filter))segs.push({s:r.s,e:r.e,tag:'mark',attrs:{'data-s':r.sev,'data-i':String(idx)}})});
@@ -3793,7 +3839,7 @@ function renderVoice(a){
     /* The checks, in the order the pane lists them.
        Rare words appears only when frequency.txt is loaded. */
     const items=[
-    {name:'The skim test',lvl:'ok',count:a.skim.length+' sentence'+(a.skim.length===1?'':'s'),why:'Each sentence\'s first words, then its last. Down the left: one thread of characters, or a crowd? From each ending into the next opening: does the next sentence start where the last one ended? A word they share is underlined. The endings alone are what a reader keeps. Click a line to find it.',custom:a.skim.length?'<div class="openers skim">'+a.skim.slice(0,800).map(r=>{const wd=(w,j,m)=>m.has(j)?'<u>'+esc(w)+'</u>':esc(w);return `<div class="op${r.para&&r!==a.skim[0]?' para':''}" data-s="${r.s}" data-e="${r.e}"><b>${r.open.slice(0,2).map((w,j)=>wd(w,j,r.mo)).join(' ')}</b> ${r.open.slice(2).map((w,j)=>wd(w,j+2,r.mo)).join(' ')}${r.end.length?(r.gap?'<span class="op-gap"> … </span>':' ')+'<span class="op-end">'+r.end.map((w,j)=>wd(w,j,r.me)).join(' ')+'</span>':''}</div>`}).join('')+'</div>':''},
+    {name:'The skim test',lvl:'ok',count:a.skim.length+' sentence'+(a.skim.length===1?'':'s'),why:'Each sentence\'s first words, then its last. Down the left: one thread of characters, or a crowd? From each ending into the next opening: does the next sentence start where the last one ended? A word they share is underlined. The endings alone are what a reader keeps. Click a line to find it. Lens: Skim shows them on the page.',custom:a.skim.length?'<div class="openers skim">'+a.skim.slice(0,800).map(r=>{const wd=(w,j,m)=>m.has(j)?'<u>'+esc(w)+'</u>':esc(w);return `<div class="op${r.para&&r!==a.skim[0]?' para':''}" data-s="${r.s}" data-e="${r.e}"><b>${r.open.slice(0,2).map((w,j)=>wd(w,j,r.mo)).join(' ')}</b> ${r.open.slice(2).map((w,j)=>wd(w,j+2,r.mo)).join(' ')}${r.end.length?(r.gap?'<span class="op-gap"> … </span>':' ')+'<span class="op-end">'+r.end.map((w,j)=>wd(w,j,r.me)).join(' ')+'</span>':''}</div>`}).join('')+'</div>':''},
     (()=>{const st=a.zom.filter(z=>z.strong);return{name:'Zombie nouns',lvl:st.length>4?'crit':st.length>1||a.zom.length>8?'warn':'ok',count:st.length+' strong · '+a.zom.length,
       why:'Actions hidden inside nouns drain the verb. Strong ones sit in the zombie pattern: after a light verb (make a decision), before "of" (the implementation of), or after "there is". Free those first: the doer in the subject, the action in the verb. A noun on its own may be a term doing honest work; add it to your lexicon as ignore.'+(R.nom?'':' <b>Using a rough suffix guess.</b> Drop nominalizations.txt into your folder for the real list and the verb behind each noun.'),
       hits:zchips(a.zom)}})(),
@@ -4325,7 +4371,9 @@ const ED=(()=>{
     keymap.of([{key:'ArrowDown',run:v=>arrowIntoTable(v,true)},{key:'ArrowUp',run:v=>arrowIntoTable(v,false)},...standardKeymap,...historyKeymap]),
     placeholder('Start writing. In Revise, the coach reads along and never touches a word.'),
     EditorView.contentAttributes.of({spellcheck:'true',autocorrect:'on',autocapitalize:'sentences','aria-label':'Essay body'}),
-    EditorState.allowMultipleSelections.of(false)]}
+    EditorState.allowMultipleSelections.of(false),
+    /* the pinned Revise tools cover the top of the page: scroll the caret clear of them */
+    EditorView.scrollMargins.of(()=>{const h=document.getElementById('rhead');return {top:h&&h.offsetParent?h.offsetHeight+8:0}})]}
   const view=new EditorView({parent:host,state:EditorState.create({doc:'',extensions:exts()}),
     /* Every change passes through here once the page has updated, so listeners can paint
        and edit again. Only the writer's own edits (they carry a user event) count as input. */
@@ -4415,7 +4463,7 @@ function titlesize(){doctitle.style.height='auto';doctitle.style.height=doctitle
 function refresh(){const a=analyze(editor.value,mode);
   $('#m-words').textContent=a.wc;$('#m-sent').textContent=a.sents.length;$('#m-avg').textContent=Math.round(a.mean)||0;
   $('#hstat').innerHTML=`<b>${a.wc}</b> words · ${a.readMin} min`;updNoteStat();
-  scan(editor.value);renderBackdrop(editor.value,sevFilter);renderVoice(a);renderYou(a);renderLex();updOwn();if(lens==='runway')renderLensBar();
+  scan(editor.value);renderBackdrop(editor.value,sevFilter);renderVoice(a);renderYou(a);renderLex();updOwn();if(lens==='runway'||lens==='skim')renderLensBar();
 }
 /* Keeps the browser copy of the session half a second after the last change (persistSession).
    Then passes the change on to the folder save, which keeps its own timer. */
@@ -4553,7 +4601,7 @@ const FS_OK=typeof window.showDirectoryPicker==='function';
 /* The hidden back room inside the writer's folder.
    The dot keeps it out of the file list and out of Obsidian's view. */
 const SIDE='.pointfirst';
-const PF_VERSION='1.6.1';
+const PF_VERSION='1.7.0';
 /* Tiny key-value store in IndexedDB.
    Holds what localStorage cannot: the folder handle, and browser copies of word lists.
    A failed read comes back empty, never an error. */
@@ -6481,6 +6529,7 @@ function paletteCommands(){const C=[];const add=(label,group,run,keys)=>C.push({
   
     /* Lenses: what the backdrop shows under the words. */
     Object.entries(LENSES).forEach(([k,l])=>add('Lens: '+l,'Lens',()=>{rv();setLens(k)}));
+  Object.entries(SKIM).forEach(([k,v])=>add('Skim: '+v[0],'Lens',()=>{rv();skimMode=k;store.set('ww:skim',k);setLens('skim')}));
   Object.entries(SYN).forEach(([k,v])=>add('Word classes: '+v[0],'Lens',()=>{rv();synClass=k;store.set('ww:syn',k);setLens('syntax')}));
   add('X-ray: punctuation only','Lens',()=>{rv();if(!xray)$('#xrayBtn').click()});add('Show pasted text','Lens',()=>{rv();if(!ownView)$('#ownBtn').click()});
   add('Claim the selection as yours','Lens',()=>$('#claimBtn').click());
@@ -6566,7 +6615,7 @@ async function settingsOnFolder(){if(dirState!=='ready')return;if(store.get('ww:
   const okLeaf=v=>typeof v==='boolean'||(typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.length<=40&&/^[\w-]*$/.test(v));
   const okSetting=v=>okLeaf(v)||(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length<=12&&Object.values(v).every(okLeaf));
   for(const [k,v] of Object.entries(o.values))if(SETTINGS_KEYS.has(k)&&okSetting(v))try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}
-  theme=store.get('ww:theme','system');applyTheme(theme);lens=store.get('ww:lens',lens);synClass=store.get('ww:syn',synClass);if(typeof synClass!=='string'||!(synClass in SYN))synClass='verb';
+  theme=store.get('ww:theme','system');applyTheme(theme);lens=store.get('ww:lens',lens);synClass=store.get('ww:syn',synClass);if(typeof synClass!=='string'||!(synClass in SYN))synClass='verb';skimMode=store.get('ww:skim',skimMode);if(typeof skimMode!=='string'||!(skimMode in SKIM))skimMode='para';
   fx=Object.assign({dim:'sentence',type:true,fwd:false},store.get('ww:focus',{}));sevFilter=store.get('ww:sev',sevFilter);
   W.sort=store.get('ww:wsort',W.sort);W.rel=W.tabRel=store.get('ww:wrel',W.rel);libFilter=store.get('ww:libStage',libFilter);if(typeof libFilter!=='string'||(libFilter&&!(libFilter in STAGE_NAME)))libFilter='';pubTo=store.get('ww:pubTo',pubTo);
   
