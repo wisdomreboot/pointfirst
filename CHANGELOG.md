@@ -2,6 +2,21 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.6.1 (2026-10-29)
+
+The runway, hardened
+- A shade now means what it says. The runway is shown only when every word before the verb is accounted for. A sentence that could be read two ways stays plain, in the lens and in Long runways: a wrong shade misleads, a missing one only goes unseen.
+- Measured on 68,000 sentences of real prose (news, essays, speeches, science writing, fiction), each with its main verb found by a full parser, and every shade that disagreed with the parser checked by hand: in 1.6.0, about 7 shades in 10 were right, and some 700 fine sentences were shaded as long. Now 99.8% are right, and 3 are. About half of all long runways are shaded, as before.
+- On prose it had never seen, before any fix for that prose, 94% to 98% of shades were right. Expect about one wrong shade in twenty-five on new writing. About half of those fall on a sentence that really is long, with the shade ending early or late.
+- It reads more of what essays do: an opening clause or phrase, a subject with a clause inside it, asides in commas, brackets or dashes, a verb phrase as the subject, "what this means is", "we all know", "the question arises", "according to".
+- It knows more words that can only be verbs ("depends", "arises", "went") and never takes them for nouns, and more nouns that look like verbs ("high-end sets", "fresh produce", "the four delegates").
+- A sentence the runway cannot read stays plain, and the rest of the draft still reads.
+
+Words and sentences
+- Two hyphens between words are a dash ("revenues--something" is two words), and so is a hyphen with a space either side. "21st" and "1990s" are one word each.
+- "cannot", "after", "ain't" and the "-wise" words are tagged right; "precise", "expertise" and a few others are not taken for verbs.
+- A sentence no longer splits after "Gov.", "Lt.", "Jr.", "Ave." and other abbreviations, after "No." before a number, inside a number like "2.5", or before a word that starts in lower case. A closing quote or bracket after a full stop stays with its sentence.
+
 ## 1.6.0 (2026-10-28)
 
 The runway replaces the reading grade
