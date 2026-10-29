@@ -6,7 +6,7 @@
      scripts hashed below, and Point First may connect only to its own address and its
      page-view counter. After editing an inline script, run  python3 tools/csp.py index.html
      (or the app will stop running). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nkOR9cGMsk3kM7bvMdix8che5BxvCtJ0soZkFoBjclo=' 'sha256-aijZWJUa+M/T+YvI5Ex0SN++ta+X7X6WbHxYW9SpTI8=' 'sha256-jwqZcp13KBArVH7eFvgmC66xeJM7gjsrivD9KNuSW4A='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pointfirst.goatcounter.com; connect-src 'self' https://pointfirst.goatcounter.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nkOR9cGMsk3kM7bvMdix8che5BxvCtJ0soZkFoBjclo=' 'sha256-aijZWJUa+M/T+YvI5Ex0SN++ta+X7X6WbHxYW9SpTI8=' 'sha256-QB5ShY1K3IY5GE6mIuPC6QmCg2F29STnCLLgVJJ+EKQ='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pointfirst.goatcounter.com; connect-src 'self' https://pointfirst.goatcounter.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Point First: a writing desk that never writes for you</title>
 <meta name="description" content="Point First is a free writing desk that coaches while you write and never writes for you. Your essays stay as plain Markdown files in your own folder.">
 <meta name="author" content="Jonathan du Toit">
@@ -1361,7 +1361,7 @@ const POS_LEX = Object.create(null);
 		everyone everybody everything nobody nothing none one`);
 
 	add('PREP', `of in for with on at by from about into over under above
-		across against along among amid around before behind below beneath
+		after across against along among amid around before behind below beneath
 		beside besides between beyond despite during except inside near off
 		onto outside past since through throughout till toward towards
 		underneath until unto upon within without via per unlike like`);
@@ -1372,7 +1372,7 @@ const POS_LEX = Object.create(null);
 	add('AUX', `am is are was were be been being have has had having do does
 		did doing`);
 
-	add('MOD', `will would shall should can could may might must ought`);
+	add('MOD', `will would shall should can could may might must ought cannot`);
 
 	add('TO', 'to');
 
@@ -1471,7 +1471,7 @@ const POS_LEX = Object.create(null);
 		haven't hadn't i'm you're we're they're he's she's it's that's
 		there's what's here's who's let's i've you've we've they've it'll
 		that'll i'll you'll he'll she'll we'll they'll i'd you'd he'd she'd
-		we'd they'd`);
+		we'd they'd ain't`);
 
 	add('MOD', `can't won't wouldn't shouldn't couldn't mustn't needn't
 		oughtn't`);
@@ -1489,7 +1489,10 @@ const LY_NOT_ADVERB = new Set(`only family reply apply supply imply comply
 	prickly rally scaly smelly steely surly wobbly wooly worldly italy sicily
 	assembly panoply monopoly`.split(/\s+/).filter(Boolean));
 
-const WORD_RE = /\p{Script=Latin}[\p{Script=Latin}\p{M}'\u2019-]*|\d+(?:[.,:]\d+)*%?/gu;
+// A hyphen joins a word ("well-known"); two in a row are a dash typed by hand, and
+// part a word from the next ("revenues--something").
+// A number keeps its ordinal or plural ending: "21st", "1990s".
+const WORD_RE = /\p{Script=Latin}(?:[\p{Script=Latin}\p{M}'\u2019]|-(?!-))*|\d+(?:[.,:]\d+)*(?:%|(?:st|nd|rd|th|s)(?![\p{L}\d]))?/gu;
 
 // One word of a line as the checks see it: the text, lowered, its span, the
 // tag the tagger gives it, and whether it opens a sentence.
@@ -1506,6 +1509,9 @@ function tokenizeLine(text) {
 	return out;
 }
 
+const ISE_NOT_VERB = { precise: 'ADJ', imprecise: 'ADJ', concise: 'ADJ', expertise: 'NOUN',
+	enterprise: 'NOUN', paradise: 'NOUN', premise: 'NOUN', demise: 'NOUN', treatise: 'NOUN' };
+
 function suffixTag(lw) {
 	if (/^\d/.test(lw)) return 'NUM';
 	if (lw.length > 3 && /ly$/.test(lw) && !LY_NOT_ADVERB.has(lw)) return 'ADV';
@@ -1514,6 +1520,11 @@ function suffixTag(lw) {
 	if (lw.length > 4 && /(est)$/.test(lw)) return 'ADJ';
 	if (lw.length > 4 && /(tion|sion|ment|ness|ity|ance|ence|ship|hood|dom|ism|ist|acy|age|ure|ery|ology|graphy|itis)$/.test(lw)) return 'NOUN';
 	if (lw.length > 4 && /(ous|ful|less|ive|able|ible|ical|ic|ish|ary|ent|ant|ile|ory|some|like|ward|proof)$/.test(lw)) return 'ADJ';
+	// "-wise" words are adverbs ("likewise", "clockwise"), and a few "-ise"
+	// words were never verbs at all.
+	if (/wise$/.test(lw)) return 'ADV';
+	if (/oise$/.test(lw)) return 'NOUN';   // "tortoise", "porpoise", "turquoise"
+	if (ISE_NOT_VERB[lw]) return ISE_NOT_VERB[lw];
 	if (lw.length > 4 && /(ize|ise|ate|ify|fy)$/.test(lw)) return 'VERB';
 	if (lw.length > 3 && /(er|or)$/.test(lw)) return 'NOUN';
 	if (lw.length > 3 && /s$/.test(lw) && !/ss$/.test(lw)) {
@@ -1559,7 +1570,10 @@ const LINKING_VERBS = new Set(`seem seems seemed appear appears appeared
 const ABBREVIATIONS = new Set(`mr mrs ms dr prof rev gen sen rep hon st mt
 	ft vs etc al cf ca approx dept est fig vol ch pp no op ed inc ltd co
 	corp univ assn bros jan feb mar apr jun jul aug sep sept oct nov dec
-	mon tue tues wed thu thurs fri sat sun`.split(/\s+/).filter(Boolean));
+	mon tue tues wed thu thurs fri sat sun gov lt col capt sgt cpl maj adm
+	atty messrs esq jr sr ave blvd rd bldg`.split(/\s+/).filter(Boolean));
+// "No. 5" abbreviates; "He said no. And that was that." does not.
+const isAbbreviation = (lw, next) => ABBREVIATIONS.has(lw) && (lw !== 'no' || /^\d/.test(next || ''));
 
 const SUBJECT_PRONOUNS = new Set(['i', 'you', 'we', 'they', 'he', 'she', 'it', 'who']);
 
@@ -1590,7 +1604,7 @@ function tagTokens(tokens, text) {
 		if (!SENT_END.test(ch)) { firstInSentence = false; continue; }
 		if (ch !== '.') { firstInSentence = true; continue; }
 		const nx = tokens[i + 1];
-		firstInSentence = !(ABBREVIATIONS.has(t.lw) || t.lw.length === 1) &&
+		firstInSentence = !(isAbbreviation(t.lw, nx && nx.w) || t.lw.length === 1) &&
 			(!nx || /^\p{Lu}/u.test(nx.w));
 	}
 
@@ -2066,87 +2080,89 @@ function isVaguePronoun(t, next) {
 // verb meet, nothing in a sentence has happened yet: an opening phrase, a long
 // subject, or a clause wedged between subject and verb all make the reader wait.
 // Written for Point First, not part of Word-Smith.
+//
+// The rule it lives by: a runway is shown only when every word before the verb
+// is accounted for. Where the sentence could be read two ways, it answers with
+// doubt, and a doubtful runway is never shaded. Silence is a miss; a wrong shade
+// is a lie. The tests in tools/tests/s_runway.py hold it to that.
 
-// Common verbs, base forms and irregular pasts. The tagger's own lexicon is
-// small, so a present-tense verb it does not know ("memory represents",
-// "materials fail") falls through to a noun, and the runway would run on to some
-// later verb. These let the runway see them, in a verb's slot only.
+// Prepositions in the form of an -ing word.
+const PREP_ING = /^(according|owing|regarding|concerning|notwithstanding|barring|pending|excluding|including)$/;
+// Common verbs in their base form. The tagger's own lexicon is small, so a
+// present-tense verb it does not know ("memory represents", "materials fail")
+// falls through to a noun. These let the runway see it, in a verb's slot only.
 const RUNWAY_VERBS = new Set(`abandon absorb accelerate accept access accommodate accompany accomplish
 	account accumulate accuse achieve acknowledge acquire act adapt add
 	address adjust admire admit adopt advance advise advocate affect afford
 	age agree aim alarm alert align allocate allow alter amaze amend amount
 	amuse analyse analyze anchor announce annoy answer anticipate apologise
 	apologize appeal appear apply appoint appreciate approach approve argue
-	arise arose arrange arrest arrive ask assemble assert assess assign assist
-	assume assure ate attach attack attain attempt attend attract attribute
-	avoid await award awoke back bade bake balance ban bar bargain base bathe
-	battle bear beat become beg begin behave believe belong bend benefit bent
-	bet bind bit bite blame bled blend bless blew block blow board boast boil
-	book boost bore borrow bother bought bounce bow break breathe bred breed
-	bring broadcast broke brought build built burn burnt burst bury buy
+	arise arrange arrest arrive ask assemble assert assess assign assist
+	assume assure attach attack attain attempt attend attract attribute avoid
+	await award back bake balance ban bar bargain base bathe battle bear beat
+	become beg begin behave believe belong bend benefit bet bind bite blame
+	blend bless block blow board boast boil book boost borrow bother bounce
+	bow break breathe breed bring broadcast build burn burst bury buy
 	calculate call calm campaign cancel capture care carry carve cast catch
-	caught cause cease celebrate challenge change charge chase chat check
-	cheer chew choose chose cite claim clarify classify clean clear climb
-	cling close clung coach collapse collect combine come comfort command
-	comment commit communicate compare compel compete compile complain
-	complete comply compose comprise compute conceal concede conceive
-	concentrate concern conclude condemn conduct confess confine confirm
-	conflict conform confront confuse connect consent consider consist
-	constitute construct consult consume contact contain contemplate contend
-	continue contradict contrast contribute control convert convey convince
-	cook cooperate coordinate cope copy correct correspond cost cough count
-	counter cover crack crash crawl create credit creep crept criticise
-	criticize cross crush cry cultivate cure curl cut damage dance dare deal
-	dealt debate decay deceive decide declare decline decorate decrease
-	dedicate deem defeat defend define delay delegate delete deliver demand
-	demonstrate deny depart depend depict deploy deposit derive descend
-	describe deserve design desire despise destroy detail detect determine
-	develop devise devote die differ dig diminish dine dip direct disagree
-	disappear disappoint discard discover discuss dismiss display dispose
-	dispute dissolve distinguish distort distribute disturb dive divert divide
-	do dominate donate double doubt dove download drag drain drank draw dream
-	dreamt dress drew drift drill drink drive drop drove drown dry dump dwell
-	dwelt earn ease eat echo edit educate elect elevate eliminate embrace
-	emerge emphasise emphasize employ enable encounter encourage end endorse
-	endure enforce engage enhance enjoy enlarge enquire ensure enter entertain
-	equip erode escape establish estimate evaluate evaporate evoke evolve
-	exaggerate examine exceed exchange excite exclude excuse execute exercise
-	exhaust exhibit exist expand expect experience experiment explain explode
-	exploit explore export expose express extend extract face facilitate fade
-	fail fall fancy fasten favor favour fear feature fed feed feel fell felt
-	fetch fight file fill finance find finish fire fit fix flash fled flee
-	flew float flood flourish flow flung fly focus fold follow forbade forbid
-	force forecast foresee forgave forget forgive forgot fork form formulate
-	foster found frame free freeze frighten froze fry fulfil fulfill function
-	fund gain gather gaze generate get give glance glow go govern grab grade
-	grant grasp greet grew grind grip grow guarantee guard guess guide halt
-	hand handle hang happen harm hate have head heal hear heat help hesitate
-	hid hide highlight hinder hint hire hit hold hope host house hung hunt
+	cause cease celebrate challenge change charge chase chat check cheer chew
+	choose cite claim clarify classify clean clear climb cling close coach
+	collapse collect combine come comfort command comment commit communicate
+	compare compel compete compile complain complete comply compose comprise
+	compute conceal concede conceive concentrate concern conclude condemn
+	conduct confess confine confirm conflict conform confront confuse connect
+	consent consider consist constitute construct consult consume contact
+	contain contemplate contend continue contradict contrast contribute
+	control convert convey convince cook cooperate coordinate cope copy
+	correct correspond cost cough count counter cover crack crash crawl create
+	credit creep criticise criticize cross crush cry cultivate cure curl cut
+	damage dance dare deal debate decay deceive decide declare decline
+	decorate decrease dedicate deem defeat defend define delay delegate delete
+	deliver demand demonstrate deny depart depend depict deploy deposit derive
+	descend describe deserve design desire despise destroy detail detect
+	determine develop devise devote die differ dig diminish dine dip direct
+	disagree disappear disappoint discard discover discuss dismiss display
+	dispose dispute dissolve distinguish distort distribute disturb dive
+	divert divide do dominate donate double doubt download drag drain draw
+	dream dress drift drill drink drive drop drown dry dump dwell earn ease
+	eat echo edit educate elect elevate eliminate embrace emerge emphasise
+	emphasize employ enable encounter encourage end endorse endure enforce
+	engage enhance enjoy enlarge enquire ensure enter entertain equip erode
+	escape establish estimate evaluate evaporate evoke evolve exaggerate
+	examine exceed exchange excite exclude excuse execute exercise exhaust
+	exhibit exist expand expect experience experiment explain explode exploit
+	explore export expose express extend extract face facilitate fade fail
+	fall fancy fasten favor favour fear feature feed feel fetch fight file
+	fill finance find finish fire fit fix flash flee float flood flourish flow
+	fly focus fold follow forbid force forecast foresee forget forgive fork
+	form formulate foster found frame free freeze frighten fry fulfil fulfill
+	function fund gain gather gaze generate get give glance glow go govern
+	grab grade grant grasp greet grind grip grow guarantee guard guess guide
+	halt hand handle hang happen harm hate have head heal hear heat help
+	hesitate hide highlight hinder hint hire hit hold hope host house hunt
 	hurry hurt identify ignore illustrate imagine imitate implement imply
 	import impose impress improve include incorporate increase indicate induce
 	indulge infer influence inform inherit inhibit initiate injure insert
 	insist inspect inspire install instruct insult insure integrate intend
 	interact interest interfere interpret interrupt intervene introduce invade
 	invent invest investigate invite involve isolate issue join joke judge
-	jump justify keep kick kill kiss kneel knelt knock know label lack laid
-	land last laugh launch lay lead lean leap leapt learn leave lecture led
-	lend lent let lie lift light like limit linger link list listen lit live
-	load locate lock look loom lose lost love lower maintain make manage
-	manipulate manufacture march mark marry master match matter mean meant
-	measure meet melt mention merge met mind miss mix mock modify monitor
-	motivate mount mourn move multiply name narrow need neglect negotiate nod
-	note notice nurse obey object oblige observe obtain occupy occur offend
-	offer omit open operate oppose opt order organise organize originate
-	outline outweigh overcame overcome overlook owe own pack paid paint pair
-	panic park participate pass paste pause pay perceive perform permit
-	persist persuade pick picture place plan plant play plead please plunge
-	point polish ponder pose possess post postpone pour practice practise
-	praise pray preach precede predict prefer prepare prescribe present
-	preserve press presume pretend prevail prevent price print proceed process
-	produce profit program progress prohibit project promise promote prompt
-	pronounce propose prosecute protect protest prove provide provoke publish
-	pull pump punish purchase pursue push put qualify question quit quote race
-	raise ran rang range rank rate reach react read realise realize reason
+	jump justify keep kick kill kiss kneel knock know label lack land last
+	laugh launch lay lead lean leap learn leave lecture lend let lie lift
+	light like limit linger link list listen live load locate lock look loom
+	lose love lower maintain make manage manipulate manufacture march mark
+	marry master match matter mean measure meet melt mention merge mind miss
+	mix mock modify monitor motivate mount mourn move multiply name narrow
+	need neglect negotiate nod note notice nurse obey object oblige observe
+	obtain occupy occur offend offer omit open operate oppose opt order
+	organise organize originate outline outweigh overcome overlook owe own
+	pack paint pair panic park participate pass paste pause pay perceive
+	perform permit persist persuade pick picture place plan plant play plead
+	please plunge point polish ponder pose possess post postpone pour practice
+	practise praise pray preach precede predict prefer prepare prescribe
+	present preserve press presume pretend prevail prevent price print proceed
+	process produce profit program progress prohibit project promise promote
+	prompt pronounce propose prosecute protect protest prove provide provoke
+	publish pull pump punish purchase pursue push put qualify question quit
+	quote race raise range rank rate reach react read realise realize reason
 	reassure rebuild recall receive reckon recognise recognize recommend
 	reconcile record recover recruit reduce refer reflect reform refuse regain
 	regard register regret regulate reinforce reject relate relax release
@@ -2154,178 +2170,1092 @@ const RUNWAY_VERBS = new Set(`abandon absorb accelerate accept access accommodat
 	repeat replace reply report represent reproduce request require rescue
 	resemble reserve reside resign resist resolve resort respect respond rest
 	restore restrict result resume retain retire retreat retrieve return
-	reveal reverse review revise revive reward ride ring rise risk rode roll
-	rose rotate rub ruin rule run rush sacrifice sail sang sank sat satisfy
-	save saw say scan scare scatter schedule score scream scroll search secure
-	see seek seem seize select sell send sense sent separate serve set settle
-	shake shape share shed shift shine shone shook shoot shot shout show
-	showed shrank shrink shut sigh sign signal simplify sing sink sit sketch
-	skip slept slid slide slip slow slung smell smile smoke snap sold solve
-	sort sought sound span spare spat speak specialise specialize specify
-	speculate sped speed spell spend spent spill spilt spin split spoil spoke
-	sponsor spot sprang spread spring spun squeeze stab stack stage stand
-	stare start state stay steal steer stem step stick stimulate stir stole
-	stood stop store strengthen stress stretch strike strip strive strode
-	strove struck struggle stuck study stung submit succeed suck suffer
-	suggest suit summarise summarize supply support suppose suppress surprise
-	surround survey survive suspect suspend sustain swallow swam swear sweep
-	swept swim swing switch swore swung tackle take talk tap target taste
-	taught teach tear tell tempt tend term test testify thank think threaten
-	threw throw thrust tie tighten tip tire told tolerate top tore total touch
-	tour trace track trade train transfer transform translate transmit
-	transport trap travel treat tremble trigger trim trouble trust try turn
-	twist type undergo undermine understand understood undertake undertook
-	unite unveil update upgrade upheld upload upset urge use value vanish vary
-	venture view visit voice volunteer vote wait wake walk wander want warn
-	wash waste watch wave weaken wear weigh welcome wept whisper widen win
-	wind wipe wish withdraw withdrew witness woke won wonder wore work worry
-	wound wove wrap write wrote yell yield zoom`.split(/\s+/).filter(Boolean));
+	reveal reverse review revise revive reward ride ring rise risk roll rotate
+	rub ruin rule run rush sacrifice sail satisfy save say scan scare scatter
+	schedule score scream scroll search secure see seek seem seize select sell
+	send sense separate serve set settle shake shape share shift shine shoot
+	shout show shrink shut sigh sign signal simplify sing sink sit sketch skip
+	slide slip slow smell smile smoke snap solve sort sound span spare speak
+	specialise specialize specify speculate speed spell spend spill spin split
+	spoil sponsor spot spread spring squeeze stab stack stage stand stare
+	start state stay steal steer stem step stick stimulate stir stop store
+	strengthen stress stretch strike strip strive struggle study submit
+	succeed suck suffer suggest suit summarise summarize supply support
+	suppose suppress surprise surround survey survive suspect suspend sustain
+	swallow swear sweep swim swing switch tackle take talk tap target taste
+	teach tear tell tempt tend term test testify thank think threaten throw
+	tie tighten tip tire tolerate top total touch tour trace track trade train
+	transfer transform translate transmit transport trap travel treat tremble
+	trigger trim trouble trust try turn twist type undergo undermine
+	understand undertake unite unveil update upgrade upload upset urge use
+	value vanish vary venture view visit voice volunteer vote wait wake walk
+	wander want warn wash waste watch wave weaken wear weigh welcome whisper
+	widen win wind wipe wish withdraw witness wonder work worry wrap write
+	yell yield zoom`.split(/\s+/).filter(Boolean));
+// Irregular past forms of those verbs ("rose", "fed", "struck").
+const RUNWAY_PASTS = new Set(`arose ate awoke bade bent bit bled blew bore bought bred broke brought
+	built burnt caught chose clung crept dealt dove drank dreamt drew drove
+	dwelt fed fell felt fled flew flung forbade forgave forgot froze grew hid
+	hung knelt laid leapt led lent lit lost meant met overcame paid ran rang
+	rode rose sang sank sat saw sent shed shone shook shot showed shrank slept
+	slid slung sold sought spat sped spent spilt spoke sprang spun stole stood
+	strode strove struck stuck stung swam swept swore swung taught threw
+	thrust told tore understood undertook upheld wept withdrew woke won wore
+	wound wove wrote`.split(/\s+/).filter(Boolean));
 
-// Is lw one of those verbs, or its -s form? "represents", "pushes", "carries".
+// Is lw one of those verbs: a base form, its -s form, or an irregular past?
 function runwayVerb(lw) {
-	if (RUNWAY_VERBS.has(lw)) return true;
+	if (RUNWAY_VERBS.has(lw) || RUNWAY_PASTS.has(lw) || PAST_ONLY.has(lw)) return true;
+	const bare = lw.replace(/^(re|over|under|out|mis|fore|up|with)(?=[a-z]{3})/, '');
+	if (bare !== lw && (RUNWAY_PASTS.has(bare) || PAST_ONLY.has(bare))) return true;   // "rewrote", "outgrew"
+	if (/^[a-z]{4,}izes$/.test(lw)) return true;   // "utilizes", "emphasizes"; not "prizes"
+	return !!runwayBase(lw);
+}
+// The base form behind an -s form: "carries" → "carry", "pushes" → "push".
+function runwayBase(lw) {
 	const stems = lw.endsWith('ies') ? [lw.slice(0, -3) + 'y'] :
 		lw.endsWith('es') ? [lw.slice(0, -2), lw.slice(0, -1)] :
-		lw.endsWith('s') ? [lw.slice(0, -1)] : [];
-	return stems.some(s => RUNWAY_VERBS.has(s));
+		lw.endsWith('s') && !lw.endsWith('ss') ? [lw.slice(0, -1)] : [];
+	return stems.find(s => RUNWAY_VERBS.has(s)) || null;
 }
 
 // Verb forms that never carry a clause on their own.
-const NON_FINITE = new Set(['be', 'been', 'being', 'having']);
+const NON_FINITE = new Set(['be', 'been', 'being', 'having', 'doing']);
 // Words ending in -ing that are not -ing forms.
 const NOT_ING = new Set(`bring sing ring sting string swing fling cling spring wring
-	sling thing king wing`.split(/\s+/).filter(Boolean));
-const isIng = (t) => /ing$/.test(t.lw) && !NOT_ING.has(t.lw);
+	sling thing king wing during`.split(/\s+/).filter(Boolean));
+const isIng = (t) => /ing$/.test(t.lw) && !NOT_ING.has(t.lw) && POS_LEX[t.lw] !== 'NOUN' && POS_LEX[t.lw] !== 'PRON';   // not "nothing", "morning"
+// Of those, the ones that are never verbs: "during", "the king", "last spring".
+const NOUN_ING = new Set(['during', 'thing', 'king', 'wing', 'string', 'ceiling', 'offspring']);
+// Adverbs the tagger misses that sit inside a verb group: "to further load".
+const SPLIT_ADVERBS = new Set(['further', 'better', 'best', 'first']);
 // Clause openers. Each brings a verb of its own that is not the main verb.
 const RELATIVES = new Set(['who', 'whom', 'whose', 'which']);
-const OPENING_CLAUSE = new Set(`when whenever while whereas whether if unless because
-	although though since as after before until till once where wherever what
-	whatever`.split(/\s+/).filter(Boolean));
+// Clauses that open a sentence and end at a comma: "When we read, …".
+const OPENING_CLAUSE = new Set(`when whenever while whereas if unless because
+	although though since as after before until till once where wherever
+	lest`.split(/\s+/).filter(Boolean));
+// The ones that are prepositions too: "After the war, …" has no clause in it.
+const OPENING_PREP = new Set(['as', 'after', 'before', 'since', 'until', 'till']);
+// Clauses that are themselves the subject: "What matters is…", "Whether he
+// knew is unclear", "That he left surprised us". The main verb follows them
+// with no comma.
+const SUBJECT_CLAUSE = new Set(['what', 'whatever', 'whoever', 'whichever', 'whether', 'how', 'why']);
 // Mid-sentence, the prepositions (after, since, as) are left out: "the vote
 // after the debate" has no clause in it.
 const INNER_CLAUSE = new Set(`when whenever while whereas whether if unless because
-	although though where wherever why how`.split(/\s+/).filter(Boolean));
+	although though where wherever why how lest wherein whereby whereof whereupon whence`.split(/\s+/).filter(Boolean));
+const FREE_RELATIVES = new Set(['what', 'whatever', 'whoever', 'whichever', 'whomever']);
 // After a comma, these start a second clause. The runway stops there.
 const NEW_CLAUSE = new Set(['and', 'but', 'or', 'so', 'yet', 'nor']);
-const CLAUSE_SUBJECTS = new Set(['i', 'you', 'we', 'they', 'he', 'she']);
+const CLAUSE_SUBJECTS = new Set(['i', 'you', 'we', 'they', 'he', 'she', 'it']);
+// Determiners that can stand alone as a subject: "Some say", "This suggests".
+const DEMONSTRATIVES = new Set(['this', 'that', 'these', 'those']);
+const QUANTIFIERS = new Set(['some', 'many', 'most', 'few', 'several', 'both', 'all',
+	'others', 'each', 'either', 'neither', 'none', 'another', 'such']);
+// Singular ones take the -s form ("each wants"); plural ones the base form
+// ("many remain"). Agreement tells the verb from the noun: "these plans" is a
+// noun, "these plan" can only be a verb.
+const SINGULAR_DETS = new Set(['this', 'that', 'each', 'either', 'neither', 'another']);
+// Pronouns that open a clause and are its subject: "which means", "what matters".
+const REL_SUBJECTS = new Set(['which', 'what', 'whatever', 'whichever']);
+// Superlative-shaped nouns: "the interest grew" is not "the latest report".
+const EST_NOUNS = new Set(`interest request contest protest conquest harvest forest arrest
+	unrest inquest bequest behest manifest digest`.split(/\s+/).filter(Boolean));
+// Adverbs that grade a quality, never an action: "very close", "too late".
+const GRADING = new Set(['very', 'too', 'extremely', 'incredibly', 'terribly', 'awfully', 'fairly', 'pretty']);
+// Verbs that take "of" straight after them. Any other verb word before "of" is
+// a noun: "the use of", "listener support of".
+const OF_VERBS = new Set(`think thinks thought consist consists consisted approve approves
+	approved disapprove disapproves disapproved dream dreams dreamed dreamt speak speaks spoke
+	hear hears heard die dies died smell smells smelled complain complains complained dispose
+	disposes disposed conceive conceives conceived despair despairs despaired partake partakes
+	partook tire tires tired boast boasts boasted taste tastes tasted know knows knew
+	smack smacks smacked reek reeks reeked`.split(/\s+/).filter(Boolean));
+// Verbs that take another verb's participle: "feel compelled", "got started".
+const CATENATIVES = new Set(`feel feels felt seem seems seemed get gets got become becomes
+	became look looks looked appear appears appeared keep keeps kept stay stays stayed
+	remain remains remained grow grows grew turn turns turned go goes went come comes
+	came sound sounds sounded prove proves proved`.split(/\s+/).filter(Boolean));
+// Verbs that take an object and then a bare verb: "let you fail", "made her cry".
+const CAUSATIVES = new Set(`let lets make makes made help helps helped have has had see
+	sees saw watch watches watched hear hears heard bid bids`.split(/\s+/).filter(Boolean));
+// Verbs of saying that can sit in a parenthesis: "Writing, he argues, is thinking."
+const REPORTING = new Set(`say says said add adds added note notes noted argue argues
+	argued write writes wrote explain explains explained believe believes believed
+	think thinks thought suggest suggests suggested insist insists insisted claim
+	claims claimed recall recalls recalled concede concedes conceded admit admits
+	admitted report reports reported estimate estimates estimated contend contends
+	contended predict predicts predicted warn warns warned observe observes observed
+	agree agrees agreed concludes concluded continues continued`.split(/\s+/).filter(Boolean));
+// Past forms that are never participles: "rose", "grew", "took". After a subject
+// they can only be its verb; "sales rose in May" has no other reading.
+const PAST_ONLY = new Set(`arose ate awoke bade began bit blew bore broke came chose did drank
+	drew drove fell flew forbade forgave forgot froze gave grew knew overcame ran rang rode
+	rose sang sank saw shook shrank spoke sprang stole strode strove swam swore threw took
+	tore undertook went withdrew woke wore wove wrote became`.split(/\s+/).filter(Boolean));
+// Prepositions that can stand alone as adverbs: "the men inside informed him".
+const PREP_ADVERBS = new Set(['inside', 'outside', 'above', 'below', 'behind', 'around', 'nearby', 'aboard', 'along', 'before', 'since', 'within', 'beneath', 'underneath', 'across', 'past', 'about', 'throughout']);
+// Past forms that are nouns too: "a bit of", "the rose garden".
+const NOUNY_PAST = new Set(['bit', 'bore', 'saw', 'rose', 'fell', 'dove', 'drew']);
+// -s forms that are almost never plural nouns: "the teacher takes hold", "it
+// also helps explain". Before another verb word they are still the verb.
+const S_VERBS = new Set(`takes makes gives comes goes seems becomes gets says tells asks
+	brings lets thinks knows sees helps provides requires includes involves appears
+	suggests describes explains contains considers receives believes depends exists
+	occurs allows enables creates reduces applies reflects represents indicates
+	determines establishes improves seeks tends enters achieves arises belongs deserves
+	ensures follows happens implies learns maintains obtains performs prefers prevents
+	proves recognizes refers reveals suffers supposes understands grows emerges agrees
+	argues feels continues`.split(/\s+/).filter(Boolean));
+const S_VERB_BASES = new Set([...S_VERBS].map(w => w.endsWith('ies') ? w.slice(0, -3) + 'y' : /(ss|sh|ch|x|z|o)es$/.test(w) ? w.slice(0, -2) : w.slice(0, -1)));
+// Words that most often take a clause with no "that" after them: "to make sure
+// our military is ready", "assuming the weather holds".
+const CLAUSE_TAKERS = new Set(`sure think thought thinking say said saying believe believed
+	believing hope hoped hoping suppose supposed supposing guess wish insist argue claim
+	assume assumed assuming ensure ensuring realize realizing pretend conclude suggest
+	admit doubt`.split(/\s+/).filter(Boolean));
+// Words that are only ever verbs: -s forms never plural nouns, past forms never
+// participles or nouns.
+const strongVerb = (t) => S_VERBS.has(t.lw) || (pastOnly(t) && !NOUNY_PAST.has(t.lw));
+// The reasons that read a word as a noun, or as an infinitive or a preposition's
+// object: none of them can hold for a word that is only ever a finite verb.
+const NOUN_READING = new Set(['after adjective', 'after suffix adjective', 'after determiner', 'noun at end',
+	'noun before its verb', 'number and plural', 'plural, noun', 'singular, noun', 'noun phrase', 'known noun',
+	'noun before auxiliary', 'noun before verb', 'noun before verb?', 'noun and', 'noun of', 'after possessive',
+	'opens, noun word', 'after comma, noun word', 'infinitive', 'after preposition', 'noun in a noun phrase',
+	'plural before its verb', 'plural before a verb', 'plural before a verb?', 'after a hyphenated modifier',
+	'noun joined to a noun', 'after an -ing word', 'singular noun, bare verb', 'verb word before of']);
+// Plural nouns without an s: "people say", "data show".
+const BARE_PLURALS = new Set(`people police children men women data media criteria phenomena
+	cattle personnel clergy staff feet teeth mice geese folk offspring sheep fish deer
+	species series aircraft majority public youth`.split(/\s+/).filter(Boolean));
+// Words of time: "Last year the company grew" opens on an adverb, not a clause.
+const TIME_NOUNS = new Set(`year years week weeks month months day days time times morning
+	evening night afternoon quarter season spring summer fall autumn winter decade decades
+	century hour hours minute minutes moment period era weekend yesterday today tomorrow
+	january february march april may june july august september october november december
+	monday tuesday wednesday thursday friday saturday sunday`.split(/\s+/).filter(Boolean));
+// A pronoun with its verb attached starts a clause: "One claims he's pro-choice."
+const PRONOUN_VERB = /^(i|you|he|she|it|we|they|that|there|who|what)['\u2019](s|m|re|ve|ll|d)$/;
+// Past participles that commonly stand before a noun as adjectives: "a broken
+// promise", "two hidden costs". Regular -ed forms do this freely.
+const ATTRIBUTIVE_PP = new Set(`broken fallen hidden written spoken stolen frozen
+	chosen beaten sunken shaken forgotten given known lost worn torn grown
+	proven mistaken swollen sworn bound built`.split(/\s+/).filter(Boolean));
 
 // A word the tagger guessed at: not in the lexicon, so a noun by default or a
 // modifier by its neighbours ("the grade counts" tags grade as a modifier).
 const guessedTag = (t) => (t.tag === 'NOUN' || t.tag === 'ADJ') && !POS_LEX[t.lw];
+// A word the lexicon does not know, shaped like an adjective: "-ous", "-ful",
+// "-ional", or "un-" before a stem ("unhappy", "unusual"; not "under-", "unit").
+const adjShape = (lw) => !POS_LEX[lw] && (suffixTag(lw) === 'ADJ' || /.{3}ional$/.test(lw) ||   // "traditional", "regional"
+	(/^un[a-z]{4,}$/.test(lw) && !/^(under|uni|until|unto|uncle|unrest|unemploy)/.test(lw) && !/(s|ed|ing)$/.test(lw)));
 // What can stand right before a verb as the end of its subject.
 const subjectEnd = (t) => t.tag === 'NOUN' || t.tag === 'PRON' || guessedTag(t) ||
 	(t.tag === 'VERB' && isIng(t));
+// Can this word be a finite verb at all, whatever the tagger made of it here?
+// The tagger turns "suggests" into a noun after "this"; the runway asks again.
+const compoundAdjective = (t) => /-/.test(t.lw) && /(ed|en)$/.test(t.lw) && !/^(re|co|pre|de|un|over|under|out|mis|non|self|cross|double|inter)-/.test(t.lw);
+const verbShape = (t) => t.lw.length > 1 && !isIng(t) && !NOUN_ING.has(t.lw) && !compoundAdjective(t) && (t.tag === 'VERB' || POS_LEX[t.lw] === 'VERB' ||
+	runwayVerb(t.lw) || (isPastParticiple(t) && t.lw.length > 3));
+const participleShape = (t) => isPastParticiple(t) || RUNWAY_PASTS.has(t.lw);
+const VERB_PREFIX = /^(re|over|under|out|mis|fore|up|with)(?=[a-z]{3})/;
+const pastOnly = (t) => PAST_ONLY.has(t.lw) || PAST_ONLY.has(t.lw.replace(VERB_PREFIX, ''));
+// "-s" forms: "carries", "means"; not "pass", not "was".
+const sForm = (t) => /[^s]s$/.test(t.lw) && !RUNWAY_PASTS.has(t.lw) && !/^(is|was|has|does|this|thus|us|his|its|as)$/.test(t.lw);
+const baseForm = (t) => !sForm(t) && !participleShape(t) && !isIng(t) && !pastOnly(t);
 
 // A sentence that opens on a verb phrase: "Seeing the accident…", "To integrate…",
-// "Being born…", "Written in 1990, …". Participles and gerunds, not commands.
-function opensOnVerbPhrase(toks) {
-	const t0 = toks[0], t1 = toks[1];
+// "Being born…", "Written in 1990, …". Participles and gerunds, not commands,
+// and not a name that happens to end in -ing ("Learning Materials for…").
+// `at` skips a leading "But" or "Yet".
+// `subject` asks the narrower question: can this phrase be the subject? A gerund
+// or an infinitive can ("Seeing the accident… compromised"); a participle cannot
+// ("Written in 1990, the book…" opens on a description).
+function opensOnVerbPhrase(toks, at, subject) {
+	const t0 = toks[at], t1 = toks[at + 1];
+	if (!t0 || (t1 && /^\p{Lu}/u.test(t1.w))) return false;
 	if (t0.tag === 'TO') return !!t1 && t1.tag === 'VERB';
 	if (t0.lw === 'being' || t0.lw === 'having') return true;
-	if (t0.tag !== 'VERB') return false;
+	if (t0.tag !== 'VERB' && !(guessedTag(t0) && RUNWAY_PASTS.has(t0.lw))) return false;
+	// "According to the reports, …": a preposition in -ing form opens a phrase, never a subject.
+	if (PREP_ING.test(t0.lw)) return !subject;
 	if (isIng(t0)) return true;
-	if (!isPastParticiple(t0)) return false;
+	if (subject || !isPastParticiple(t0)) return false;
+	// "Rekindled hope", "Increased demand": a participle before a noun is an
+	// adjective, and the phrase is a plain noun phrase.
+	if (t1 && (t1.tag === 'NOUN' || t1.tag === 'ADJ')) return false;
 	// "Read the notes" is a command; "Set in Rome, the novel…" describes.
-	return POS_LEX[t0.lw] !== 'VERB' || !t1 || t1.tag === 'PREP' || t1.tag === 'ADV';
+	return !RUNWAY_VERBS.has(t0.lw) || !t1 || t1.tag === 'PREP' || t1.tag === 'ADV';
 }
 
-// The runway of one sentence, from its tagged tokens. `text` is what the
-// token offsets point into. Returns { n, verb, verbal }: n words come before
-// the main verb, and verbal says the subject itself is a verb phrase
-// ("Seeing the accident from the window… compromised"). Returns null for a
-// question, a fragment, or a sentence whose verb this tagger cannot find:
-// better no answer than a runway that runs on into the next clause.
+// The runway of one sentence, from its tagged tokens. `text` is what the token
+// offsets point into. Returns { n, verb, verbal, doubt }: n words come before
+// the main verb; verbal says the subject itself is a verb phrase ("Seeing the
+// accident from the window… compromised"); doubt says the sentence could be
+// read another way, so the runway must not be shown as long. Returns null for
+// a question, a headline, a fragment, or a sentence whose verb it cannot find.
 function findRunway(toks, text) {
+	// "i.e." and "e.g." are read as one adverb, not the pronoun "I" and a word "e".
+	toks = toks.map((t, k) => /^(i|e)$/.test(t.lw) && /^[ie]\.\s?[eg]\./i.test(text.slice(t.from, t.from + 5)) ||
+		(/^(e|g)$/.test(t.lw) && k > 0 && /^[ie]\.\s?[eg]\./i.test(text.slice(toks[k - 1].from, toks[k - 1].from + 5))) ? { ...t, tag: 'ADV' } : t);
 	const n = toks.length;
 	if (n < 4) return null;
-	if (/^\s*\?/.test(text.slice(toks[n - 1].to, toks[n - 1].to + 4))) return null;
-	const between = (a, b) => text.slice(a.to, b.from);
-	const BREAK = /[,;:()\u2013\u2014]/;
-	const breaks = (a, b) => BREAK.test(between(a, b));
+	if (/^[\s"'\u201d\u2019)]*\?/.test(text.slice(toks[n - 1].to, toks[n - 1].to + 6))) return null;
+	// A quoted question with its speaker after it: "…why wouldn't she…?" asks Dr Naccache.
+	if (/\?["'\u201d\u2019]/.test(text.slice(toks[0].from, toks[n - 1].to))) return null;
+	const caps = toks.filter(t => /^\p{Lu}/u.test(t.w)).length;
+	if (caps / n >= 0.75) return null;   // a headline: "Seed for Jail Solution Fails to Take Root"
 
-	// Can toks[i] carry the main clause? inPhrase: still inside an opening verb
-	// phrase, where a participle after a noun is describing it ("the building
-	// located one block away") rather than acting.
-	const finiteAt = (i, inPhrase) => {
-		const t = toks[i];
-		if (t.tag === 'AUX' || t.tag === 'MOD') return !NON_FINITE.has(t.lw);
+	const gap = (i) => {
+		const g = text.slice(toks[i - 1].to, toks[i].from);
+		return g.length === 3 && g === ' - ' && /\d$/.test(toks[i - 1].w) && /^\d/.test(toks[i].w) ? '-' : g;   // "1860 - 70" is a range
+	};
+	// A spaced en dash is a dash, and so is a spaced hyphen, as plain text types
+	// one; "1990–95" is a range and "well-known" one word.
+	const BREAK = /[,;:()\u2014]|--|\s\u2013|\u2013\s|\s-\s/;
+	const DASH = /\u2014|--|\s\u2013|\u2013\s|\s-\s/;
+	const breakAt = (i) => i > 0 && i < n && BREAK.test(gap(i));
+	// A capital letter mid-sentence is a name or a month, never the verb: "In May",
+	// "Leo Melamed", "Advanced Investment Management". "I" is the exception.
+	const named = (i) => i > 0 && /^\p{Lu}/u.test(toks[i].w) && !/^i($|['\u2019])/.test(toks[i].lw);
+	const shouted = (i) => named(i) && /^\p{Lu}{2,}$/u.test(toks[i].w);
+	const possessive = (t) => /['\u2019]s$/.test(t.w) || /^['\u2019]/.test(text.slice(t.to, t.to + 1));
+	const nextTok = (i) => (i + 1 < n && !breakAt(i + 1)) ? toks[i + 1] : null;
+	const adverbish = (p) => toks[p].tag === 'ADV' || SPLIT_ADVERBS.has(toks[p].lw) ||
+		(/^(so|too|as)$/.test(toks[p].lw) && p + 1 < n && toks[p + 1].tag === 'ADV' && /ly$/.test(toks[p + 1].lw)) ||   // "so clearly contained"
+		(/^(much|little|more|less|most)$/.test(toks[p].lw) && ((p > 0 && toks[p - 1].tag === 'ADV') ||
+			(p + 1 < n && toks[p + 1].tag === 'ADV' && /ly$|^often$/.test(toks[p + 1].lw))));   // "pretty much require", "more often chose"
+	// The word before toks[i] in the same stretch, adverbs passed over; -1 when
+	// toks[i] opens its stretch (the sentence, or the words after a comma).
+	const prevWord = (i) => {
 		let p = i - 1;
-		while (p >= 0 && toks[p].tag === 'ADV') p--;
-		const pv = p >= 0 ? toks[p] : null;
-		// A verb the tagger did not know, in a verb's slot: right after the end
-		// of a subject, not inside a prepositional phrase ("plans like business
-		// plans"), not a name. Across a comma only an -s verb with something
-		// after it: "colons, converts to".
-		if (pv && guessedTag(t) && !/^\p{Lu}/u.test(t.w) && runwayVerb(t.lw) && subjectEnd(pv)) {
-			const inPrepPhrase = toks.slice(Math.max(0, i - 3), i).some(x => x.tag === 'PREP' && !BREAK.test(text.slice(x.to, t.from)));
-			const nx = toks[i + 1];
-			if ((!inPrepPhrase || pv.tag === 'PRON') &&
-				(!breaks(pv, t) || (/s$/.test(t.lw) && nx && /^(DET|PRON|PREP|TO|ADV|NUM)$/.test(nx.tag)))) return true;
+		while (p >= 0 && !breakAt(p + 1) && adverbish(p)) p--;
+		return p >= 0 && !breakAt(p + 1) ? p : -1;
+	};
+	// Where the stretch holding toks[i] begins.
+	const stretchStart = (i) => { let s = i; while (s > 0 && !breakAt(s)) s--; return s; };
+	// Where toks[i] sits between "either" or "neither" and its "or" or "nor", in
+	// the same stretch and within a few words: the index of "either", or -1.
+	const correlativeAt = (i) => {
+		let b = -1;
+		for (let j = i - 1; j >= 0 && j >= i - 5 && !breakAt(j + 1); j--) if (/^(either|neither)$/.test(toks[j].lw)) { b = j; break; }
+		if (b < 0) return -1;
+		for (let j = i + 1; j < n && j <= i + 5 && !breakAt(j); j++) if (/^(or|nor)$/.test(toks[j].lw)) return b;
+		return -1;
+	};
+	// A word alone between commas, in a list: "the difficulties, changes, and
+	// tragedies facing them".
+	const listItem = (k) => k > 0 && k + 1 < n && /,/.test(gap(k)) && /,/.test(gap(k + 1)) &&
+		(/^(and|or)$/.test(toks[k + 1].lw) || (k > 1 && /,/.test(gap(k - 1))));
+	// Does the clause pick up again with a verb after the next comma? Tells
+	// ", based in Hartford, saw" (an aside) from ", said in an interview" (the verb).
+	const resumesWithVerb = (i) => {
+		let j = i + 1;
+		while (j < n && !breakAt(j)) j++;
+		if (j >= n || /[;:]/.test(gap(j))) return false;
+		let k = j;
+		while (k < n && toks[k].tag === 'ADV') k++;
+		if (k >= n) return false;
+		const v = toks[k], after = k + 1 < n && !breakAt(k + 1) ? toks[k + 1] : null;
+		if (listItem(k)) return false;
+		// A finite verb: "saw its stock", "said the company"; not "well-educated, and".
+		return ((v.tag === 'AUX' || v.tag === 'MOD') && !NON_FINITE.has(v.lw)) || pastOnly(v) ||
+			(v.tag === 'VERB' && !isIng(v) && !participleShape(v)) ||
+			(v.tag === 'VERB' && participleShape(v) && !!after && (/^(DET|PRON|NUM)$/.test(after.tag) || /^(that|nothing|something|anything|everything)$/.test(after.lw)));
+	};
+	// A noun position: a participle there describes ("two failed votes", "the
+	// nation's accumulated exports"); a verb there acts ("Moody's said the").
+	const modifierSlot = (nx) => !!nx && (nx.tag === 'NOUN' || nx.tag === 'ADJ') && !named(toks.indexOf(nx)) &&
+		!/^(nothing|something|anything|everything|none)$/.test(nx.lw);   // "said nothing new"
+	const isYear = (t) => /^1[5-9]\d\d$|^20\d\d$/.test(t.lw);
+	// A number or a plural determiner earlier in the noun phrase ending at toks[p].
+	const pluralBefore = (p) => {
+		for (let k = p - 1; k >= 0 && !breakAt(k + 1) && /^(DET|ADJ|NOUN|NUM)$/.test(toks[k].tag); k--) {
+			if (/^(a|an|every|each|per|another|this|that)$/.test(toks[k].lw)) return false;   // "$90 a bottle sells"
+			if ((toks[k].tag === 'NUM' && !/^\d+(st|nd|rd|th)$/.test(toks[k].lw) && !isYear(toks[k]) && !/^(1|one)$/.test(toks[k].lw)) ||   // not "the 21st century"
+				/^(these|those|many|several|both|few|various|numerous|two|three|four|five|six|seven|eight|nine|ten)$/.test(toks[k].lw)) return true;
 		}
-		if (t.tag !== 'VERB' || isIng(t)) return false;
-		if (!pv) return true;
-		if (pv.lw === 'to') return false;                                    // "to not let"
-		if (pv.tag === 'AUX' || pv.tag === 'MOD' || NON_FINITE.has(pv.lw)) return false;
-		if (pv.tag === 'DET' || pv.tag === 'PREP' ||
-			(pv.tag === 'ADJ' && POS_LEX[pv.lw] === 'ADJ')) return false;    // "the main point"
-		if (pv.tag === 'VERB' && !isIng(pv) && isPastParticiple(t)) return false;   // "feel compelled"
-		if (pv.tag === 'PRON' && p > 0 && toks[p - 1].tag === 'VERB') return false; // "let you fail"
-		if (inPhrase && isPastParticiple(t) && (pv.tag === 'NOUN' || pv.tag === 'VERB')) {
-			const nx = toks[i + 1];
-			if (!nx || nx.tag === 'PREP' || nx.tag === 'ADV' || nx.tag === 'NUM' || nx.lw === 'one') return false;
-		}
-		return true;
+		return false;
 	};
 
-	const t0 = toks[0];
-	const verbal = opensOnVerbPhrase(toks);
-	// An opening clause has its own verb: "When we read, …", "That he left…".
-	let skip = (OPENING_CLAUSE.has(t0.lw) && t0.tag !== 'DET') ||
-		(t0.lw === 'that' && t0.tag === 'CONJ') || t0.lw === 'what' || t0.lw === 'whatever';
-	// Commands and inversions put the verb first: "Cut the clause", "Had I known".
-	const command = guessedTag(t0) && RUNWAY_VERBS.has(t0.lw) && /^(DET|PRON|PREP|ADV|NUM|TO)$/.test(toks[1].tag);
-	if (!verbal && !skip && (t0.tag === 'AUX' || t0.tag === 'MOD' || t0.tag === 'VERB' || command)) {
-		return { n: 0, verb: t0, verbal: false };
-	}
-	// skip: a clause has opened, and its verb is not the main one.
-	// aside: a clause set off by a comma (", who…,"), passed over to the next comma.
-	let inPhrase = verbal, aside = false;
-	for (let i = 1; i < n; i++) {
-		const t = toks[i], pr = toks[i - 1];
-		if (breaks(pr, t)) {
-			// A semicolon, a colon, or ", and" starts another clause before this
-			// one's verb was found. Stop rather than guess.
-			if (/[;:]/.test(between(pr, t)) || NEW_CLAUSE.has(t.lw)) return null;
-			skip = false; inPhrase = false; aside = false;
+	// Every word that could be the verb and is passed over says why. A weak
+	// reason means the word may be the verb after all: the runway goes on, but
+	// with doubt.
+	let weakNo = false;
+	// Words passed over as the noun before a verb: the word after them has its subject.
+	const nounAt = new Set();
+	// A word that is only ever a verb ("depends", "arises", "went") is never passed
+	// over as a noun: "the question arises", "It all went well". Passed over for want
+	// of a subject after "and", it leaves the reading in doubt.
+	const no = (i, why, weak) => {
+		if (strongVerb(toks[i])) {
+			if (NOUN_READING.has(why)) return yes(i, 'sure', 'only ever a verb');
+			if (why === 'no subject before') {
+				// "who dabbles in the market… and suffers losses": joined to a clause's verb.
+				const pj = prevWord(i);
+				if (clauseAt >= 0 && clauseAt === stretchStart(i) && pj >= 0 && /^(and|or)$/.test(toks[pj].lw)) return yes(i, 'sure', 'joined to a clause verb');
+				weak = true;
+			}
 		}
-		const nx = toks[i + 1];
-		const opens = RELATIVES.has(t.lw) || INNER_CLAUSE.has(t.lw) ||
-			(t.lw === 'that' && (t.tag === 'CONJ' || pr.tag === 'VERB' || (nx && /^(VERB|AUX|MOD|ADV)$/.test(nx.tag)))) ||
-			(CLAUSE_SUBJECTS.has(t.lw) && pr.tag === 'NOUN' && !breaks(pr, t));   // "every sentence we read"
+		if (weak) weakNo = true;
+		return null;
+	};
+	const yes = (i, kind, why) => kind;
+
+	// What kind of verb toks[i] is: 'sure', 'guess' (a word that may be a verb or a
+	// noun, kept only when no sure verb follows in its clause) or null.
+	const verbKind = (i, inPhrase, inClause) => {
+		const k = verbKind0(i, inPhrase, inClause);
+		if (!k || toks[i].tag === 'AUX' || toks[i].tag === 'MOD') return k;
+		// "no amount of either smiles or toughness": the words between "either" and its
+		// "or" are one of two things. Straight after a subject or an auxiliary they are
+		// verbs ("Griffith either invented or…", "can neither accept nor…"); after a
+		// preposition, nouns. Elsewhere they could be either.
+		const pair = correlativeAt(i);
+		if (pair < 0) return k;
+		const before = pair > 0 && !breakAt(pair) ? toks[pair - 1] : null;
+		if (before && prevWord(i) === pair && (subjectEnd(before) || named(pair - 1) || before.tag === 'AUX' || before.tag === 'MOD')) return k;
+		return no(i, 'between either and or', !(before && /^(PREP|DET)$/.test(before.tag)));
+	};
+	const verbKind0 = (i, inPhrase, inClause) => {
+		const t = toks[i];
+		if (named(i)) {
+			// "EVERYONE AGREES that…": a shouted verb is still a verb. "Sir -- Permit me":
+			// a capital after a dash or colon may start a new sentence.
+			const lw = t.lw;
+			const verbWord = POS_LEX[lw] === 'VERB' || POS_LEX[lw] === 'AUX' || POS_LEX[lw] === 'MOD' || RUNWAY_VERBS.has(lw);
+			return (shouted(i) || (/[:\u2014]|--/.test(gap(i)) && !/^\p{Lu}+$/u.test(t.w))) && verbWord ? no(i, 'capital verb', true) : null;
+		}
+		if (t.tag === 'AUX' || t.tag === 'MOD') {
+			if (i > 0 && !breakAt(i) && /^(than|as)$/.test(toks[i - 1].lw)) return no(i, 'comparison');   // "longer than do any of the others"
+			// "the expression of the popular will can be": a modal straight before another
+			// finite verb is a noun.
+			const v2 = i + 1 < n && !breakAt(i + 1) ? toks[i + 1] : null;
+			if (t.tag === 'MOD' && v2 && (v2.tag === 'AUX' || v2.tag === 'MOD') && !NON_FINITE.has(v2.lw) && !/^(have|be|do|not)$/.test(v2.lw)) return no(i, 'modal as a noun');
+			return NON_FINITE.has(t.lw) ? no(i, 'non-finite') : yes(i, 'sure', 'aux');
+		}
+		const p = prevWord(i), pv = p >= 0 ? toks[p] : null, nx = nextTok(i);
+		const pvNamed = p >= 0 && named(p);
+		// What can end a subject here: a noun, a pronoun, a name, a number ("Section
+		// 605 imposes"), or a verb word the tagger left as a verb but which is a noun
+		// by its place ("Total return measures").
+		const subj = pv && (subjectEnd(pv) || pvNamed || pv.tag === 'NUM' || nounAt.has(p) ||
+			(pv.tag === 'VERB' && !isIng(pv) && p > 0 && /^(DET|ADJ)$/.test(toks[p - 1].tag)));
+		if (!verbShape(t)) {
+			// A word the tagger has never seen, shaped like a verb, where a verb goes:
+			// "the sense of relationship overreaches the truth".
+			if (guessedTag(t) && !sForm(t) && !/s$/.test(t.lw) && pv && !possessive(pv) && (/s$/.test(pv.lw) && (pv.tag === 'NOUN' || guessedTag(pv)) || /^(we|they|you|i)$/.test(pv.lw)) &&
+				toks[i - 1] === pv && nx && (/^(DET|PRON|PREP)$/.test(nx.tag) && !/^(such|whose|which|what|who|whom|that|of)$/.test(nx.lw))) return yes(i, 'guess', 'unknown word after a plural subject');   // "pieces butt against"
+			// ", coat one side with resin": a word nobody knows, after a comma, with an object.
+			if (guessedTag(t) && !pv && i > 0 && stretchStart(i) > 0 && !sForm(t) && nx && /^(DET|PRON|NUM)$/.test(nx.tag) && !/^(such|whose|which|what|who|whom|that)$/.test(nx.lw)) return yes(i, 'guess', 'unknown word with an object');
+			if (guessedTag(t) && sForm(t) && subj && !possessive(pv) && nx && !(pv.tag === 'NUM' && !(p > 0 && /^\p{Lu}/u.test(toks[p - 1].w)))) {
+				if ((/^(DET|PRON|NUM)$/.test(nx.tag) && !/^(such|whose|which|what|who|whom|that)$/.test(nx.lw)) || named(i + 1) ||
+					/^(more|less|fewer|much|enough|several)$/.test(nx.lw)) return yes(i, 'guess', 'unknown verb-shaped word');   // "the research also sheds more light"
+				if (/^(down|up|out|off|away|back)$/.test(nx.lw) && !/s$/.test(pv.lw)) return yes(i, 'guess', 'unknown verb, particle');
+				if (/^(ADV|TO)$/.test(nx.tag)) return no(i, 'unknown verb-shaped word', true);
+			}
+			return null;
+		}
+		if (i > 0 && !breakAt(i) && GRADING.has(toks[i - 1].lw)) return no(i, 'after grading adverb');   // "very close"
+		// "the fact that the common position has for the first time introduced": the
+		// participle finishes the clause's "has".
+		if (participleShape(t) && !pastOnly(t) && lastConsumed >= 0 && lastConsumed < i - 1 && i - lastConsumed <= 8 &&
+			/^(has|have|had)$/.test(toks[lastConsumed].lw) && toks[lastConsumed].tag === 'AUX') {
+			let plain = true;
+			for (let k = lastConsumed + 1; k < i && plain; k++) plain = !breakAt(k) && /^(PREP|DET|ADJ|NOUN|NUM|ADV)$/.test(toks[k].tag) && !named(k);
+			if (plain && !breakAt(i)) return no(i, 'finishes a verb group');
+		}
+		if (verbless && i === o1) return no(i, 'verbless opening');
+		if (verblessAt >= 0 && prevWord(i) === verblessAt) return no(i, 'verbless clause');   // "when linked up with…"
+		if (TIME_NOUNS.has(t.lw) && i > 0 && /^(last|next|this|every|each|early|late)$/.test(toks[i - 1].lw)) return no(i, 'time word');   // "last fall"                 // "Although tired, the editor…"
+		const atStart = i === 0 || p < 0 && stretchStart(i) === 0;
+
+		// Nothing before it in its stretch.
+		if (!pv) {
+			if (i > 0 && breakAt(i) || stretchStart(i) > 0) {
+				if (listItem(i) && !pastOnly(t)) return no(i, 'list item');
+				if ((sForm(t) || baseForm(t)) && nx && (nx.tag === 'AUX' || nx.tag === 'MOD') && !NON_FINITE.has(nx.lw) && !PRONOUN_VERB.test(nx.lw)) return no(i, 'noun before auxiliary');   // ", means have been found"
+				// "to read, write, move": a list of infinitives, not a verb.
+				const ps = stretchStart(stretchStart(i) - 1), prevStretch = toks.slice(ps, stretchStart(i));
+				const infinitiveBefore = prevStretch.length > 0 && ((prevStretch[0].tag === 'TO' && prevStretch.length <= 3) ||
+					(prevStretch.length >= 3 && prevStretch[0].lw === 'in' && prevStretch[1].lw === 'order' && prevStretch[2].tag === 'TO') ||
+					(prevStretch.length === 1 && prevStretch[0].tag === 'VERB' && baseForm(prevStretch[0])) ||
+					(prevStretch.length <= 3 && prevStretch.some((x, k, a) => x.tag === 'TO' && a[k + 1] && a[k + 1].tag === 'VERB')));
+				if (baseForm(t) && infinitiveBefore) return no(i, 'infinitive list');
+				// "to induce them to exercise their reason, follow its dictates": a longer list
+				// of infinitives, or a command after a purpose.
+				if (baseForm(t) && prevStretch.length > 3 && prevStretch[0].tag === 'TO' && prevStretch[1].tag === 'VERB' && ps > at) return no(i, 'after an infinitive', true);
+				// After a comma: ", said the", but ", tentatively priced by" may describe.
+				if (pastOnly(t)) return yes(i, 'sure', 'after comma, past');
+				// ", tentatively priced by", ", repeated crying episodes": a participle that
+				// describes; ", now become American citizens": a bare form with no subject.
+				// After an aside or an appositive has closed on the subject ("Hudson General's
+				// president, Alan J. Stearn, resigned") a past form is the verb; anywhere else
+				// it may describe, unless an object follows.
+				if (participleShape(t)) {
+					const ps2 = stretchStart(stretchStart(i) - 1);
+					// "X, the Y of Z, resigned": the subject, then a noun phrase set off by commas.
+					const appositive = ps2 > 0 && (toks[ps2].tag === 'DET' || named(ps2)) && /,/.test(gap(ps2)) && /,/.test(gap(stretchStart(i))) &&
+						stretchStart(ps2 - 1) === at && !openingAdverbial && !frontedPP && !phrase && !verbless && toks[at].tag !== 'PREP';
+					if (nx && /^(by|as)$/.test(nx.lw)) return yes(i, 'guess', 'after comma, participle');
+					// Only after a subject: "If such could have been…, how much greater must be the
+					// danger…, quadrupled in amount" has an opening clause before its aside.
+					if ((asideClosedAt === stretchStart(i) && !asideAfterOpening) || appositive) return yes(i, 'sure', 'after an aside');
+					if (nx && (/^(DET|PRON)$/.test(nx.tag) || named(i + 1) || /^(nothing|something|anything|everything)$/.test(nx.lw))) return yes(i, 'sure', 'after comma, with object');
+					return yes(i, 'guess', 'after comma, participle');
+				}
+				if (baseForm(t) && !atStart) return nx && /^(DET|PRON)$/.test(nx.tag) && nx.lw !== 'that' && !openingAdverbial ? yes(i, 'sure', 'after comma, bare form with object') : yes(i, 'guess', 'after comma, bare form');
+				if (t.tag === 'VERB') return yes(i, 'sure', 'after comma');
+				return nx && /^(DET|PRON|NUM|PREP|ADV|TO)$/.test(nx.tag) ? yes(i, 'guess', 'after comma, verb word') : no(i, 'after comma, noun word', true);
+			}
+			// "Now suppose that…": a command after an opening adverb.
+			if (atStart && RUNWAY_VERBS.has(t.lw) && nx && (/^(DET|PRON|NUM)$/.test(nx.tag) || nx.lw === 'that')) return yes(i, 'sure', 'command');
+			if (t.tag === 'VERB' || pastOnly(t)) return yes(i, 'sure', 'opens');
+			return nx && /^(DET|PRON|NUM)$/.test(nx.tag) ? yes(i, 'guess', 'opens, verb word') : no(i, 'opens, noun word');
+		}
+		if (pv.lw === 'to') return no(i, 'infinitive');                          // "to not let"
+		// "be they approvals": an -s form cannot follow "they", "we", "you" or "I".
+		if (sForm(t) && !participleShape(t) && toks[i - 1] === pv && /^(i|you|we|they)$/.test(pv.lw)) { nounAt.add(i); return no(i, 'disagrees with its pronoun'); }   // "We veterans acknowledge"
+		// "If love reflects…", "because work matters": the word after "if" is its subject.
+		if (baseForm(t) && toks[i - 1] === pv && /^(if|when|whenever|because|although|though|unless|while|whereas|until|till|whether)$/.test(pv.lw)) { nounAt.add(i); return no(i, 'subject after a clause opener'); }
+		if (!pvNamed && (pv.tag === 'AUX' || pv.tag === 'MOD') && !(sForm(t) && !participleShape(t))) return no(i, 'verb group');
+		// "where long sentences earned praise": the word after a clause's verb is its object.
+		if (p === lastConsumed && toks[i - 1] === pv && baseForm(t)) return no(i, 'object of a clause verb');
+		if (p === lastConsumed && toks[i - 1] === pv && participleShape(t) && !pastOnly(t) && (modifierSlot(nx) || (nx && /^(and|or)$/.test(nx.lw)))) return no(i, 'modifier in a clause object');
+		if (lastConsumed >= 0 && lastConsumed < p && toks.slice(lastConsumed + 1, i).every((x, k) => (/^(DET|ADJ|NUM)$/.test(x.tag) || (guessedTag(x) && adjShape(x.lw))) && !breakAt(lastConsumed + 1 + k)) &&
+			!breakAt(i) && !pastOnly(t)) return no(i, 'in the object of a clause verb');   // "who had known unhappy loves"
+		if (NON_FINITE.has(pv.lw)) return no(i, 'after be');
+		if (t.lw === 'like' && nx && nx.tag === 'TO' && subjectEnd(pv)) return yes(i, 'sure', 'like to');   // "managers like to charge"
+
+		// A determiner standing alone as the subject: "This suggests", "Some say",
+		// "these depend", "each sought", "which means", "what matters". Agreement
+		// decides the rest: "these plans" is a noun, "these plan" a verb.
+		// "we all know", "they both agree": a quantifier after its pronoun.
+		if (/^(all|both|each)$/.test(pv.lw) && p > 0 && !breakAt(p) && !isIng(t) && (t.tag === 'VERB' || pastOnly(t) || RUNWAY_VERBS.has(t.lw) || participleShape(t)) &&
+			(/^(we|they|you|it)$/.test(toks[p - 1].lw) || nounAt.has(p - 1))) return yes(i, 'sure', 'subject and quantifier');   // "the four other grower delegates all represented"
+		// "what this means is": the clause's subject and its verb.
+		if (p > 0 && !breakAt(p) && FREE_RELATIVES.has(toks[p - 1].lw) && SINGULAR_DETS.has(pv.lw) && sForm(t) && !participleShape(t)) return yes(i, 'sure', 'what this means');
+		const alone = !pvNamed && (DEMONSTRATIVES.has(pv.lw) || REL_SUBJECTS.has(pv.lw) ||
+			(QUANTIFIERS.has(pv.lw) && (p === at || breakAt(p) || /^(PREP|CONJ)$/.test(toks[p - 1].tag) ||
+				(toks[p - 1].tag === 'ADV' && (p - 1 === at || breakAt(p - 1) || /^(PREP|CONJ)$/.test((toks[p - 2] || {}).tag || ''))))));   // "not all provide"
+		if (alone) {
+			// "What matters is": the clause's verb, then the main one.
+			if (FREE_RELATIVES.has(pv.lw) && (p === at || breakAt(p))) return yes(i, 'sure', 'relative subject');
+			// "these results show"; but after "this" a noun would need the -s form after it,
+			// so in "this means change" the verb is "means".
+			if (nx && (nx.tag === 'AUX' || nx.tag === 'MOD' || (nx.tag === 'VERB' && !isIng(nx) && !participleShape(nx) &&
+				!(SINGULAR_DETS.has(pv.lw) && sForm(t) && baseForm(nx))))) return no(i, 'noun before its verb');
+			if (REL_SUBJECTS.has(pv.lw) || (pv.lw === 'that' && inClause)) return yes(i, 'sure', 'relative subject');
+			// "many design facets" is a noun phrase; "both seem sorry" is a verb and its complement.
+			if (baseForm(t) && modifierSlot(nx) && !/^(that|this)$/.test(pv.lw) && !(CATENATIVES.has(t.lw) && nx.tag === 'ADJ') && !S_VERB_BASES.has(t.lw)) return no(i, 'noun phrase');   // not "These receive chemical fuel"
+			if (pastOnly(t)) return yes(i, 'sure', 'determiner, past');            // "these grew"
+			if (participleShape(t) && !RUNWAY_VERBS.has(t.lw)) return yes(i, 'guess', 'determiner, past');   // "these turned up", "those trained in"
+			if (SINGULAR_DETS.has(pv.lw)) return sForm(t) ? yes(i, 'sure', 'singular agrees') : no(i, 'singular, noun');
+			return sForm(t) ? no(i, 'plural, noun') : yes(i, 'sure', 'plural agrees');
+		}
+		if (pv.tag === 'DET' && !pvNamed) return no(i, 'after determiner');          // "the work", "a call"
+		if (pvNamed && possessive(pv)) return (t.tag === 'VERB' || pastOnly(t)) && !baseForm(t) && !modifierSlot(nx) ? yes(i, 'sure', 'name with s') : no(i, 'after possessive');   // "Britain's move"
+		if (!pvNamed) {
+			// "the men inside informed him": a preposition with no object is an adverb.
+			if (pv.tag === 'PREP' && PREP_ADVERBS.has(pv.lw) && !baseForm(t) && nx && /^(DET|PRON)$/.test(nx.tag)) return no(i, 'after preposition used as adverb', true);
+			if (pv.tag === 'PREP') return no(i, 'after preposition');               // "of getting", "for use"
+			if (possessive(pv)) {
+				// "Moody's said the": a name with an s, then its verb.
+				const capital = /^\p{Lu}/u.test(pv.w) && !/^(the|a|an|this|that|his|her|its|their|our|my|your)$/i.test(toks[p - 1] ? toks[p - 1].lw : '');
+				if (capital && (p === at || p === stretchStart(p)) && (t.tag === 'VERB' || pastOnly(t)) && !baseForm(t) && !modifierSlot(nx)) return yes(i, 'sure', 'name with s');
+				return no(i, 'after possessive');                                  // "the nation's accumulated exports"
+			}
+			// "the main point", "the unavoidable need", "the latest report". The tagger
+			// calls an adjective a noun when no noun follows it, so ask the word itself.
+			// Only before a noun: "Democrats long fought" uses "long" as an adverb.
+			const prenominal = p === stretchStart(p) || /^(DET|ADJ|PREP|NUM)$/.test(toks[p - 1].tag) || possessive(toks[p - 1]) ||
+				(p > 1 && /^(and|or)$/.test(toks[p - 1].lw) && (toks[p - 2].tag === 'ADJ' || POS_LEX[toks[p - 2].lw] === 'ADJ' ||
+					adjShape(toks[p - 2].lw))) ||   // "radical and revolutionary change"
+				/^(other|same|own|main|chief|sole|mere|sheer|utter|former|latter|entire|whole)$/.test(pv.lw);   // "grains and other seed products"
+			const adjSlot = prenominal && toks[i - 1] === pv && (pv.tag === 'ADJ' || (pv.tag === 'NOUN' && p > 0 && toks[p - 1].tag === 'DET'));
+			const objectNext = nx && (/^(DET|PRON|NUM)$/.test(nx.tag) || nx.lw === 'that');
+			if (adjSlot && POS_LEX[pv.lw] === 'ADJ' && !pastOnly(t)) {
+				if (baseForm(t) || !objectNext) return no(i, 'after adjective');
+				return no(i, 'after adjective, object follows', true);              // "The total marks the sixth"
+			}
+			// "-ive", "-ent", "-ary" words are often nouns: "the secretary said", "the
+			// detective gets the best". Still, "Mr. Coward's more memorable works." is a noun.
+			if (adjSlot && adjShape(pv.lw) && !EST_NOUNS.has(pv.lw) &&
+				(baseForm(t) || (!objectNext && !pastOnly(t) && !(t.tag === 'VERB' && participleShape(t))))) return no(i, 'after suffix adjective');
+			if (pv.tag === 'NUM' && !isYear(pv) && modifierSlot(nx) &&
+				(/ed$/.test(t.lw) || ATTRIBUTIVE_PP.has(t.lw))) return no(i, 'modifier after number', true);   // "two failed votes"
+			if (pv.tag === 'ADJ' && modifierSlot(nx) && participleShape(t) && !pastOnly(t)) return no(i, 'modifier after modifier', true);
+			// "high-end sets", "twenty-six states": a hyphenated word is most often a
+			// modifier, and the -s word after it its noun. With an object after it, the
+			// hyphenated word may be the noun: "the young poet-painter reproduces the".
+			if (sForm(t) && /\w-\w/.test(pv.lw) && toks[i - 1] === pv && !S_VERBS.has(t.lw) && !/^(re|co|pre|de|un|non|self|ex)-/.test(pv.lw))
+				return no(i, 'after a hyphenated modifier', !!nx && /^(DET|PRON|TO|ADJ)$/.test(nx.tag) && !/^(such|whose|which|what|who|whom|that)$/.test(nx.lw));
+		}
+		if (/^(need|dare)$/.test(t.lw) && nx && nx.lw === 'not') return yes(i, 'sure', 'modal need');   // "The operand need not extend"
+		// "the ad plan", "a trade law": a singular noun cannot take a bare verb, so the
+		// word after it is a noun too. "people say", "traders place" can.
+		// Only a plain noun phrase: in "the results of the study show" the subject is
+		// "results", and in "Mother and son recognize" it is two.
+		const plainNP = toks.slice(stretchStart(p), p).every(x => /^(DET|ADJ|NOUN|NUM)$/.test(x.tag) && !/^(and|or)$/.test(x.lw));
+		// "backload with fresh produce": after a preposition and one word, a bare form
+		// is still that phrase's noun, unless a plural before the preposition can be its
+		// subject ("the effects of smoking remain").
+		if (baseForm(t) && toks[i - 1] === pv && p > 1 && toks[p - 1].tag === 'PREP' && !breakAt(p) && !breakAt(p - 1) && pv.tag !== 'PRON' && !isIng(pv) &&
+			!named(p) && !/s$/.test(pv.lw) && !BARE_PLURALS.has(pv.lw) && !/s$/.test(toks[p - 2].lw) && !BARE_PLURALS.has(toks[p - 2].lw) &&
+			!/^(PRON|NUM)$/.test(toks[p - 2].tag) && !DEMONSTRATIVES.has(toks[p - 2].lw) && !QUANTIFIERS.has(toks[p - 2].lw) && !named(p - 2) &&
+			!toks.slice(stretchStart(p), p - 1).some(x => /^(and|or)$/.test(x.lw))) return no(i, 'noun in a phrase');   // not "realism and feeling for truth remain"
+		// "a research associate": after "a" and a singular noun, a bare form is a noun,
+		// unless a preposition puts that noun inside a phrase ("the results of a study show").
+		if (baseForm(t) && toks[i - 1] === pv && pv.tag === 'NOUN' && /^\p{Ll}/u.test(pv.w) && !/s$/.test(pv.lw) && !BARE_PLURALS.has(pv.lw) &&
+			p > 0 && /^(a|an|every|each|another)$/.test(toks[p - 1].lw) && !breakAt(p) && !(p > 1 && toks[p - 2].tag === 'PREP'))
+			return no(i, 'singular noun, bare verb', p > 1 && /^(and|or)$/.test(toks[p - 2].lw));   // "a man and a woman meet" may be two
+		// "the four other grower delegates": a plural is the noun after a number.
+		if (sForm(t) && !strongVerb(t) && toks[i - 1] === pv && (pv.tag === 'NOUN' || guessedTag(pv)) && !/s$/.test(pv.lw) && pluralBefore(p)) { nounAt.add(i); return no(i, 'plural after a number'); }
+		// "to rewarding work": a gerund takes the -s form ("Reading helps"), so a bare
+		// form straight after one is its object. After a preposition the verb may
+		// agree with a noun before it: "the origins of writing rest on".
+		if (baseForm(t) && toks[i - 1] === pv && pv.tag === 'VERB' && isIng(pv) && !/-/.test(pv.lw) && !BARE_PLURALS.has(t.lw) &&
+			!(p > 0 && toks[p - 1].tag === 'PREP') &&
+			!(nx && /^(DET|PRON|NUM)$/.test(nx.tag) && p > 0 && /^(DET|ADJ|NOUN)$/.test(toks[p - 1].tag))) { nounAt.add(i); return no(i, 'after an -ing word'); }   // not "in a single building hold the most promise"   // "the marketing push stresses"
+		if (baseForm(t) && plainNP && !pvNamed && (pv.tag === 'NOUN' || (guessedTag(pv) && !adjShape(pv.lw))) && /^\p{Ll}/u.test(pv.w) && !/s$/.test(pv.lw) &&
+			!BARE_PLURALS.has(pv.lw) && !(p > 0 && QUANTIFIERS.has(toks[p - 1].lw))) return no(i, 'singular noun, bare verb');
+		// "two years", "50 witnesses": a number and a plural are a quantity. "Section
+		// 605 imposes", "Ruling 54-17 provides" and "the Act of 1948 says" are not.
+		let q = p; while (q > 0 && toks[q - 1].tag === 'NUM') q--;
+		if (pv.tag === 'NUM' && sForm(t) && !isYear(pv) && !(q > 0 && /^\p{Lu}/u.test(toks[q - 1].w)) &&
+			POS_LEX[t.lw] !== 'VERB') return no(i, 'number and plural');
+		if (baseForm(t) && participleShape(pv) && !pastOnly(pv) && toks[i - 1] === pv && p > 0 && /^(PREP|DET|ADJ)$/.test(toks[p - 1].tag)) return no(i, 'after a modifying participle');   // "lost for lost love"
+		if (pv.lw === 'as' && participleShape(t)) return no(i, 'as a participle');     // "as illustrated in Fig. 5"
+		const afterRel = i + 2 < n && !breakAt(i + 2) ? toks[i + 2] : null;
+		// "our citizens understand who does what" asks a question; it opens no relative.
+		if (nx && /^(which|who|whom|whose)$/.test(nx.lw) && !(afterRel && /^(NOUN|ADJ)$/.test(afterRel.tag) && nx.lw !== 'who') &&
+			!/^(understand|know|ask|wonder|decide|explain|show|learn|tell|determine|consider|discover|remember|forget|realize|realise|see|choose|doubt)s?$/.test(t.lw)) return no(i, 'before a relative');   // "the gradual changes which seep in"
+		if (i > 0 && toks[i - 1].lw === 'not' && baseForm(t)) return no(i, 'bare verb after not');   // "to end a war, not start one"
+		if (CATENATIVES.has(pv.lw) && participleShape(t)) return no(i, 'catenative');   // "feel compelled"
+		if ((pv.tag === 'PRON' || pvNamed) && p > 0 && (CAUSATIVES.has(toks[p - 1].lw) || /^(seen|watched|heard|felt|noticed)$/.test(toks[p - 1].lw)) &&
+			!breakAt(p) && baseForm(t)) return no(i, 'causative');
+		if (baseForm(t) && (pv.tag === 'NOUN' || guessedTag(pv))) {
+			for (let k = p - 1; k >= Math.max(0, p - 4) && !breakAt(k + 1); k--) {
+				if (/^(make|makes|made|making|let|lets|letting|have|has|had|having|help|helps|helped|helping|watch|watched|see|saw|seen)$/.test(toks[k].lw)) return no(i, 'causative');   // "making the sweat glands work"
+				if (!/^(DET|ADJ|NOUN|NUM)$/.test(toks[k].tag) && !guessedTag(toks[k])) break;
+			}
+		}   // "let you fail", "had seen Reno leave"
+		if (/^(help|helps|helped|dare|dared|go|come)$/.test(pv.lw) && RUNWAY_VERBS.has(t.lw)) return no(i, 'bare verb');   // "helped build"
+		// "sends you stuff", "gave them work": a pronoun after a verb is its object.
+		if (pv.tag === 'PRON' && p > 0 && !breakAt(p) && toks[p - 1].tag === 'VERB' && !isIng(toks[p - 1]) && baseForm(t)) {
+			if (/^(me|him|her|us|them)$/.test(pv.lw)) return no(i, 'after object pronoun');
+			if (/^(you|it)$/.test(pv.lw)) return no(i, 'after object pronoun?', true);
+		}
+		// "a large and intimate collection": a word joined to a modifier is one.
+		if (/^(and|or|but|nor)$/.test(pv.lw) && p > 0 && !breakAt(p) &&
+			(/^(ADJ|DET|PREP)$/.test(toks[p - 1].tag) || POS_LEX[toks[p - 1].lw] === 'ADJ')) return no(i, 'joined to a modifier');
+		// "vast new growth and change are": a word joined to a noun, straight before the
+		// verb, is a noun too.
+		if (/^(and|or)$/.test(pv.lw) && p > 0 && !breakAt(p) && toks[p - 1].tag === 'NOUN' && baseForm(t) && toks[i - 1] === pv && nx &&
+			(((nx.tag === 'AUX' || nx.tag === 'MOD') && !NON_FINITE.has(nx.lw) && !PRONOUN_VERB.test(nx.lw)) || pastOnly(nx))) return no(i, 'noun joined to a noun');
+
+		// "sales rose 5%": a past form with no participle reading.
+		if (pastOnly(t) && NOUNY_PAST.has(t.lw) && (pv.tag === 'NOUN' || guessedTag(pv)) && !/s$/.test(pv.lw) && toks[i - 1] === pv && p > 0 && toks[p - 1].tag === 'DET') return no(i, 'noun in a noun phrase');   // "a hack saw"
+		if (pastOnly(t) && subj) return nx && nx.lw === 'of' && NOUNY_PAST.has(t.lw) ? no(i, 'noun of') : yes(i, 'sure', 'past only');
+		if (t.tag === 'VERB' || (participleShape(t) && subj)) {
+			// "the opposite changes occur", "price changes affect": an -s word before a
+			// bare verb is the plural subject. "the events here mentioned becomes": a
+			// participle before a finite verb describes.
+			// After a modifier the -s word is the noun ("two walks take", "industrial uses
+			// hold"); after a noun it could be either ("price changes affect").
+			if (sForm(t) && !participleShape(t) && !S_VERBS.has(t.lw) && nx && (nx.tag === 'VERB' || guessedTag(nx)) && baseForm(nx) && (POS_LEX[nx.lw] === 'VERB' || RUNWAY_VERBS.has(nx.lw))) {
+				const modifierBefore = toks[i - 1] === pv && (/^(NUM|ADJ|DET)$/.test(pv.tag) || POS_LEX[pv.lw] === 'ADJ' || /^(we|you)$/.test(pv.lw));
+				nounAt.add(i);   // the end of a subject: "We veterans acknowledge"
+				return no(i, 'plural before its verb', !modifierBefore);
+			}
+			// Not after a pronoun subject: "what we found is".
+			if (participleShape(t) && !pastOnly(t) && nx && (((nx.tag === 'AUX' || nx.tag === 'MOD') && !NON_FINITE.has(nx.lw) && !PRONOUN_VERB.test(nx.lw)) ||
+				pastOnly(nx) || (nx.tag === 'VERB' && sForm(nx) && !participleShape(nx))) && !(toks[i - 1] === pv && /^(i|you|he|she|it|we|they)$/.test(pv.lw))) return no(i, 'participle before a verb', true);
+			// A verb word straight before an auxiliary is a noun: "the orders report had".
+			// Not a word that is only ever a verb ("on which all Americans agree is"), nor, in a
+			// clause, an -s form after its singular noun ("when the new program begins must").
+			if (nx && (nx.tag === 'AUX' || nx.tag === 'MOD') && !NON_FINITE.has(nx.lw) && !PRONOUN_VERB.test(nx.lw) &&
+				(pv.tag === 'NOUN' || pvNamed || (pv.tag === 'VERB' && !isIng(pv))) && !S_VERBS.has(t.lw) && !S_VERB_BASES.has(t.lw) &&
+				!(inClause && sForm(t) && !participleShape(t) && pv.tag === 'NOUN' && !/s$/.test(pv.lw))) return no(i, 'noun before auxiliary', true);
+			// A participle carrying a phrase after a noun describes it: "items listed
+			// as…", "a study released in September", "the building located one block".
+			// An adverb after it acts, "the mail arrived twice", unless it points back
+			// to a place in the text or a time: "the items listed below", "the man
+			// mentioned earlier".
+			const actingAdverb = nx && nx.tag === 'ADV' && !/^(below|above|earlier|later|here|there|elsewhere|previously|recently|before|already|now|then|so|too|also|only|just|still|yet|ever|never|again|today|yesterday|first|last|together|alone|instead)$/.test(nx.lw) &&
+				!(i + 2 < n && !breakAt(i + 2) && /^(by|as)$/.test(toks[i + 2].lw)) &&   // "laid down by Stevenson"
+				!/^(how|why|where|when|what|whether)$/.test(nx.lw);
+			if (participleShape(t) && subj && actingAdverb && !inPhrase) return yes(i, 'sure', 'verb ed, adverb');
+			if (inPhrase && participleShape(t) && nx && nx.tag === 'VERB' && participleShape(nx)) return no(i, 'participle in phrase');   // "one shot estimated by"
+			if (participleShape(t) && (subj || pv.tag === 'VERB' || (nx && nx.lw === 'by')) &&
+				(!nx || /^(PREP|NUM|TO)$/.test(nx.tag) || (nx.tag === 'ADV' && !/^(how|why|where|when)$/.test(nx.lw)) || /^(one|by|as|so|too)$/.test(nx.lw))) {
+				return inPhrase ? no(i, 'participle in phrase') : yes(i, 'guess', 'participle phrase');
+			}
+			if (participleShape(t) && modifierSlot(nx) && (participleShape(pv) || pv.tag === 'ADJ') && toks[i - 1] === pv && !pvNamed && !pastOnly(t)) return no(i, 'stacked modifiers');
+			if (participleShape(t) && modifierSlot(nx) && pv.tag === 'VERB' && !isIng(pv) && !participleShape(pv) && toks[i - 1] === pv && !pastOnly(t)) return no(i, 'modifier after a verb');   // "to promote balanced development"   // "connected disabled veterans"
+			// "pasta and pre-cooked noodles": a participle joined before a noun describes it;
+			// "arising from… and built into": one joined to a phrase is part of it.
+			if (participleShape(t) && /^(and|or)$/.test(pv.lw) && modifierSlot(nx)) return no(i, 'joined participle before noun');
+			if (participleShape(t) && !pastOnly(t) && /^(and|or)$/.test(pv.lw) && (!nx || /^(PREP|ADV|TO)$/.test(nx.tag))) return inPhrase ? no(i, 'joined participle in phrase') : yes(i, 'guess', 'joined participle phrase');
+			if (/^(called|named|dubbed|titled|entitled|nicknamed|labeled|labelled|termed|styled)$/.test(t.lw) && subj && nx && (/^(DET)$/.test(nx.tag) || named(i + 1))) return yes(i, 'guess', 'naming participle');
+			// "an extra edition headlined X", "a kit called Learning Materials": a
+			// participle before a bare noun, a name or a quoted title may describe.
+			if (participleShape(t) && subj &&
+				(modifierSlot(nx) || (nx && named(i + 1)) || (i + 1 < n && /["\u201c\u2018]/.test(gap(i + 1))))) return yes(i, 'guess', 'participle before noun');
+			// "listener support of", "the use of": a verb word before "of" is a noun.
+			if (nx && nx.lw === 'of' && !OF_VERBS.has(t.lw) && !participleShape(t)) return no(i, 'verb word before of', true);
+			// "the silver already coined": a participle after a time adverb, with no object, may describe.
+			if (participleShape(t) && !pastOnly(t) && i > 0 && /^(already|previously|recently|newly|hitherto|formerly|heretofore|originally|once)$/.test(toks[i - 1].lw) &&
+				!(nx && (/^(DET|PRON|NUM)$/.test(nx.tag) || named(i + 1)))) return inPhrase ? no(i, 'participle in phrase') : yes(i, 'guess', 'participle after a time adverb');
+			return yes(i, 'sure', participleShape(t) ? 'verb ed' : 'verb');
+		}
+		// A verb the tagger did not know (or knows only as a noun: "firms face"), in a
+		// verb's slot: straight after the end of a subject, followed by what a verb
+		// takes. Never a list item, never "X of", never before another verb.
+		// "who drafts in the morning… and loses the thread by noon": joined to a clause's verb.
+		if (!subj && /^(and|or)$/.test(pv.lw) && clauseAt >= 0 && clauseAt === stretchStart(i) && (sForm(t) || pastOnly(t))) return yes(i, 'sure', 'joined to a clause verb');
+		if (!subj || possessive(pv) && !pvNamed) return no(i, 'no subject before', false);
+		if (POS_LEX[t.lw] === 'ADJ') return nx && nx.tag === 'PREP' && RUNWAY_VERBS.has(t.lw) ? no(i, 'adjective before a preposition', true) : no(i, 'adjective');   // "offices last spring", "girls major in"
+		if (/^[a-z]{4,}izes$/.test(t.lw) && toks[i - 1] === pv) return yes(i, 'sure', 'an -izes verb');   // "one recent approach utilizes"
+		// "the long sentence rewards the reader": a singular noun, an -s form, an object.
+		// The object is not a subject pronoun ("the reform measures we have introduced"),
+		// and the subject not a modifier after a preposition ("of individual measures the").
+		if (sForm(t) && nx && /^(DET|PRON)$/.test(nx.tag) && !/^(such|whose|which|what|who|whom|that|i|we|they|he|she)$/.test(nx.lw) &&
+			(pv.tag === 'NOUN' || (guessedTag(pv) && !adjShape(pv.lw))) && /^\p{Ll}/u.test(pv.w) && !/s$/.test(pv.lw) && !BARE_PLURALS.has(pv.lw) &&
+			!(pv.tag === 'ADJ' && p > 0 && toks[p - 1].tag === 'PREP' && (POS_LEX[pv.lw] === 'ADJ' || adjShape(pv.lw) || /al$/.test(pv.lw)))) return yes(i, 'sure', 'singular subject, object');
+		// "the reader slows down": a singular noun, an -s form, a particle.
+		if (sForm(t) && nx && /^(down|up|out|off|away|back)$/.test(nx.lw) && pv.tag !== 'PRON' && !/s$/.test(pv.lw)) return yes(i, 'sure', 'singular subject, particle');
+		if (!nx) {
+			// "Ms. Poore replies:", "I always sell.", "Joe Robbie disagrees,"
+			const firstName = p === 0 && /^\p{Lu}/u.test(pv.w) && !POS_LEX[pv.lw] && !RUNWAY_VERBS.has(pv.lw);   // "Faulkner traces,"
+			if ((pv.tag === 'PRON' || pvNamed || firstName) && (sForm(t) || participleShape(t))) return yes(i, 'guess', 'verb at end');
+			return no(i, 'noun at end');
+		}
+		if (nx.lw === 'of') return OF_VERBS.has(t.lw) || OF_VERBS.has(runwayBase(t.lw) || '') ? yes(i, 'guess', 'verb of') : no(i, 'noun of', true);
+		if (nx.lw === 'and' || nx.lw === 'or') {
+			// "owns and operates", "arose and delivered": two verbs joined; "stocks and
+			// bonds": two nouns.
+			const after = i + 2 < n && !breakAt(i + 2) ? toks[i + 2] : null;
+			if (after && verbShape(after) && participleShape(t) && participleShape(after)) return yes(i, 'guess', 'joined verbs');
+			return no(i, 'noun and', true);
+		}
+		if (nx.tag === 'AUX' || nx.tag === 'MOD') {
+			if (PRONOUN_VERB.test(nx.lw)) return yes(i, 'guess', 'verb before clause');
+			if (inClause && sForm(t) && !NON_FINITE.has(nx.lw)) return yes(i, 'guess', 'clause verb before the main one');   // "before the verb arrives is"
+			return no(i, 'noun before verb');
+		}
+		if (nx.tag === 'VERB' && !isIng(nx) || (guessedTag(nx) && runwayVerb(nx.lw))) {
+			// "interest rates rose", "price changes affect": the noun before the verb.
+			// But "traders place orders" and "controversies involve self-styled Jews".
+			const nn = i + 2 < n && !breakAt(i + 2) ? toks[i + 2] : null;
+			if (participleShape(nx) && !pastOnly(nx) && modifierSlot(nn)) return yes(i, 'guess', 'verb before modifier');
+			// "traders place orders": a bare verb, then its plural object. But in
+			// "the northern states cuts their rates" the lexicon's verb is the verb.
+			if (sForm(nx) && !RUNWAY_PASTS.has(nx.lw)) return baseForm(t) ? yes(i, 'guess', 'verb before plural') :
+				POS_LEX[nx.lw] === 'VERB' || POS_LEX[runwayBase(nx.lw) || ''] === 'VERB' ? no(i, 'plural before a verb') : no(i, 'plural before a verb?', true);
+			if (pastOnly(nx) || participleShape(nx)) return no(i, 'noun before verb');
+			return no(i, 'noun before verb?', true);
+		}
+		const knownNoun = POS_LEX[t.lw] === 'NOUN' || (runwayBase(t.lw) && POS_LEX[runwayBase(t.lw)] === 'NOUN');
+		if (knownNoun && !/^(DET|PRON|NUM)$/.test(nx.tag) && nx.lw !== 'that') return no(i, 'known noun', true);
+		return yes(i, 'guess', 'verb word in verb slot');
+	};
+
+	// Sentence start. A leading "But", "Yet" or "And" is passed over.
+	let at = 0;
+	if (/^(but|yet|and|so|or|nor)$/.test(toks[0].lw) && !breakAt(1)) at = 1;
+	const nowThat = toks[at].lw === 'now' && toks[at + 1] && toks[at + 1].lw === 'that' && !breakAt(at + 1);   // "But now that all builders build with drywall, …"
+	if (nowThat) at++;
+	if (/^(even|only|just|especially|particularly|mainly|partly|largely|simply)$/.test(toks[at].lw) && toks[at + 1] &&
+		OPENING_CLAUSE.has(toks[at + 1].lw) && !breakAt(at + 1)) at++;   // "Even though…", "Only when…"
+	const t0 = toks[at];
+	const verbal = opensOnVerbPhrase(toks, at, true);
+	const phrase = verbal || opensOnVerbPhrase(toks, at, false);
+	// A verb phrase as subject takes a singular verb: "Basing action on evidence
+	// provides", "To err is human". "Engineering graduates are" and "Surprising
+	// numbers seem" open on a noun phrase; "To support his family Hamilton went"
+	// opens on a purpose, not a subject. A gerund with a plain object or a
+	// preposition after it ("Bathing the parts gave relief") may take any tense.
+	const t1v = toks[at + 1];
+	const clearGerund = verbal && isIng(toks[at]) && t1v && /^(DET|PRON|PREP|ADV|TO)$/.test(t1v.tag);
+	const singularVerb = (v) => /^(is|was|has|does|isn't|wasn't|hasn't|doesn't)$/.test(v.lw) || v.tag === 'MOD' || sForm(v);
+	const inverted = (v) => isIng(toks[at]) && t1v && /^(PREP|ADV)$/.test(t1v.tag) && /^(is|was)$/.test(v.lw);   // "Bursting from the lips… was the last sound"
+	const verbalAgrees = (v) => verbal && !inverted(v) && (singularVerb(v) || (clearGerund && (pastOnly(v) || participleShape(v))));
+	// An opening clause has its own verb: "When we read, …", "That he left…",
+	// "Had I known, …".
+	const comparison = t0.lw === 'as' && toks[at + 1] && /^(many|much|few|little|several)$/.test(toks[at + 1].lw);   // "As many as 70 banks"
+	const inversion = /^(had|should|were)$/.test(t0.lw) && toks[at + 1] && /^(PRON|DET|NOUN)$/.test(toks[at + 1].tag);   // "Had I known, …"
+	const openingAdverbial = nowThat || (OPENING_CLAUSE.has(t0.lw) && t0.tag !== 'DET' && !comparison &&
+		!(t0.lw === 'because' && toks[at + 1].lw === 'of') && !(t0.lw === 'once' && breakAt(at + 1))) || inversion;
+	const openingPrep = openingAdverbial && OPENING_PREP.has(t0.lw);
+	// "Should we argue that…" may be a question that lost its mark; "and that they
+	// can ignore…" is the tail of another sentence; "But what a task it is to…" is an
+	// exclamation.
+	let doubtStart = (inversion && t0.lw === 'should') || /^\p{Ll}/u.test(toks[0].w) ||
+		(t0.lw === 'what' && toks[at + 1] && /^(a|an)$/.test(toks[at + 1].lw));
+	// "Though no longer able to…", "While in Rome", "When asked": an opening clause
+	// with no subject has no verb either.
+	let o1 = at + 1;
+	while (o1 < n && toks[o1].tag === 'ADV' && !breakAt(o1)) o1++;
+	// A finite verb before the first comma means the clause was not verbless after
+	// all: "Even though in most cases the completion… is still years off,".
+	let finiteAhead = false;
+	for (let j = o1; j < n && !(j > o1 && breakAt(j)); j++) {
+		const x = toks[j];
+		if (((x.tag === 'AUX' || x.tag === 'MOD') && !NON_FINITE.has(x.lw)) || pastOnly(x) || (x.tag === 'VERB' && sForm(x)) ||
+			(x.tag === 'VERB' && !isIng(x) && j > 0 && /^(i|you|he|she|we|they)$/.test(toks[j - 1].lw))) { finiteAhead = true; break; }   // "If in lifting burdens… we reduce"
+	}
+	const verbless = openingAdverbial && !inversion && !openingPrep && o1 < n && !breakAt(o1) && !(toks[o1].tag === 'PREP' && finiteAhead) &&
+		((/^(ADV|PREP|TO)$/.test(toks[o1].tag) && !QUANTIFIERS.has(toks[o1].lw)) ||
+			(toks[o1].tag === 'ADJ' && !QUANTIFIERS.has(toks[o1].lw) && !(o1 + 1 < n && !breakAt(o1 + 1) && /^(NOUN|ADJ)$/.test(toks[o1 + 1].tag)) &&
+				!(o1 + 1 < n && /^(than|as)$/.test(toks[o1 + 1].lw))) ||
+			(toks[o1].tag === 'VERB' && ((isIng(toks[o1]) && !/^(if|unless|because)$/.test(t0.lw)) || isPastParticiple(toks[o1]))) ||
+			(/^(being|having)$/.test(toks[o1].lw) && !/^(if|unless|because)$/.test(t0.lw))) && !named(o1);   // "While being rocked it will…"
+	let skip = (openingAdverbial && !verbless) || SUBJECT_CLAUSE.has(t0.lw) && t0.tag !== 'DET' && !breakAt(at + 1) || t0.lw === 'what' ||   // not "Why, it looks…"
+		(t0.lw === 'that' && t0.tag === 'CONJ');
+	if (!verbal && !skip) {
+		// Commands and inversions put the verb first: "Cut the clause", "Do this".
+		if (t0.tag === 'AUX' || t0.tag === 'MOD') return { n: at, verb: t0, verbal: false, doubt: false };
+		// A command opens on a bare verb: "Cut the clause". Not "Last year,", "Like
+		// most churches", "Close parallels are common", "Judge Ramirez said".
+		const commandWord = (RUNWAY_VERBS.has(t0.lw) || (t0.tag === 'VERB' && POS_LEX[t0.lw] === 'VERB' && !isPastParticiple(t0) && !/s$/.test(t0.lw)) ||
+			(t0.tag === 'VERB' && !POS_LEX[t0.lw] && baseForm(t0) && toks[at + 1] && /^(DET|PRON)$/.test(toks[at + 1].tag))) &&
+			!/^(PREP|ADV|ADJ)$/.test(POS_LEX[t0.lw] || '');
+		const t1 = toks[at + 1];
+		const shortOpening = [1, 2, 3].some(k => at + k < n && /,/.test(gap(at + k)));   // "Put another way, …"
+		if (commandWord && t1 && !shortOpening && !possessive(t0) && !/^\p{Lu}/u.test(t1.w) && t1.lw !== 'of') {
+			// "Read the notes"; but "Interest rates rose" and "Profit from operations
+			// has soared" open on a noun.
+			let laterVerb = false;
+			for (let j = at + 1; j < n && !breakAt(j) && toks[j].lw !== 'and'; j++) {
+				if (toks[j].tag === 'AUX' || toks[j].tag === 'MOD' || (toks[j].tag === 'VERB' && !isIng(toks[j]))) { laterVerb = true; break; }
+			}
+			if (t1.tag === 'PREP' && POS_LEX[t0.lw] !== 'VERB') for (let j = at + 2; j < n; j++) {
+				if ((toks[j].tag === 'AUX' || toks[j].tag === 'MOD') && !NON_FINITE.has(toks[j].lw)) { laterVerb = true; break; }
+			}
+			if (/^(DET|PRON|ADV|NUM|TO)$/.test(t1.tag) || (/^(ADJ|NOUN|PREP)$/.test(t1.tag) && !laterVerb)) {
+				return { n: at, verb: t0, verbal: false, doubt: false };
+			}
+		}
+	}
+
+	// skip: a clause has opened, and its first verb group is not the main one.
+	// aside: a stretch set off by commas (", who…,", ", based in…,"), passed over whole.
+	// asideVerb: the aside is a clause whose verb has not come yet.
+	// opened: the opening clause's verb has gone by and no comma has closed it.
+	// paren, dash: inside brackets or between dashes, passed over whole.
+	let inPhrase = phrase, aside = false, asideVerb = false, opened = false, paren = 0, dash = false;
+	let lastConsumed = -1, lastCandidate = -1, openedByPrep = false, verblessAt = -1, asideClosedAt = -1;
+	let clauseInPhrase = false, prepOpeningAt = -1, asideAfterOpening = false;
+	let guess = null, segStart = at, doubt = doubtStart, asidePrep = false, clauseAt = -1, prepAt = -1, nested = 0, clauseOpen = at, openedAt = at, interruptedClause = false;
+	const dashes = [];
+	for (let i = 1; i < n; i++) if (DASH.test(gap(i))) dashes.push(i);
+	// Two dashes enclose an aside. Three or more, and nobody can say which pair.
+	if (dashes.length > 2) doubt = true;
+	let pp0 = at;
+	while (pp0 < n - 1 && toks[pp0].tag === 'ADV' && !breakAt(pp0 + 1)) pp0++;
+	const opensPP = toks[pp0].tag === 'PREP' || verbless;
+	const frontedPP = toks[pp0].tag === 'PREP' && !openingAdverbial;
+	const subjectStarted = (i) => {
+		for (let j = Math.max(1, stretchStart(i)); j < i; j++) {
+			const x = toks[j], w = toks[j - 1];
+			if (breakAt(j)) continue;
+			if (x.tag === 'PRON' && CLAUSE_SUBJECTS.has(x.lw) && w.tag !== 'PREP') return true;
+			if (x.lw === 'there' && (w.tag === 'NOUN' || guessedTag(w) || w.tag === 'NUM')) return true;   // "To each point there corresponds…"
+			if ((x.tag === 'DET' || PRONOUN_VERB.test(x.lw)) && (w.tag === 'NOUN' || w.tag === 'NUM' || guessedTag(w))) return true;
+			if ((x.tag === 'NOUN' || guessedTag(x)) && (w.tag === 'NUM' || TIME_NOUNS.has(w.lw))) return true;
+		}
+		return false;
+	};
+	const quoteAt = (j) => /["\u201c\u201d\u2018]/.test(gap(j)) || /(^|\s)['\u2019]$/.test(gap(j));
+	const consume = (i) => {
+		// Pass over a clause's verb group: "was missing", "can start". It never runs
+		// across a comma or a quotation mark.
+		let j = i + 1;
+		if (toks[i].tag === 'AUX' || toks[i].tag === 'MOD') {
+			while (j < n && /^(AUX|MOD|ADV)$/.test(toks[j].tag) && !breakAt(j) && !quoteAt(j)) j++;
+			if (j < n && toks[j].tag === 'VERB' && !breakAt(j) && !quoteAt(j) && !(sForm(toks[j]) && !participleShape(toks[j]))) j++;   // not "one who does not | shows"
+		}
+		lastConsumed = j - 1;
+		return j - 1;
+	};
+	for (let i = at + 1; i < n; i++) {
+		const t = toks[i], pr = toks[i - 1], g = gap(i);
+		let closing = false;   // this gap only closes a bracket or a dash aside
+		if (g.includes('(')) paren++;
+		if (g.includes(')')) { paren = Math.max(0, paren - 1); closing = paren === 0 && !/[,;:]/.test(g); }
+		if (paren > 0) continue;
+		// "X -- an aside -- verb": paired dashes enclose an aside.
+		if (DASH.test(g) && dashes.length === 2) {
+			if (dash) { dash = false; closing = !/[,;:]/.test(g); }
+			else if (dashes[0] === i) { dash = true;  continue; }
+		}
+		if (dash) continue;
+		// A quotation mark before the verb: quoted speech or a quoted phrase. Stop.
+		if (quoteAt(i)) break;
+		if (closing && skip && openingPrep && clauseOpen === at && lastConsumed < 0) skip = false;
+		const brk = BREAK.test(g) && !closing;
+		if (brk) {
+			if (/[;:]/.test(g) || NEW_CLAUSE.has(t.lw)) break;
+			if (guess) break;   // a guessed verb's clause ends here
+			// An opening clause still waiting for its verb: "When ready, …" is fine,
+			// but "When Warren Winiarski, proprietor of…, announced…" is not.
+			if (skip && i === clauseOpen + 1) interruptedClause = true;   // "If, in preparing that shot, you…", "Those who, because of…, would"
+			let oi = clauseOpen + 1;
+			while (oi < i && toks[oi].tag === 'ADV') oi++;
+			const opener = toks[oi];
+			const hasSubject = opener && oi < i && (/^(DET|PRON|NOUN|NUM)$/.test(opener.tag) || named(oi) || (isIng(opener) && !verbless));   // "If laying ties…, which…, paid more"
+			const interrupted = skip && interruptedClause;
+			if (skip && !interrupted && !openingPrep && hasSubject) doubt = true;
+			// "Just as nations of this Hemisphere, in the… conferences, have closed": read as
+			// a phrase here, the opening may yet turn out to be a clause.
+			if (skip && !interrupted && openingPrep && hasSubject && clauseOpen === at && prepOpeningAt < 0) prepOpeningAt = i;
+			if (aside) asideClosedAt = i;
+			if (aside && asideVerb && !asidePrep) doubt = true;
+			else if (!interrupted) {
+				skip = false; aside = false; asidePrep = false;
+			}
+			inPhrase = false; opened = false; openedByPrep = false; segStart = i; prepAt = -1; nested = 0;
+			const nx = i + 1 < n ? toks[i + 1] : null;
+			// ", produced by…," ", based in…," a participle set off after a noun.
+			if (!aside && t.tag === 'VERB' && (isPastParticiple(t) || isIng(t)) && (subjectEnd(pr) || named(i - 1)) &&
+				nx && (nx.tag === 'PREP' || nx.tag === 'ADV' || nx.tag === 'TO' || nx.lw === 'by') && resumesWithVerb(i)) { aside = true; asideVerb = false; asideAfterOpening = (openingAdverbial || opensPP) && stretchStart(i - 1) <= at;  continue; }
+			// ", had it existed then," a condition set off mid-sentence.
+			if (!aside && /^(had|should|were)$/.test(t.lw) && nx && /^(PRON|DET)$/.test(nx.tag)) { aside = true; asideVerb = true;  continue; }
+		}
+		const nx = i + 1 < n ? toks[i + 1] : null;
+		const ss = stretchStart(i);
+		const afterComma = brk || (i > 1 && breakAt(i - 1) && (pr.tag === 'ADV' || /^(long|shortly|soon|just|right|even|well)$/.test(pr.lw)));   // ", long before…"
+		// "After dialysis the sample was centrifuged": the opening was a phrase, and
+		// the main clause starts at the new noun phrase.
+		if (skip && openingPrep && ss === 0 && !brk && (pr.tag === 'NOUN' || guessedTag(pr)) && (t.tag === 'DET' || (t.tag === 'PRON' && CLAUSE_SUBJECTS.has(t.lw)))) skip = false;
+		// "To spot these giveaways the therapist must know", "To keep the reader with
+		// you a writer needs": a new noun phrase straight after a noun or an object
+		// ends the verb phrase. It was an opening, not the subject.
+		// "to make sure our military is ready": a clause inside the phrase, with its own
+		// verb. A verb found before the phrase ends may be that clause's.
+		if (inPhrase && verbal && !brk && CLAUSE_TAKERS.has(pr.lw) && ((t.tag === 'DET' && !DEMONSTRATIVES.has(t.lw) && !/^(which|what|whose)$/.test(t.lw)) ||
+			(t.tag === 'PRON' && /^(i|he|she|we|they)$/.test(t.lw)))) { clauseInPhrase = true; }
+		if (inPhrase && !brk && /^(i|he|she|we|they)$/.test(t.lw)) { inPhrase = false; }
+		if (inPhrase && !brk && (pr.tag === 'NOUN' || guessedTag(pr) || (pr.tag === 'PRON' && /^(you|it|them|him|her|me|us)$/.test(pr.lw))) &&
+			((t.tag === 'DET' && !/^(whose|which|what|whatever)$/.test(t.lw)) || (t.tag === 'PRON' && CLAUSE_SUBJECTS.has(t.lw)))) { inPhrase = false; }
+		// A new subject straight after a noun, inside a noun phrase, opens a clause
+		// with no "that": "every sentence we read is", "the money they're paid", "the
+		// cattle the scouts saw". After an opening phrase it starts the main clause
+		// instead: "In her wake she left", "When I hold my son he stiffens".
+		const s0 = toks[ss === 0 ? at : ss];
+		// "Last year the company grew": a time word, then the main clause. But "at the
+		// time their development was commenced" has a clause after "the time".
+		const timeHead = TIME_NOUNS.has(pr.lw) && !(i > 2 && toks[i - 2].lw === 'the' && toks[i - 3].tag === 'PREP' && !breakAt(i - 2));
+		let contact = (CLAUSE_SUBJECTS.has(t.lw) || PRONOUN_VERB.test(t.lw) ||
+			(t.tag === 'DET' && /^(the|a|an|his|her|their|its|my|our|your)$/.test(t.lw) && /^(DET|ADJ)$/.test(s0.tag) && !timeHead) ||
+			// "the day Custer had gone down": a name after a noun that takes a clause.
+			(named(i) && /^(day|time|moment|night|year|way|reason|place)$/.test(pr.lw) && i > 1 && toks[i - 2].lw === 'the')) &&
+			(pr.tag === 'NOUN' || guessedTag(pr)) && !brk && !aside && !timeHead && lastConsumed !== i - 1 && lastCandidate !== i - 1;
+		// After an opening phrase a new subject starts the main clause ("In her wake she
+		// left"), but not after a noun that takes a clause: "maybe the way you look".
+		const clauseHead = /^(way|reason|thing|things|place|kind|sort)$/.test(pr.lw) && i > 1 && toks[i - 2].lw === 'the';   // not "In this way you will"
+		// "all it wants to do", "everything she said": a pronoun after these starts a clause.
+		if (!contact && !brk && !aside && /^(i|you|we|they|he|she|it)$/.test(t.lw) && /^(all|everything|anything|something|nothing|much|little)$/.test(pr.lw) &&
+			!(i > 1 && /^(at|after|above|in|of|for)$/.test(toks[i - 2].lw)) && lastConsumed !== i - 1) contact = true;
+		if (contact && (opened || skip || ((s0.tag === 'PREP' || s0.tag === 'ADV') && !clauseHead) || (verbless && ss === 0))) contact = false;
+		// ", as the tendency became harder to deny," may be a clause or a phrase.
+		const prepClause = afterComma && (OPENING_PREP.has(t.lw) || (/^(once|for)$/.test(t.lw) && nx && (/^(DET|PRON)$/.test(nx.tag) || named(i + 1)))) && t.tag !== 'DET';
+		// "as they were", "as far as I know", "as long as this view prevails": "as"
+		// with a subject behind it, or after "so far", opens a clause.
+		const asClause = t.lw === 'as' && ((nx && nx.tag === 'PRON' && CLAUSE_SUBJECTS.has(nx.lw)) ||
+			(pr.lw === 'such' && nx && ((nx.tag === 'AUX' || nx.tag === 'MOD') || (nx.tag === 'VERB' && baseForm(nx)))) ||   // "to such as relate to…"
+			(i > 1 && /^(far|long|soon)$/.test(pr.lw) && /^(so|as)$/.test(toks[i - 2].lw)));
+		// "by the time the risk was doubled", "the next time Mr. Wilder talks".
+		const timeClause = nx && (/^(DET|PRON)$/.test(nx.tag) || named(i + 1)) && (
+			(/^(time|moment|minute|instant)$/.test(t.lw) && i > 0 && /^(first|next|last|every|each|any)$/.test(pr.lw) &&
+				!(i > 2 && toks[i - 3].tag === 'PREP') && !(i > 1 && toks[i - 2].tag === 'PREP')) ||
+			(t.lw === 'time' && i > 1 && pr.lw === 'the' && toks[i - 2].lw === 'by'));
+		const wordToInfinitive = nx && (nx.tag === 'TO' || ((nx.tag === 'ADV' || SPLIT_ADVERBS.has(nx.lw)) && i + 2 < n && toks[i + 2].tag === 'TO'));   // "how to translate", "how best to perform"
+		// Inside a verb phrase subject a clause can open on "before" or "until": "To
+		// finish a draft before the outline is settled is…".
+		const phraseClause = inPhrase && verbal && !brk && /^(before|after|since|until|till|once)$/.test(t.lw) && nx &&
+			(/^(DET|PRON)$/.test(nx.tag) || named(i + 1));
+		// "while waiting for the verb": an opener with no subject has no verb to wait for.
+		const verblessInner = nx && (isIng(nx) || (nx.tag === 'VERB' && isPastParticiple(nx)) || (nx.tag === 'ADJ' && !(i + 2 < n && /^(NOUN|ADJ)$/.test(toks[i + 2].tag)))) &&
+			INNER_CLAUSE.has(t.lw) && !/^(how|why|where)$/.test(t.lw);
+		if (verblessInner) {
+			// ", when linked up with her fears," is an aside with no verb; mid-sentence,
+			// "while waiting for the verb" just runs on.
+			if (afterComma && !aside && !skip) { aside = true; asideVerb = false;  continue; }
+			verblessAt = i;
+		}
+		// "less feasible than it was supposed to be": a clause after "than".
+		const thanClause = t.lw === 'than' && !brk && nx && /^(i|you|he|she|it|we|they)$/.test(nx.lw) && i + 2 < n && !breakAt(i + 2) &&
+			(toks[i + 2].tag === 'AUX' || toks[i + 2].tag === 'MOD' || toks[i + 2].tag === 'VERB');
+		// "once they are old": a clause, mid-sentence; "once a week" is not.
+		const onceClause = t.lw === 'once' && !brk && nx && ((nx.tag === 'PRON' && CLAUSE_SUBJECTS.has(nx.lw)) ||
+			(nx.tag === 'DET' && !TIME_NOUNS.has(((i + 2 < n && toks[i + 2]) || {}).lw || '')));
+		// "Assuming, somewhat arbitrarily, that…": "that" after a verb, across adverbs set
+		// off by commas. Not "we must act promptly, that in itself would be".
+		let pc = i - 1;
+		while (pc > 0 && toks[pc].tag === 'ADV') pc--;
+		const thatAfterVerb = t.lw === 'that' && pc >= 0 && pc < i - 1 && toks[pc].tag === 'VERB' && breakAt(pc + 1);
+		// "who does what in our institutions": "what" as an object, with no clause of its own.
+		const whatObject = FREE_RELATIVES.has(t.lw) && nx && nx.tag === 'PREP' && i > 0 && (pr.tag === 'VERB' || pr.tag === 'AUX') && !brk;
+		const opens = ((RELATIVES.has(t.lw) || INNER_CLAUSE.has(t.lw) || FREE_RELATIVES.has(t.lw)) && !wordToInfinitive && !verblessInner && !whatObject) || phraseClause ||
+			(t.lw === 'that' && (pr.tag !== 'PREP' || /^(except|save)$/.test(pr.lw)) && (t.tag === 'CONJ' || pr.tag === 'VERB' || pr.tag === 'NOUN' || named(i - 1) ||
+				/^(those|these|all|everything|anything|something|nothing|one|ones|any|none|much|little)$/.test(pr.lw) ||   // "those that combine"
+				(nx && /^(VERB|AUX|MOD|ADV)$/.test(nx.tag)) || (nx && nx.tag === 'PREP' && nx.lw !== 'of' && !brk)) &&   // "Assuring myself that under every…"
+				!(brk && nx && (nx.tag === 'NOUN' || nx.tag === 'ADJ') && !named(i + 1) && t.tag !== 'CONJ')) || thatAfterVerb ||   // not ", that maturity was"
+			contact || prepClause || asClause || timeClause || onceClause || thanClause;
 		if (opens) {
-			const afterBreak = breaks(pr, t) || (pr.tag === 'ADV' && i > 1 && breaks(toks[i - 2], pr));
-			if (afterBreak) aside = true; else skip = true;
+			// "The fact that the members whose lists were used did not…": a relative
+			// inside a clause still waiting for its verb has a verb of its own.
+			if (skip && !aside && (RELATIVES.has(t.lw) || t.lw === 'that') && toks.slice(clauseOpen, i).some(x => subjectEnd(x))) { nested++;  continue; }
+			if (aside || skip) continue;
+			// ", during which a faint star… will be occulted," runs to the next comma.
+			const afterBreak = brk || (pr.tag === 'ADV' && i > 1 && breakAt(i - 1)) || (RELATIVES.has(t.lw) && pr.tag === 'PREP' && i > 1 && breakAt(i - 1));
+			if (afterBreak && !FREE_RELATIVES.has(t.lw) && !timeClause) { aside = true; asideVerb = true; asidePrep = prepClause; clauseOpen = i; asideAfterOpening = (openingAdverbial || opensPP) && stretchStart(i - 1) <= at; }
+			else { skip = true; clauseOpen = i; interruptedClause = false; }
+			if (contact) doubt = true;
 			continue;
 		}
-		if (aside || !finiteAt(i, inPhrase)) continue;
-		if (skip) {
-			// Pass over that clause's verb group: "was missing", "can start".
-			let j = i + 1;
-			if (t.tag === 'AUX' || t.tag === 'MOD') {
-				while (j < n && /^(AUX|MOD|ADV)$/.test(toks[j].tag) && !breaks(toks[j - 1], toks[j])) j++;
-				if (j < n && toks[j].tag === 'VERB' && !breaks(toks[j - 1], toks[j])) j++;
-			}
-			i = j - 1; skip = false; continue;
+		if (aside && !asideVerb) {
+			// "The possibility, as he asserted, that the Russians may get ahead … does
+			// not supply": a second verb inside an aside may be the main one.
+			if ((((t.tag === 'AUX' || t.tag === 'MOD') && !NON_FINITE.has(t.lw)) || pastOnly(t)) && lastConsumed >= 0 && lastConsumed < i - 1 &&
+				!/^(and|or|but|nor|than|as)$/.test(pr.lw) && !doubt) doubt = true;
+			 continue;
 		}
-		return { n: i, verb: t, verbal: verbal && inPhrase };
+		if (OPENING_PREP.has(t.lw) && t.lw !== 'as' && !brk && !skip && nx && (/^(DET|PRON)$/.test(nx.tag) || named(i + 1)) && !TIME_NOUNS.has((toks[i + 2] || {}).lw)) prepAt = i;
+		weakNo = false;
+		const kind = (skip && inversion && clauseOpen === at && /^(been|done)$/.test(t.lw)) ? 'sure' : verbKind(i, inPhrase, skip || (aside && asideVerb));
+		if (!kind) {
+			if (weakNo && !skip && !aside) doubt = true;
+			continue;
+		}
+		lastCandidate = i;
+		// Inside an opening "According to…," or "Notwithstanding…," no verb is the main one.
+		if (PREP_ING.test(toks[at].lw) && ss === 0 && !skip && !aside && toks.slice(i + 1).some((x, k) => /,/.test(gap(i + 1 + k)))) continue;
+		// "Assuming the weather holds through the weekend, the whole family will…": the
+		// clause inside the opening phrase has its verb here; the main one follows the comma.
+		if (inPhrase && clauseInPhrase && !skip && !aside && toks.slice(i + 1).some((x, k) => /,/.test(gap(i + 1 + k)))) { i = consume(i);  continue; }
+		// Inside an opening prepositional phrase no verb has its subject yet: "With the
+		// resumption of testing and their intransigence at the Geneva talks, however,".
+		// A subject starts with a pronoun, or a new noun phrase after a noun or a
+		// number: "In 1990 sales rose", "Under the plan the company will…".
+		if ((frontedPP && ss === 0 || (ss > 0 && toks[ss].tag === 'PREP')) && !skip && !aside && t.tag !== 'AUX' && t.tag !== 'MOD' && !subjectStarted(i)) {
+			const nt = nextTok(i);
+			// With an object after it, it is a verb whose subject went unseen ("In The Law
+			// Of Civilization And Decay Brooks Adams traced this evolution"): doubt.
+			const endsPhrase = breakAt(i + 1) || modifierSlot(nt);
+			if ((nt && (/^(DET|PRON)$/.test(nt.tag) || named(i + 1))) || baseForm(t) || (RUNWAY_VERBS.has(t.lw) && !sForm(t)) || !endsPhrase) { if (!doubt) doubt = true; }
+			else if (toks.slice(i + 1).some((x, k) => /,/.test(gap(i + 1 + k)))) continue;
+		}
+		if (aside) {
+			// The aside's own verb: ", who taught,". The aside runs to the next comma.
+			// ", after the Russian journey in the summer of 1959 was expected…" had no
+			// clause: a preposition before the verb says the aside was a phrase.
+			if (asidePrep && toks.slice(clauseOpen + 1, i).some(x => x.tag === 'PREP')) doubt = true;
+			asideVerb = false; i = consume(i);  continue;
+		}
+		if (skip) {
+			// "in which the parental request for substitute care is precipitated": a
+			// guessed word inside the clause's subject, with the clause's verb ahead.
+			const pg = prevWord(i);
+			if (kind === 'guess' && !participleShape(t) && !(pg === clauseOpen || (pg === clauseOpen + 1 && toks[pg].tag === 'PRON')) &&
+				nx && (/^(PREP|NOUN|ADJ)$/.test(nx.tag))) {
+				let j = i + 1, ahead = false;
+				for (; j < n && !breakAt(j); j++) {
+					const x = toks[j];
+					if (RELATIVES.has(x.lw) || INNER_CLAUSE.has(x.lw) || x.lw === 'that') break;
+					if (((x.tag === 'AUX' || x.tag === 'MOD') && !NON_FINITE.has(x.lw)) || pastOnly(x) || (x.tag === 'VERB' && sForm(x))) { ahead = true; break; }
+				}
+				if (ahead) continue;
+			}
+			if (nested > 0) { nested--; i = consume(i);  continue; }
+			skip = false; clauseAt = ss; interruptedClause = false;
+			i = consume(i);
+			if ((openingAdverbial || opensPP) && (ss === 0 || clauseOpen === at) && !FREE_RELATIVES.has(toks[clauseOpen].lw)) { opened = true; openedAt = i + 1; }
+			// A clause verb that takes a clause of its own: "which he believed might
+			// develop" (its verb follows at once), "while others believe they are" (its
+			// subject does).
+			if (CLAUSE_TAKERS.has(toks[i].lw) && i + 1 < n && !breakAt(i + 1)) {
+				const c = toks[i + 1];
+				if ((c.tag === 'AUX' || c.tag === 'MOD') && !NON_FINITE.has(c.lw) && RELATIVES.has(toks[clauseOpen].lw)) { i = consume(i + 1); continue; }   // not "what I would say is"
+				if (/^(i|he|she|we|they)$/.test(c.lw)) skip = true;
+			}
+			 continue;
+		}
+		// "who are candidates and can satisfy": a second verb joined to the clause's own.
+		const pj = prevWord(i);
+		if (clauseAt === ss && pj >= 0 && /^(and|or|but|nor)$/.test(toks[pj].lw)) { i = consume(i);  continue; }
+		// "domestic terrorism that we must confront and we will defeat": a second clause
+		// joined to that one, before any main verb.
+		if (clauseAt >= 0 && clauseAt === ss && !opened && pj > 0 && /^(i|you|he|she|it|we|they)$/.test(toks[pj].lw) && !breakAt(pj) && /^(and|or|but)$/.test(toks[pj - 1].lw)) {
+			doubt = true; i = consume(i);  continue;
+		}
+		// "Writing, he argues, is thinking." "But, say his managers, he did."
+		if (REPORTING.has(t.lw) && segStart > at && breakAt(i + 1) && i - segStart <= 4 &&
+			toks.slice(segStart, i).every(x => /^(PRON|NOUN|DET|ADJ)$/.test(x.tag) || /^\p{Lu}/u.test(x.w))) { doubt = true;  continue; }
+		if (REPORTING.has(t.lw) && breakAt(i) && segStart === i) {
+			let j = i + 1;
+			while (j < n && j - i <= 5 && !breakAt(j) && (/^\p{Lu}/u.test(toks[j].w) || /^(DET|NOUN|PRON|ADJ)$/.test(toks[j].tag))) j++;
+			if (j < n && j > i + 1 && breakAt(j)) { doubt = true;  i = j - 1; continue; }
+		}
+		// "Just a month after the war broke out, the cavalry was moving": the verb may
+		// belong to a clause that "after" opened.
+		if (prepAt >= ss && prepAt > 0 && !opened) { opened = true; openedAt = prepAt + 1; openedByPrep = true; }
+		// "If A is high and B is low, C will…": a verb after an opening clause, with
+		// no comma between, may still belong to it, and goes with it to the comma.
+		// "…in the beginning he had to go": a new subject with no comma may have
+		// started the main clause.
+		if (opened) {
+			const commaLater = toks.slice(i).some((x, k) => k > 0 && /^[^(]*,/.test(gap(i + k)));
+			let juncture = false;
+			for (let j = Math.max(openedAt, 1); j < i; j++) {
+				const x = toks[j], w = toks[j - 1];
+				// "because the technology is so new there are concerns": "there" and its verb.
+				if (!breakAt(j) && x.lw === 'there' && j + 1 <= i && toks[j + 1].tag === 'AUX' && !breakAt(j + 1) &&
+					!/^(CONJ|PREP|DET)$/.test(w.tag) && !OPENING_CLAUSE.has(w.lw) && !INNER_CLAUSE.has(w.lw)) { juncture = true; break; }   // not "and since there is"
+				// "While he talked you wouldn't trade…", "While they were away Blanche came":
+				// a subject pronoun or a name after the clause's verb or an adverb.
+				if (!breakAt(j) && ((w.tag === 'VERB' && !CLAUSE_TAKERS.has(w.lw)) || w.tag === 'ADV') &&
+					((x.tag === 'PRON' && /^(i|he|she|we|they)$/.test(x.lw)) || (x.lw === 'you' && w.tag === 'ADV') || (x.lw === 'you' && toks[j + 1] && /^(AUX|MOD)$/.test(toks[j + 1].tag)) ||
+						(named(j) && !named(j - 1) && w.tag === 'ADV'))) { juncture = true; break; }
+				if (breakAt(j) || !(w.tag === 'NOUN' || guessedTag(w) || w.tag === 'NUM')) continue;
+				if ((x.tag === 'PRON' && CLAUSE_SUBJECTS.has(x.lw)) || PRONOUN_VERB.test(x.lw) ||
+					(x.tag === 'DET' && /^(the|a|an|his|her|their|its|my|our|your|this|these|those)$/.test(x.lw))) { juncture = true; break; }
+			}
+			// "Where I cannot commit myself is on…": "is" straight after a "where" clause may be the main verb.
+			const cleft = /^(is|was)$/.test(t.lw) && toks[at].lw === 'where' && i > 0 && !breakAt(i) && (toks[i - 1].tag === 'PRON' || toks[i - 1].tag === 'VERB');
+			if (commaLater && (kind === 'guess' || !juncture) && !openedByPrep && !cleft) { i = consume(i); continue; }
+			doubt = true;
+		}
+		if (kind === 'sure') {
+			// "Most readers skim the page and then decide": a verb joined to the guess
+			// confirms it.
+			const pj2 = prevWord(i);
+			if (guess && pj2 >= 0 && /^(and|or|but|nor)$/.test(toks[pj2].lw)) return { n: guess.i, verb: toks[guess.i], verbal: guess.verbal, doubt: true };
+			// A verb with no subject of its own after such an opening, only phrases between,
+			// may be the opening's.
+			let subjectless = prepOpeningAt >= 0 && !PRONOUN_VERB.test(t.lw);
+			for (let j = prepOpeningAt; subjectless && j < i; j++) {
+				const st = stretchStart(j);
+				if (st === stretchStart(i)) subjectless = toks[j].tag === 'ADV' && toks[j].lw !== 'there';
+				else subjectless = toks[st].tag === 'PREP';
+			}
+			return { n: i, verb: t, verbal: inPhrase && verbalAgrees(t), doubt: doubt || !!guess || (inPhrase && clauseInPhrase) || subjectless };
+		}
+		if (!guess) guess = { i, verbal: inPhrase && verbalAgrees(t), doubt: doubt || (inPhrase && clauseInPhrase) };
 	}
+	if (guess) return { n: guess.i, verb: toks[guess.i], verbal: guess.verbal, doubt: true };
 	return null;
 }
 
 // Sentence ranges within one line. Markdown paragraphs are normally a single
 // soft-wrapped line, so a sentence very rarely crosses a hard break; treating
 // the line as the outer bound keeps this cheap and viewport-local.
-const SENTENCE_SPLIT = /[^.!?\u2026]+[.!?\u2026]*\s*/g;
+// A closing quote or bracket after the full stop stays with its sentence: "Now."
+const SENTENCE_SPLIT = /[^.!?\u2026]+[.!?\u2026]*["'\u201d\u2019)\]]*\s*/g;
 
 function wsSentences(text) {
 	const out = [];
@@ -2349,8 +3279,13 @@ function wsSentences(text) {
 		if (prev) {
 			const tail = text.slice(prev.from, prev.to);
 			const am   = /(\p{L}+)\.$/u.exec(tail);
-			const falseEnd = (am && (am[1].length === 1 || ABBREVIATIONS.has(am[1].toLowerCase()))) ||
-				/\d\.$/.test(tail) || /^[\p{Ll}0-9]/u.test(raw.trim());
+			const next = raw.trim();
+			// A number before the stop ends a sentence ("…rose by 12. The next year…")
+			// unless the stop is a decimal point or a numbered item runs on ("No. 5").
+			// Nothing ends before a comma: "Quincy, Ill., Saturday".
+			const glued = prev.to === from;   // no space after the stop: "2.5", "U.S."
+			const falseEnd = (am && (am[1].length === 1 || isAbbreviation(am[1].toLowerCase(), next))) ||
+				(/\d\.$/.test(tail) && (glued || /^\d/.test(next))) || /^[\p{Ll}0-9,;:]/u.test(next);
 			if (falseEnd) {
 				prev.to   = to;
 				prev.text = text.slice(prev.from, to).trim();
@@ -2663,12 +3598,14 @@ function proseRun(text){if(proseCache.text===text)return proseCache;
       let k=i+1;while(k<L.toks.length&&k<i+5&&!L.toks[k].first)k++;const tail=L.toks.slice(i,k).map(x=>x.w).join(' ');P.pron.push({s:t.from,e:t.to,w:t.w,label:tail})}}
     /* Runways, sentence by sentence, from the tagged words inside each sentence of four words or more.
        Code blocks and headings have none. rw is the number of words before the main verb, null when
-       the tagger can't find one; rs to rwEnd spans those words; verbal marks a verb phrase as the subject. */
+       the tagger can't find one; rs to rwEnd spans those words; verbal marks a verb phrase as the subject;
+       doubt marks a sentence that reads two ways, whose runway is never shown as long. */
     let ti=0;
     if(!fence&&!/^\s{0,3}#{1,6}\s/.test(L.text))for(const se of WS.wsSentences(L.masked)){const s=L.from+se.from,e=L.from+se.to;
       while(ti<L.toks.length&&L.toks[ti].from<s)ti++;let tj=ti;while(tj<L.toks.length&&L.toks[tj].to<=e)tj++;
-      const st=L.toks.slice(ti,tj);ti=tj;if(st.length<4)continue;const r=WS.findRunway(st,text);
-      P.sents.push({s,e,words:st.length,label:st.slice(0,6).map(x=>x.w).join(' '),rw:r?r.n:null,rs:st[0].from,rwEnd:r&&r.n?st[r.n-1].to:st[0].from,verbal:!!(r&&r.verbal)})}
+      const st=L.toks.slice(ti,tj);ti=tj;if(st.length<4)continue;
+      let r=null;try{r=WS.findRunway(st,text)}catch(err){/* a sentence the runway can't read stays plain, and the rest of the draft still reads */}
+      P.sents.push({s,e,words:st.length,label:st.slice(0,6).map(x=>x.w).join(' '),rw:r?r.n:null,rs:st[0].from,rwEnd:r&&r.n?st[r.n-1].to:st[0].from,verbal:!!(r&&r.verbal),doubt:!!(r&&r.doubt)})}
     for(const q of WS.findDialogue(L.text))P.quoted+=WS.tokenizeLine(L.text.slice(q.from,q.to)).length}
   /* doubled words across the whole draft, only when nothing but spaces or a line break sits between them */
   for(let i=1;i<D.toks.length;i++){const a=D.toks[i-1],b=D.toks[i];
@@ -2747,7 +3684,8 @@ function renderSyntax(text){const D=tagDoc(text),segs=[];
    the subject from 6 ("Seeing the accident from…", "To integrate the…"). Very long: 20 and up.
    0 for a sentence that is fine, or whose verb the tagger can't find. */
 const RW_LONG=12,RW_VERY=20,RW_VERBAL=6;
-const rwLevel=x=>x.rw==null?0:x.rw>=RW_VERY?2:(x.rw>=RW_LONG||(x.verbal&&x.rw>=RW_VERBAL))?1:0;
+/* A runway in doubt stays plain: a wrong shade misleads, a missing one only goes unseen. */
+const rwLevel=x=>x.rw==null||x.doubt?0:x.rw>=RW_VERY?2:(x.rw>=RW_LONG||(x.verbal&&x.rw>=RW_VERBAL))?1:0;
 /* Paints the Runway lens: in each sentence that has one, the words a reader holds before the verb.
    Two strengths. Long gets a shade; very long a stronger shade and an underline.
    It reads the prose as the checks do (notes and addresses masked), so it shares their prose run. */
@@ -2762,7 +3700,7 @@ function renderLensBar(){const bar=$('#lensbar');if(!bar)return;
     bar.innerHTML=`<div class="synseg" role="group" aria-label="Word class">${Object.keys(SYN).map(k=>`<button data-syn="${k}" aria-pressed="${synClass===k}"><span class="sxs sx-${k==='all'?'noun':k}">${SYN[k][0]}</span></button>`).join('')}</div><p class="lenscap">${SYN[synClass][1]}</p>`;
     bar.querySelectorAll('[data-syn]').forEach(b=>b.onclick=()=>{synClass=b.dataset.syn;store.set('ww:syn',synClass);applyLens()})}
   else if(effLens()==='runway'&&!xray&&!ownView){bar.hidden=false;const P=proseRun(maskProse(editor.value));const h=P.sents.filter(x=>rwLevel(x)===1).length,v=P.sents.filter(x=>rwLevel(x)===2).length;
-    bar.innerHTML=`<p class="lenscap"><b>${h+v} long runway${h+v===1?'':'s'}.</b> A runway is the words a reader holds before the verb arrives. Tinted: ${h} long, ${RW_LONG} words or more, or a verb phrase as the subject. Tinted and underlined: ${v} very long, ${RW_VERY} and up. Questions, fragments and sentences whose verb the tagger can't find stay plain.</p>`}
+    bar.innerHTML=`<p class="lenscap"><b>${h+v} long runway${h+v===1?'':'s'}.</b> A runway is the words a reader holds before the verb arrives. Tinted: ${h} long, ${RW_LONG} words or more, or a verb phrase as the subject. Tinted and underlined: ${v} very long, ${RW_VERY} and up. Questions, fragments and sentences that read two ways stay plain.</p>`}
   else{bar.hidden=true;bar.innerHTML=''}}
 /* Puts the lens in force: root classes for CSS, button and menu state, then a repaint. */
 function applyLens(){const root=document.documentElement;
@@ -2866,7 +3804,7 @@ function renderVoice(a){
     {name:'Echoes and threads',lvl:a.P.echoes.length>6?'warn':'ok',count:a.P.echoes.length+' echo'+(a.P.echoes.length===1?'':'es')+' · '+a.P.threads.length+' thread'+(a.P.threads.length===1?'':'s'),
       why:'An echo is an uncommon word repeated within fifty words by accident. A thread is a Key Term carried through three or more paragraphs on purpose, which the method asks for: repeat the exact term, never a synonym. Threads are never counted as echoes, and the list of them is your argument\'s vocabulary.',
       hits:jchips(a.P.echoes.map(x=>({...x,label:x.w})),12,false),custom:a.P.threads.length?'<div class="openers">'+a.P.threads.map(o=>`<div class="op"><b>${esc(o.w)}</b> ${o.n} times across ${o.lines.size} paragraphs</div>`).join('')+'</div>':''},
-    (()=>{const S=a.P.sents.filter(x=>x.rw!=null),L=S.filter(x=>rwLevel(x)),V=S.filter(x=>x.verbal&&x.rw>=RW_VERBAL),r=S.length?L.length/S.length:0;
+    (()=>{const S=a.P.sents.filter(x=>x.rw!=null),L=S.filter(x=>rwLevel(x)),V=S.filter(x=>x.verbal&&!x.doubt&&x.rw>=RW_VERBAL),r=S.length?L.length/S.length:0;
       return{name:'Long runways',lvl:r>0.2?'crit':(r>0.08||L.some(x=>rwLevel(x)===2))?'warn':'ok',count:L.length+' of '+S.length,
       why:'The words a reader holds before the verb arrives. Until subject and verb meet, nothing in a sentence has happened, so a long opening, a long subject or a clause wedged between them makes the reader wait. Hardest of all is a subject that is itself a verb phrase: <i>Seeing the accident from the window…</i> Lens · Runway shades them on the page.',
       hits:(L.some(x=>x.rw>=RW_LONG)?'<span class="hitlab">Longest</span>'+jchips(L.filter(x=>x.rw>=RW_LONG).sort((x,y)=>y.rw-x.rw).map(x=>({s:x.rs,e:x.rwEnd,label:x.label+'… '+x.rw})),10,false):'')+(V.length?'<span class="hitlab">Verb phrase as subject</span>'+jchips(V.map(x=>({s:x.rs,e:x.rwEnd,label:x.label+'…'})),8,false):'')}})(),
@@ -3615,7 +4553,7 @@ const FS_OK=typeof window.showDirectoryPicker==='function';
 /* The hidden back room inside the writer's folder.
    The dot keeps it out of the file list and out of Obsidian's view. */
 const SIDE='.pointfirst';
-const PF_VERSION='1.6.0';
+const PF_VERSION='1.6.1';
 /* Tiny key-value store in IndexedDB.
    Holds what localStorage cannot: the folder handle, and browser copies of word lists.
    A failed read comes back empty, never an error. */
