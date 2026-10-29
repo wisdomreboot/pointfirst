@@ -2,6 +2,19 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.7.0 (2026-10-29)
+
+The Skim lens
+- A new lens, first in the menu: Skim. What a reader who skims takes from the page stays in full ink, and the rest fades. The difference is light and dark, never colour.
+- Paragraphs: only the first sentence of each paragraph and list item stays dark. Read them alone, top to bottom. This is the skim test from the Anatomy card, on the page: if they tell the argument, the structure works.
+- Sentences: each sentence's first words and its last stay dark, the openings and endings the Voice list shows, in place. A word an ending hands to the next opening is underlined in both.
+- The choice between them is remembered, and both are in the palette: Skim: Paragraphs, Skim: Sentences.
+
+The tools stay in reach
+- In Revise, the tools above the page (Lens, X-ray, Pasted, Claim, Word, Find, Publish, History) stay pinned to the top as you scroll, with the current lens's picker under them. The lens caption is read once and scrolls away.
+- Moving the cursor up the page keeps it clear of the pinned tools.
+- The lens picker used to come unpinned a short way down a long essay. It stays now.
+
 ## 1.6.1 (2026-10-29)
 
 The runway, hardened
