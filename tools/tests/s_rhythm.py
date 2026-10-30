@@ -36,12 +36,12 @@ async def suite(c):
     await a.ev("setRoom('revise')"); await a.wait(600)
 
     # RH1 the card says what it measures, and its track carries no colour ramp
-    lab = await a.ev("$('#voiceGauge .gauge-top .lab').textContent")
+    lab = await a.ev("$('#rhythmCard .gauge-top .lab').textContent")
     check('RH1 the card is Rhythm: sentences that change pace', lab == 'Rhythm: sentences that change pace', lab)
-    track = await a.ev("(()=>{const t=$('#voiceGauge .track');const b=t.querySelector('.band');return {bg:getComputedStyle(t).backgroundImage,left:b.style.left,width:b.style.width}})()")
+    track = await a.ev("(()=>{const t=$('#rhythmCard .track');const b=t.querySelector('.band');return {bg:getComputedStyle(t).backgroundImage,left:b.style.left,width:b.style.width}})()")
     check('RH1 a neutral track: no red-to-green ramp', track['bg'] == 'none', track)
     check('RH1 the band where published prose sits is shaded, 55 to 70%', track['left'] == '55%' and track['width'] == '15%', track)
-    ends = await a.ev("$('#voiceGauge .track-ends').textContent")
+    ends = await a.ev("$('#rhythmCard .track-ends').textContent")
     check('RH1 the band is named', 'Published prose' in ends, ends)
 
     # RH2 the bars: one per sentence, grouped by paragraph; lists left out, a heading starts afresh
@@ -52,10 +52,10 @@ async def suite(c):
     check('RH2 a list is not prose rhythm', not any(l == [3, 3, 3] or l == [3] for l in lens), lens)
     check('RH2 a heading starts a new section', [p['sec'] for p in R] == [False, False, False, True, False, False], [p['sec'] for p in R])
     check('RH2 numbers are words a reader hears, and "2.5", "0.6" and "isn\'t." do not split a sentence', lens[-1] == [11, 3, 17], lens[-1])
-    groups = await a.ev("[...document.querySelectorAll('#voiceGauge .rhy .rp')].map(g=>g.querySelectorAll('i').length)")
+    groups = await a.ev("[...document.querySelectorAll('#rhythmCard .rhy .rp')].map(g=>g.querySelectorAll('i').length)")
     check('RH2 the card draws every sentence, grouped by paragraph', groups == [len(l) for l in lens], groups)
-    check('RH2 a section break is drawn between groups', (await a.ev("document.querySelectorAll('#voiceGauge .rhy .rsec').length")) == 1, '')
-    hs = await a.ev("[...document.querySelectorAll('#voiceGauge .rhy .rp')][0].querySelectorAll('i')[3].style.height")
+    check('RH2 a section break is drawn between groups', (await a.ev("document.querySelectorAll('#rhythmCard .rhy .rsec').length")) == 1, '')
+    hs = await a.ev("[...document.querySelectorAll('#rhythmCard .rhy .rp')][0].querySelectorAll('i')[3].style.height")
     check('RH2 a bar\'s height is its length', hs == '37px', hs)
 
     # RH3 flat paragraphs: choppy, heavy and even are named; a tricolon and a varied paragraph are not
@@ -65,17 +65,17 @@ async def suite(c):
     check('RH3 three or more, none under 25 words: heavy', flat[4] == 'heavy', flat)
     check('RH3 a tricolon of three short sentences is not flat', flat[2] == '', flat)
     check('RH3 a paragraph that changes pace is not flat', flat[0] == '' and flat[5] == '', flat)
-    under = await a.ev("[...document.querySelectorAll('#voiceGauge .rhy .rp')].map(g=>g.classList.contains('flat'))")
+    under = await a.ev("[...document.querySelectorAll('#rhythmCard .rhy .rp')].map(g=>g.classList.contains('flat'))")
     check('RH3 flat paragraphs are underlined in the bars', under == [bool(f) for f in flat], under)
-    line = await a.ev("getComputedStyle(document.querySelector('#voiceGauge .rp.flat')).borderBottomStyle+' '+getComputedStyle(document.querySelector('#voiceGauge .rp:not(.flat)')).borderBottomColor")
+    line = await a.ev("getComputedStyle(document.querySelector('#rhythmCard .rp.flat')).borderBottomStyle+' '+getComputedStyle(document.querySelector('#rhythmCard .rp:not(.flat)')).borderBottomColor")
     check('RH3 the underline is a line, not a colour', line.startswith('solid') and 'rgba(0, 0, 0, 0)' in line, line)
-    note = await a.ev("$('#voiceGauge .gauge-note').textContent")
+    note = await a.ev("$('#rhythmCard .gauge-note').textContent")
     check('RH3 the note counts them', '3 flat paragraphs' in note, note)
-    cnt = await a.ev("(()=>{const c=[...document.querySelectorAll('#voiceChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Flat paragraphs');return c.querySelector('.check-count').textContent})()")
+    cnt = await a.ev("(()=>{const c=[...document.querySelectorAll('#readChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Flat paragraphs');return c.querySelector('.check-count').textContent})()")
     check('RH3 the Flat paragraphs check counts paragraphs of three sentences or more', cnt == '3 of 6', cnt)
-    labs = await a.ev("(()=>{const c=[...document.querySelectorAll('#voiceChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Flat paragraphs');return [...c.querySelectorAll('.hitlab')].map(x=>x.textContent)})()")
+    labs = await a.ev("(()=>{const c=[...document.querySelectorAll('#readChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Flat paragraphs');return [...c.querySelectorAll('.hitlab')].map(x=>x.textContent)})()")
     check('RH3 its chips are grouped by kind', labs == ['Choppy', 'Heavy', 'Even'], labs)
-    await a.ev("(()=>{const c=[...document.querySelectorAll('#voiceChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Flat paragraphs');c.querySelector('.check-row').click();c.querySelector('.hit').click()})()")
+    await a.ev("(()=>{const c=[...document.querySelectorAll('#readChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Flat paragraphs');c.querySelector('.check-row').click();c.querySelector('.hit').click()})()")
     await a.wait(300)
     sel = await a.ev("editor.value.slice(editor.selectionStart,editor.selectionEnd)")
     check('RH3 a chip selects the whole paragraph', sel == CHOPPY, sel[:60])
@@ -87,9 +87,9 @@ async def suite(c):
     # section one: 6 24 9 31 | 4 5 6 5 2 | 2 2 2, five turns in eleven; section two: 11 10 12 | 27 30 26,
     # one in five; after the list: 11 3 17, two in two. Eight in eighteen.
     check('RH4 pace counts the sentences that change length by half or more', pace['pairs'] == 18 and pace['turns'] == 8 and pace['pace'] == 44, pace)
-    val = await a.ev("$('#voiceGauge .gauge-top .val').textContent")
+    val = await a.ev("$('#rhythmCard .gauge-top .val').textContent")
     check('RH4 the card shows it', val == '44%', val)
-    band = await a.ev("$('#voiceGauge .gauge-note b').textContent")
+    band = await a.ev("$('#rhythmCard .gauge-note b').textContent")
     check('RH4 under 45%: flat', band == 'Flat.', band)
     alt = await a.ev("analyze(%s,mode).rh.pace" % json.dumps(para(6, 24, 6, 24)))
     srt = await a.ev("analyze(%s,mode).rh.pace" % json.dumps(para(6, 6, 24, 24)))
@@ -99,15 +99,15 @@ async def suite(c):
 
     # RH5 the counts agree: the Sentences tile and the skim test read the same sentences
     tile = await a.ev("$('#m-sent').textContent")
-    skim = await a.ev("(()=>{const c=[...document.querySelectorAll('#voiceChecks .check')].find(x=>x.querySelector('.check-name').textContent==='The skim test');return c.querySelector('.check-count').textContent})()")
+    skim = await a.ev("(()=>{const c=[...document.querySelectorAll('#readChecks .check')].find(x=>x.querySelector('.check-name').textContent==='The skim test');return c.querySelector('.check-count').textContent})()")
     check('RH5 the Sentences tile matches the skim test', skim == tile + ' sentences', (tile, skim))
 
     # RH6 a bar finds its sentence, and the caret's sentence is drawn in full ink
-    await a.ev("document.querySelectorAll('#voiceGauge .rhy .rp')[0].querySelectorAll('i')[1].click()"); await a.wait(300)
+    await a.ev("document.querySelectorAll('#rhythmCard .rhy .rp')[0].querySelectorAll('i')[1].click()"); await a.wait(300)
     sel = await a.ev("editor.value.slice(editor.selectionStart,editor.selectionEnd)")
     check('RH6 a click on a bar selects its sentence', sel == sent(24, 3), sel[:60])
     await a.ev("editor.setSelectionRange(editor.value.indexOf('Nobody had read'),editor.value.indexOf('Nobody had read'))"); await a.wait(200)
-    cur = await a.ev("(()=>{const g=[...document.querySelectorAll('#voiceGauge .rhy .rp')];return g.map(x=>[...x.querySelectorAll('i')].findIndex(i=>i.classList.contains('cur')))})()")
+    cur = await a.ev("(()=>{const g=[...document.querySelectorAll('#rhythmCard .rhy .rp')];return g.map(x=>[...x.querySelectorAll('i')].findIndex(i=>i.classList.contains('cur')))})()")
     check('RH6 the caret\'s sentence is marked among the bars', cur[1] == 1 and sum(1 for x in cur if x >= 0) == 1, cur)
 
     # RH7 a long draft: every sentence shows, the bars narrow, and it stays quick

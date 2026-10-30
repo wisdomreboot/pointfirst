@@ -2,6 +2,33 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.9.0 (2026-10-31)
+
+The coach in the order to revise
+- Three tabs where there were five: Reader, Voice and Words. Anatomy and Plan are gone, and Lexicon is now part of Reader, so no finding is counted in two places.
+- Reader lists every check and every kind of mark in the order Yellowlees Douglas gives for revising, largest units first: coherence (the skim test, threads), continuity (loose pronouns, echoes), clarity (zombie nouns, passive voice, weak verbs, long runways, punctuation load), concision (qualifiers, clutter), cadence (rhythm, flat paragraphs), then a last pass (tells, slips).
+- A kind of mark opens to each of its phrases once, strongest first, with its better word and how often it appears. Click a phrase to find it. Click it again for the next place it appears; its count shows which one you are on.
+- Show, on a row, puts that check on the page: Skim for the skim test, Runway for long runways, and the kind itself under Marks. Pressed again, it goes back to every mark.
+- Each kind of mark has a level, as the other checks do. Something marked always, any slip, or more than four zombie nouns in the zombie pattern needs work. Something marked usually, or many in context, is worth a look.
+- Sentence clutter is now Punctuation load: it counts commas, semicolons, colons, brackets and dashes, not cluttered words. Clutter is now the kind of mark for wordy phrases, empty words, throat-clearing, officialese and clichés.
+- Echoes and threads are apart. Echoes are marks, under Continuity. Threads, the key terms you carry on purpose, sit with the skim test under Coherence.
+- Voice asks whether any of it is yours: personal or impersonal, first person, quoted words, rare words, the abstract-to-vivid gauge and the four questions.
+- Each tab keeps its own place as you move between them, and an open row stays open while you type.
+
+Marks, one kind at a time
+- Lens: Marks has a picker, as Word classes does: All, Pronouns, Echoes, Zombies, Passive, Weak verbs, Qualifiers, Clutter, Tells and Slips. Pick one and every mark of that kind shows on the page, whatever the level. The caption counts them by category and says what to look for. The choice is remembered, and each is in the palette.
+- All keeps the level, now in its caption: Always, + Usually or Deep edit, each with the number of marks it shows.
+- A mark in context has a thin dashed line as well as its shade, so the three strengths (solid, dotted, dashed) read without colour, on the page and in Reader.
+- The concreteness gauge has a neutral track, as the rhythm meter does: no red-to-green ramp.
+
+Finding things
+- A click on a finding in the coach lands it in view the first time, however far down the page. Before, a finding far off screen could take two or three clicks: the page scrolled to an estimate of where the line would be, before the line was drawn.
+
+Words and your files
+- The files card in Words says what each file is for, your lexicon included, and Start your own saves a starter lexicon to your folder. The resources card that sat under Lexicon is gone.
+- The word-list pack's Anatomy and Plan files are skipped quietly when you add the pack. Copies already in your folder stay there untouched, and are never listed as essays.
+- Essay records no longer keep Plan ticks, and the README in the hidden folder says so.
+
 ## 1.8.0 (2026-10-30)
 
 Rhythm replaces burstiness

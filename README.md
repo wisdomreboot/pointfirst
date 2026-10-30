@@ -14,15 +14,13 @@ Everything runs in your browser. There is no server, no account and no cookies. 
 
 - **Library:** your essays, by stage.
 - **Write:** the page, and nothing else.
-- **Revise:** the lenses, checks and the coach.
+- **Revise:** the lenses, the checks and the coach. A lens shows its findings live on the page: Skim, Marks (every mark, or one kind at a time: zombie nouns, passives, loose pronouns and the rest), Word classes and Runway.
 
-**Five coach tabs**
+**Three coach tabs**
 
-- **Voice:** sentence rhythm and flat paragraphs, the skim test, long runways, zombie nouns, passive voice, and an Abstract-to-Vivid gauge.
-- **Lexicon:** words and phrases worth a second look.
-- **Words:** meanings and synonyms by sense, offline.
-- **Anatomy:** the principles of a clear essay, one per card, each with a test.
-- **Plan:** a structure checklist.
+- **Reader:** every check, in the order to revise: paragraphs first, words last. Coherence (the skim test, threads), continuity (loose pronouns, echoes), clarity (zombie nouns, passive voice, weak verbs, long runways, punctuation load), concision (qualifiers, clutter), cadence (rhythm, flat paragraphs), then a last pass (tells, slips). Show puts any of them on the page.
+- **Voice:** whether any of it is yours. Personal or impersonal, first person, quoted words, rare words, an Abstract-to-Vivid gauge, and four questions only you can answer.
+- **Words:** meanings and synonyms by sense, offline, and what each file Point First reads is for.
 
 **Also included**
 
@@ -68,7 +66,7 @@ Ctrl N can't be used for a new essay: Chrome keeps it for a new window.
 
 ## Section breaks
 
-Use `* * *` on its own line, or `---` with a blank line above it. A line of dashes straight under text turns that text into a heading in Obsidian, Ghost and GitHub; Point First shows it the same way and flags it in the Lexicon.
+Use `* * *` on its own line, or `---` with a blank line above it. A line of dashes straight under text turns that text into a heading in Obsidian, Ghost and GitHub; Point First shows it the same way and flags it under Slips.
 
 ## Word lists
 
@@ -77,11 +75,11 @@ Words, the zombie-noun check, the rare-word check and the concreteness gauge rea
 1. Download [pointfirst-word-lists.zip](https://github.com/wisdomreboot/pointfirst/releases/latest/download/pointfirst-word-lists.zip) from the latest release (about 15 MB).
 2. In Point First, open the Words tab, choose **Add word lists**, and pick the zip.
 
-Point First copies the data lists into `.pointfirst/word-lists` and three editable starter files (lexicon, Anatomy, Plan) to the top level of your folder. Where each list comes from is described in `ABOUT.md` inside the pack.
+Point First copies the data lists into `.pointfirst/word-lists` and an editable starter lexicon to the top level of your folder. Where each list comes from is described in `ABOUT.md` inside the pack.
 
 ## Make it yours
 
-The Anatomy cards, the Plan checklist and the lexicon are plain Markdown files. Keep your own `pointfirst-anatomy.md`, `pointfirst-plan.md` or `pointfirst-lexicon.md` at the top level of your folder and Point First uses yours instead of the built-in one. **Make these cards yours** in the Anatomy pane saves the built-in cards there as a starting point. Delete the file to go back.
+Your lexicon is a plain Markdown file, `pointfirst-lexicon.md`, at the top level of your folder: your own rules, marked under Tells, and the terms of art never to flag. **Start your own**, in the Words tab, saves a starter there.
 
 ## Security
 
@@ -117,4 +115,4 @@ I write at [jonathandutoit.com](https://jonathandutoit.com).
 - `concreteness.txt` holds the concreteness ratings of Brysbaert, Warriner and Kuperman (2014).
 - `nominalizations.txt` is built from WordNet's derivational links.
 
-**The Anatomy** distils principles from Joseph M. Williams (*Style: Lessons in Clarity and Grace*), George D. Gopen (*Expectations*), M. A. K. Halliday (*An Introduction to Functional Grammar*), Stanley Fish (*Is There a Text in This Class?*), Gerald Graff and Cathy Birkenstein (*They Say, I Say*) and S. I. Hayakawa (*Language in Thought and Action*), written in my own words. I first met many of them through the Writer Science YouTube channel, which brings these books together.
+**Reader** follows the order of revision in Yellowlees Douglas's *Writing for the Reader's Brain*, and her five Cs (clarity, continuity, coherence, concision, cadence) name its stages. **The coach** distils principles from Joseph M. Williams (*Style: Lessons in Clarity and Grace*), George D. Gopen (*Expectations*), M. A. K. Halliday (*An Introduction to Functional Grammar*), Stanley Fish (*Is There a Text in This Class?*), Gerald Graff and Cathy Birkenstein (*They Say, I Say*) and S. I. Hayakawa (*Language in Thought and Action*), written in my own words. I first met many of them through the Writer Science YouTube channel, which brings these books together.
