@@ -2,6 +2,25 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.10.0 (2026-10-31)
+
+Moving paragraphs
+- Alt+Up and Alt+Down move the paragraph the cursor is in past the one before or after it. The blank lines between them stay where they were. A selection moves every paragraph it touches. A heading moves on its own; a code block or a note keeps the blank lines inside it.
+- In a list, the item moves past its neighbour at the same depth, its sub-items with it, and a numbered list keeps counting up.
+- Pasted words stay pasted when they move, and a move adds nothing to the words typed today. Each move is one step to undo. Forward only keeps paragraphs where they are while drafting.
+
+Typing
+- Two hyphens always become an em dash while smart punctuation is on. The separate switch is gone. Revise still marks every em dash, under Tells.
+- Superscript and subscript, as Ghost writes them: 29^th^ and H~2~O. On the page they sit above and below the line, but never inside code, a footnote marker or strikethrough. Type ^ round a selection for superscript; ~ makes subscript, and twice, strikethrough. Publish as HTML turns them into real superscript and subscript, and Publish says where the Markdown marks render.
+
+The palette by keyword
+- Insert lists everything the page can take: link, note, table, blockquote, code block and section break. Blockquote, code block and section break are new.
+- Format lists what wraps your words: bold, italic, strikethrough, highlight, superscript and subscript.
+- Stage lists the stages (Stage: Drafting and the rest), Go to the rooms and your notes, and Move the paragraph moves.
+- Gone: Two hyphens to em dash; Open Words, which Coach: Words does, with Alt Shift W; and Copy as Markdown, which copied your notes too, where Publish leaves them out. Check folder resources is now Check folder for word lists.
+- The shortcuts list (Ctrl ?) adds the paragraph moves, strikethrough, superscript and subscript, code blocks, and --- as a section break.
+- Typing in the palette lists only what matches. Before, every essay showed under any word you typed. A command that already starts with its group, such as Insert link, no longer repeats the group beside it.
+
 ## 1.9.0 (2026-10-31)
 
 The coach in the order to revise
