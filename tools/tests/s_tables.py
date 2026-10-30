@@ -77,9 +77,12 @@ async def suite(c):
     check('T8 Publish HTML has the tables', html.count('<table>') == 2, html[:120])
     await a.ev("closePub()")
 
-    # T9 Tab outside a list or table stays in the essay; Esc then Tab leaves it
+    # T9 Tab outside a list or table stays in the essay and indents the paragraph by an em space,
+    # Shift+Tab takes it back; Esc then Tab leaves the page
     await a.ev("editor.focus();editor.setSelectionRange(5,5)"); await kb.press('Tab')
-    check('T9 Tab in a paragraph stays in the essay, adds nothing', await a.ev("editor.hasFocus") and (await a.ev("editor.value")).startswith('A paragraph before'), await a.ev("document.activeElement.className"))
+    check('T9 Tab in a paragraph stays in the essay and indents it', await a.ev("editor.hasFocus") and (await a.ev("editor.value")).startswith('\u2003A paragraph before'), await a.ev("document.activeElement.className"))
+    await kb.press('Shift+Tab')
+    check('T9 Shift+Tab takes the indent back', (await a.ev("editor.value")).startswith('A paragraph before'), (await a.ev("editor.value"))[:30])
     await kb.press('Escape'); await kb.press('Tab')
     check('T9 Esc then Tab leaves the page', not await a.ev("editor.hasFocus"), '')
 
