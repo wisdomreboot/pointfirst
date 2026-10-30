@@ -18,7 +18,7 @@ Everything runs in your browser. There is no server, no account and no cookies. 
 
 **Five coach tabs**
 
-- **Voice:** sentence rhythm, the skim test, long runways, zombie nouns, passive voice, and an Abstract-to-Vivid gauge.
+- **Voice:** sentence rhythm and flat paragraphs, the skim test, long runways, zombie nouns, passive voice, and an Abstract-to-Vivid gauge.
 - **Lexicon:** words and phrases worth a second look.
 - **Words:** meanings and synonyms by sense, offline.
 - **Anatomy:** the principles of a clear essay, one per card, each with a test.

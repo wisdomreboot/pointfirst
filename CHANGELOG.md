@@ -2,6 +2,19 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.8.0 (2026-10-30)
+
+Rhythm replaces burstiness
+- The Voice meter now reads rhythm the way a reader hears it, sentence by sentence. Its number is the share of sentences that change pace from the one before: at least half again as long, or a third shorter. The old number was the spread of every sentence length in the essay, which cannot see order. The same sentences in any order scored the same, and an essay made of flat paragraphs could score 100.
+- The track has no colour ramp. A shaded band marks where published prose sits, 55 to 70%. Measured on 17,000 paragraphs of speeches, essays, news and novels, published prose sits near 60%, and shuffling each paragraph's sentences gives the same 60%: good writers vary their sentences, they do not alternate them.
+- Every sentence is a bar, grouped by paragraph and wrapping, so a long essay shows all of them (the old row drew the first 160). Height is length, with faint lines at 15 and 25 words, and the bars widen when there are fewer to show. Click a bar to select its sentence. The sentence the cursor is in is drawn in full ink.
+- Flat paragraphs, new in Voice: paragraphs whose pace never changes. Choppy: four or more sentences, none over 15 words. Heavy: three or more, none under 25. Even: three or more, all within a few words of each other. They are underlined in the bars, and a click on one in the list selects it. About one published paragraph in eleven is flat, so a few are normal, and a tricolon or parallel sentences repeat their length on purpose.
+- The meter no longer calls even rhythm a machine tell.
+
+Counting
+- Rhythm, the Sentences count and the average length now read the same sentences as the skim test, so the pane's counts agree. A number counts as a word in a sentence's length, since it is heard. Lists are left out of rhythm, and table rows are not sentences.
+- "0.6 million" no longer splits a sentence in Voice, and a sentence that ends on a contraction ("It isn't.") no longer runs into the next one anywhere in the app.
+
 ## 1.7.0 (2026-10-29)
 
 The Skim lens

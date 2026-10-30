@@ -6,7 +6,7 @@
      scripts hashed below, and Point First may connect only to its own address and its
      page-view counter. After editing an inline script, run  python3 tools/csp.py index.html
      (or the app will stop running). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nkOR9cGMsk3kM7bvMdix8che5BxvCtJ0soZkFoBjclo=' 'sha256-aijZWJUa+M/T+YvI5Ex0SN++ta+X7X6WbHxYW9SpTI8=' 'sha256-+/U+ceQjp3kpUO1pCpbsllyuuHn0Owde30bP53V3SNM='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pointfirst.goatcounter.com; connect-src 'self' https://pointfirst.goatcounter.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nkOR9cGMsk3kM7bvMdix8che5BxvCtJ0soZkFoBjclo=' 'sha256-aijZWJUa+M/T+YvI5Ex0SN++ta+X7X6WbHxYW9SpTI8=' 'sha256-VxISQiSUgUWm5sMH9OozES0mfh1fE0HqEvxOcyqL23s='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pointfirst.goatcounter.com; connect-src 'self' https://pointfirst.goatcounter.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Point First: a writing desk that never writes for you</title>
 <meta name="description" content="Point First is a free writing desk that coaches while you write and never writes for you. Your essays stay as plain Markdown files in your own folder.">
 <meta name="author" content="Jonathan du Toit">
@@ -533,9 +533,7 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 @media (prefers-color-scheme:dark){:root:not([data-theme]) .modeseg button[aria-pressed="true"],:root:not([data-theme]) .sevseg button[aria-pressed="true"]{color:#14131a}}
 :root[data-theme="dark"] .modeseg button[aria-pressed="true"],:root[data-theme="dark"] .sevseg button[aria-pressed="true"]{color:#14131a}
 .modeseg button+button,.sevseg button+button{border-left:1px solid var(--line)}
-/* Voice pane numbers: three counts, the gauge, and the sentence rhythm bars.
-   The needle carries the reading. The colour ramp behind it only helps.
-   Rhythm bars: one per sentence, height is length. Very long ones are also coloured. */
+/* Voice pane numbers: three counts, then the gauges. The needle carries the reading. */
 .metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
 .metric{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px;padding:9px 10px}
 .metric .n{font-family:var(--mono);font-weight:600;font-size:19px;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
@@ -547,10 +545,26 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .track{height:8px;border-radius:6px;background:linear-gradient(90deg,var(--crit),var(--warn),var(--good));position:relative;opacity:.85}
 .track .needle{position:absolute;top:-4px;width:3px;height:16px;border-radius:2px;background:var(--ink);box-shadow:0 0 0 2px var(--surface);transform:translateX(-50%)}
 .gauge-note{font-size:12.5px;line-height:1.5;color:var(--ink-soft);margin:10px 0 0}
-.rhythm{display:flex;align-items:flex-end;gap:1px;height:40px;margin:12px 0 0;overflow:hidden;max-width:100%}
-.rbar{flex:1 1 0;min-width:0;background:var(--accent-soft);border-radius:2px 2px 0 0}
-.rbar.long{background:var(--crit)}
-.rlegend{font-family:var(--mono);font-size:10px;color:var(--faint);margin:6px 0 0}
+/* Rhythm. The track is neutral, with the band where published prose sits shaded in: no colour ramp.
+   Bars: one per sentence, grouped by paragraph, 1.2 pixels a word up to 40 (longer ones capped, with a
+   cap mark), wider when there are fewer to show. Two faint lines at 15 and 25 words. A flat paragraph is underlined in ink; the caret's sentence
+   and the one under the pointer are drawn in full ink. Light, dark and line, never hue. */
+.track.pace{background:color-mix(in srgb,var(--ink) 12%,transparent);opacity:1}
+.track.pace .band{position:absolute;top:0;bottom:0;border-radius:6px;background:color-mix(in srgb,var(--ink) 34%,transparent)}
+.track-ends.pace{position:relative}
+.track-ends .bandlab{position:absolute;top:0;left:62.5%;transform:translateX(-50%);white-space:nowrap}
+.rhy{--rh-line:color-mix(in srgb,var(--ink) 18%,transparent);display:flex;flex-wrap:wrap;align-items:flex-end;gap:9px 7px;margin:14px 0 0}
+.rp{display:inline-flex;align-items:flex-end;gap:1px;box-sizing:border-box;height:54px;padding-bottom:4px;border-bottom:2px solid transparent;
+  background:linear-gradient(to top,transparent 17px,var(--rh-line) 17px,var(--rh-line) 18px,transparent 18px,transparent 29px,var(--rh-line) 29px,var(--rh-line) 30px,transparent 30px);
+  background-origin:content-box;background-clip:content-box}
+.rp i{display:block;width:4px;flex:none;border-radius:1px 1px 0 0;background:color-mix(in srgb,var(--ink) 46%,transparent);cursor:pointer}
+.rhy.w8 .rp i{width:8px}.rhy.w6 .rp i{width:6px}.rhy.w3 .rp i{width:3px}
+.rhy.w8 .rp,.rhy.w6 .rp{gap:2px}
+.rp i:hover,.rp i.cur{background:var(--ink)}
+.rp i.over{box-shadow:inset 0 3px 0 var(--ink)}
+.rp.flat{border-bottom-color:var(--ink)}
+.rsec{align-self:stretch;width:1px;background:var(--line);margin:0 2px}
+.rlegend{font-family:var(--mono);font-size:10px;color:var(--faint);margin:8px 0 0}
 /* Prose checks: a pip, a name, a count, why it matters, then the hits.
    Hits that need work are bolder with a heavier border, readable without the red. */
 .check{border-top:1px solid var(--line-soft);padding:12px 0}
@@ -3297,7 +3311,8 @@ function wsSentences(text) {
 		const prev = out.length ? out[out.length - 1] : null;
 		if (prev) {
 			const tail = text.slice(prev.from, prev.to);
-			const am   = /(\p{L}+)\.$/u.exec(tail);
+			// The word before the stop, whole: "isn't." ends on "isn't", not on an initial "t".
+			const am   = /(?:^|[^\p{L}'\u2019])(\p{L}+)\.$/u.exec(tail);
 			const next = raw.trim();
 			// A number before the stop ends a sentence ("…rose by 12. The next year…")
 			// unless the stop is a decimal point or a numbered item runs on ("No. 5").
@@ -3478,9 +3493,6 @@ function findRare(text){if(!R.freq)return[];const out=[];const re=/(^|[^\p{L}’
   return out}
 /* First-person words. In impersonal mode the writer should be absent. */
 const FIRST=/\b(?:I|me|my|mine|myself|we|us|our|ours|ourselves)\b/g;
-/* Rough sentence split on . ! and ?, for rhythm.
-   Fragments with no letters drop out. */
-function splitSentences(t){return t.replace(/\s+/g,' ').match(/[^.!?…]+[.!?…]*/g)?.map(s=>s.trim()).filter(s=>/[a-z]/i.test(s))||[]}
 /* Word tokens, for counts. A token needs a letter: a list bullet or a line of dashes is not a word. */
 function words(t){return (t.match(/[A-Za-z’'-]*[A-Za-z][A-Za-z’'-]*/g)||[])}
 /* ===== notes =====
@@ -3513,8 +3525,9 @@ function maskProse(t){t=maskTables(maskNotes(t));if(!/[\[(<]|:\/\//.test(t))retu
 function noteRanges(t){const out=[];if(t.indexOf('%%')<0)return out;NOTE_RE.lastIndex=0;let m;while((m=NOTE_RE.exec(t)))out.push({s:m.index,e:m.index+m[0].length,text:m[0].slice(2,-2).trim()});return out}
 /* The skim test's lines: each sentence's first words and its last, in order.
    Opening: the first five words. Ending: the last quarter, two to six words, never repeating the opening.
-   para marks the first sentence of a paragraph, item the first of a list item; ow and ew are where the
-   opening and ending words sit in the draft, for the Skim lens.
+   para marks the first sentence of a paragraph, item the first of a list item, list any sentence in one;
+   ow and ew are where the opening and ending words sit in the draft, for the Skim lens. len is the
+   sentence's length in words a reader hears, numbers included ("in 1990", "0.6 million"), for Rhythm.
    A blank line starts a new group. A heading, code or a table breaks the chain. Within the chain, a word an
    ending shares with the next opening is marked in both (same rough stem as threads, common words
    skipped), so a sentence that starts where the last one stopped shows it. Positions point into the
@@ -3531,25 +3544,46 @@ function skimRows(text,raw){const rawLines=(raw==null?text:raw).split('\n');let 
     for(const se of WS.wsSentences(line)){const t=se.text,w=t.split(/\s+/).filter(Boolean);if(!/\p{L}/u.test(t))continue;
       const n=w.length,o=Math.min(5,n),k=Math.min(6,Math.max(2,Math.round(n/4))),e0=Math.max(o,n-k);
       const base=at+lead.length+se.from,pos=[...t.matchAll(/\S+/g)].map(m=>[base+m.index,base+m.index+m[0].length]);
-      rows.push({s:at+lead.length+se.from,e:at+lead.length+se.to,open:w.slice(0,o),end:w.slice(e0),gap:e0>o,para,item:item&&first,chain,mo:new Set(),me:new Set(),ow:pos.slice(0,o),ew:pos.slice(e0)});
+      rows.push({s:at+lead.length+se.from,e:at+lead.length+se.to,open:w.slice(0,o),end:w.slice(e0),gap:e0>o,para,item:item&&first,list:item,chain,mo:new Set(),me:new Set(),ow:pos.slice(0,o),ew:pos.slice(e0),
+        len:w.filter(x=>/[\p{L}\p{N}]/u.test(x)).length});
       para=false;first=false;chain=true}}
   for(let i=1;i<rows.length;i++){const a=rows[i-1],b=rows[i];if(!b.chain)continue;
     const ka=new Map(a.end.map((w,j)=>[content(w),j])),kb=new Map(b.open.map((w,j)=>[content(w),j]));
     for(const [k,j] of ka)if(k&&kb.has(k)){a.me.add(j);b.mo.add(kb.get(k))}}
   return rows}
+/* Rhythm: how the pace moves from one sentence to the next. It reads the skim test's sentences, so
+   the counts agree. Lists are left out, since a list is not prose rhythm; a heading, code or a table
+   starts afresh. A sentence changes pace when it is at least half again as long as the one before,
+   or a third shorter. pace is the share of sentences that do, across paragraph breaks.
+   Measured on 17,000 paragraphs of speeches, essays, news and novels, published prose sits near 60%,
+   and shuffling each paragraph's sentences gives the same 60%: good writers vary, they do not alternate.
+   A flat paragraph never changes pace. Choppy: four or more sentences, none over 15 words. Heavy: three
+   or more, none under 25. Even: three or more of 8 words or more, the longest within 30% of the shortest.
+   About one published paragraph in eleven is flat, and Douglas's examples of poor cadence are flat. */
+const RH_TURN=1.5,RH_SHORT=15,RH_LONG=25,RH_EVEN=1.3,RH_EVEN_MIN=8,RH_FULL=40;
+const FLATNAME={choppy:'Choppy',heavy:'Heavy',even:'Even'};
+function rhythmOf(rows){const paras=[];let cur=null,prev=null,pairs=0,turns=0;
+  for(const r of rows){
+    if(r.list||!r.len){prev=null;cur=null;continue}
+    if(!r.chain)prev=null;
+    if(prev){pairs++;if(Math.max(prev.len,r.len)/Math.min(prev.len,r.len)>=RH_TURN)turns++}
+    if(r.para||!cur||!r.chain){cur={rows:[],sec:!r.chain&&paras.length>0};paras.push(cur)}
+    cur.rows.push(r);prev=r}
+  for(const p of paras){const L=p.rows.map(r=>r.len),lo=Math.min(...L),hi=Math.max(...L);
+    p.flat=L.length>=4&&hi<=RH_SHORT?'choppy':L.length>=3&&lo>=RH_LONG?'heavy':L.length>=3&&lo>=RH_EVEN_MIN&&hi/lo<=RH_EVEN?'even':'';
+    p.s=p.rows[0].s;p.e=p.rows[p.rows.length-1].e}
+  return {paras,pairs,turns,pace:pairs?Math.round(turns/pairs*100):null,count:paras.reduce((n,p)=>n+p.rows.length,0)}}
 /* The numbers behind the meters and the Revise panes, recomputed on every refresh.
-   Burstiness is the spread of sentence lengths over their mean: 0.75 or more scores 100.
+   Sentences are the skim test's, so every count in the pane agrees. Average length is in words heard.
    Clutter is internal marks per sentence. Reading time assumes 200 words a minute. */
 function analyze(text,mode){const raw=text;text=maskProse(text);
-  const wc=words(text).length,sents=splitSentences(text);
-  const lens=sents.map(s=>words(s).length).filter(n=>n>0);
+  const wc=words(text).length,skim=skimRows(text,raw),rh=rhythmOf(skim);
+  const lens=skim.map(r=>r.len).filter(n=>n>0);
   const mean=lens.length?lens.reduce((a,b)=>a+b,0)/lens.length:0;
-  const sd=lens.length?Math.sqrt(lens.reduce((a,b)=>a+(b-mean)**2,0)/lens.length):0;
-  const burst=Math.round(Math.max(0,Math.min(1,(mean?sd/mean:0)/0.75))*100);
   const P=proseRun(text);const zom=findZombies(text);const nom=zom.map(z=>z.w);const rare=findRare(text);
   const internal=(text.match(/[,;:()—–]/g)||[]).length;
-  const clutter=sents.length?internal/sents.length:0;
-  return {wc,sents,lens,mean,burst,skim:skimRows(text,raw),
+  const clutter=skim.length?internal/skim.length:0;
+  return {wc,sents:skim,lens,mean,rh,skim,
     nom,zom,rare,passive:P.passive.map(x=>x.w),P,first:(text.match(FIRST)||[]),clutter,
     readMin:Math.max(1,Math.round(wc/200)),mode};
 }
@@ -3822,24 +3856,23 @@ function jumpTo(i){const h=hits[i];if(!h)return;
    Display name for a hit's category. Negative codes are the built-in checks,
    the rest are lexicon categories. */
 function catName(c){return c===-1?"Em dash":c===-2?'"Not just X, but Y"':c===-3?'Zombie noun':PCATS[c]?PCATS[c][0]:CATS[c][0]}
-/* Draws the Voice pane: the burstiness gauge, then the checks.
-   Each check gives a level, a count, why it matters, and chips that find its hits.
-   Burstiness leads: even sentence length is the strongest machine tell. */
+/* Draws the Voice pane: the rhythm card, then the checks.
+   Each check gives a level, a count, why it matters, and chips that find its hits. */
 function renderVoice(a){
-  const band=a.burst<35?'Even: reads machine-made':a.burst<60?'Some variation':'Human variation';
-  const note=a.sents.length<4?'Write a few sentences and the meter comes alive.':a.burst<35?'Your sentences are nearly the same length. This is the strongest tell there is. Put a three-word sentence after a thirty-word one.':a.burst<60?'Getting there. Push the range wider. Let one run long, then cut hard.':'Good. The rhythm rises and falls the way a person talks.';
   
-    /* The gauge: burstiness score, band, and a skyline with one bar per sentence. */
-    $('#voiceGauge').innerHTML=`<div class="gauge"><div class="gauge-top"><span class="lab">Sentence variation (burstiness)</span><span class="val">${a.burst}</span></div>
-    <div class="track"><div class="needle" style="left:${a.burst}%"></div></div>
-    <div class="gauge-note"><b style="color:var(--ink)">${band}.</b> ${note}</div>
-    ${a.lens.length?`<div class="rhythm">${a.lens.slice(0,160).map(n=>`<div class="rbar${n>42?' long':''}" style="height:${Math.max(8,Math.round(n/Math.max(...a.lens,1)*100))}%"></div>`).join('')}</div><div class="rlegend">each bar = one sentence · flat skyline = trouble</div>`:''}</div>`;
+    /* Rhythm leads: the share of sentences that change pace, then every sentence as a bar. */
+    $('#voiceGauge').innerHTML=rhythmCard(a.rh);markRhythm();
   const imp=a.mode==='impersonal';
   
     /* The checks, in the order the pane lists them.
        Rare words appears only when frequency.txt is loaded. */
     const items=[
     {name:'The skim test',lvl:'ok',count:a.skim.length+' sentence'+(a.skim.length===1?'':'s'),why:'Each sentence\'s first words, then its last. Down the left: one thread of characters, or a crowd? From each ending into the next opening: does the next sentence start where the last one ended? A word they share is underlined. The endings alone are what a reader keeps. Click a line to find it. Lens: Skim shows them on the page.',custom:a.skim.length?'<div class="openers skim">'+a.skim.slice(0,800).map(r=>{const wd=(w,j,m)=>m.has(j)?'<u>'+esc(w)+'</u>':esc(w);return `<div class="op${r.para&&r!==a.skim[0]?' para':''}" data-s="${r.s}" data-e="${r.e}"><b>${r.open.slice(0,2).map((w,j)=>wd(w,j,r.mo)).join(' ')}</b> ${r.open.slice(2).map((w,j)=>wd(w,j+2,r.mo)).join(' ')}${r.end.length?(r.gap?'<span class="op-gap"> … </span>':' ')+'<span class="op-end">'+r.end.map((w,j)=>wd(w,j,r.me)).join(' ')+'</span>':''}</div>`}).join('')+'</div>':''},
+    (()=>{const P=a.rh.paras.filter(p=>p.rows.length>=3),F=P.filter(p=>p.flat),r=P.length?F.length/P.length:0;
+      const kind=k=>{const L=F.filter(p=>p.flat===k);return L.length?`<span class="hitlab">${FLATNAME[k]}</span>`+jchips(L.map(p=>({s:p.s,e:p.e,label:p.rows[0].open.join(' ')+'…'})),8,false):''};
+      return{name:'Flat paragraphs',lvl:r>0.35?'crit':r>0.15?'warn':'ok',count:F.length+' of '+P.length,
+      why:'Paragraphs whose pace never changes. <b>Choppy:</b> four or more sentences, none over '+RH_SHORT+' words. <b>Heavy:</b> three or more, none under '+RH_LONG+'. <b>Even:</b> three or more, all within a few words of each other. About one paragraph in eleven of published speeches, essays and fiction is flat, so a few are normal. A run of short sentences can be deliberate, and parallel sentences (isocolon, anaphora) repeat their length on purpose: the bars show it, the judgement is yours. Click one to find it.',
+      hits:kind('choppy')+kind('heavy')+kind('even')}})(),
     (()=>{const st=a.zom.filter(z=>z.strong);return{name:'Zombie nouns',lvl:st.length>4?'crit':st.length>1||a.zom.length>8?'warn':'ok',count:st.length+' strong · '+a.zom.length,
       why:'Actions hidden inside nouns drain the verb. Strong ones sit in the zombie pattern: after a light verb (make a decision), before "of" (the implementation of), or after "there is". Free those first: the doer in the subject, the action in the verb. A noun on its own may be a term doing honest work; add it to your lexicon as ignore.'+(R.nom?'':' <b>Using a rough suffix guess.</b> Drop nominalizations.txt into your folder for the real list and the verb behind each noun.'),
       hits:zchips(a.zom)}})(),
@@ -3863,6 +3896,28 @@ function renderVoice(a){
     /* Every check renders through paint. */
     paint($('#voiceChecks'),items);
 }
+/* The rhythm card. The number is the share of sentences that change pace, its needle on a neutral
+   track with the band where published essays and speeches sit shaded in. Under it, every sentence as a
+   bar, grouped by paragraph, height its length up to 40 words; flat paragraphs are underlined. */
+function rhythmCard(rh){const p=rh.pace,few=rh.pairs<3,flat=rh.paras.filter(x=>x.flat);
+  const band=few?'Too short to read':p<45?'Flat':p<55?'Some changes':'Varied';
+  const note=few?'Write a few more sentences and the meter comes alive.':
+    p<45?'Most sentences keep the pace of the one before, and readers hear that as a drone.':
+    p<55?'The pace changes less often than in published essays and speeches.':
+    'The pace changes about as often as in published essays and speeches, or more.';
+  const fl=flat.length?` ${flat.length} flat paragraph${flat.length===1?'':'s'}, underlined in the bars.`:'';
+  const bars=rh.paras.map(pa=>(pa.sec?'<span class="rsec"></span>':'')+`<span class="rp${pa.flat?' flat':''}"${pa.flat?` title="${FLATNAME[pa.flat]} paragraph"`:''}>`+
+    pa.rows.map(r=>`<i data-s="${r.s}" data-e="${r.e}" style="height:${Math.max(2,Math.round(Math.min(RH_FULL,r.len)*1.2))}px"${r.len>RH_FULL?' class="over"':''} title="${r.len} word${r.len===1?'':'s'}: ${esc(r.open.join(' '))}${r.gap||r.end.length?'…':''}"></i>`).join('')+'</span>').join('');
+  return `<div class="gauge"><div class="gauge-top"><span class="lab">Rhythm: sentences that change pace</span><span class="val">${few?'–':p+'%'}</span></div>
+    <div class="track pace"><span class="band" style="left:55%;width:15%"></span>${few?'':`<div class="needle" style="left:${p}%"></div>`}</div>
+    <div class="track-ends pace"><span>0%</span><span class="bandlab">Published prose</span><span>100%</span></div>
+    <div class="gauge-note"><b style="color:var(--ink)">${band}.</b> ${note}${fl}</div>
+    ${rh.count?`<div class="rhy ${rh.count<=40?'w8':rh.count<=90?'w6':rh.count<=250?'w4':'w3'}" role="img" aria-label="Sentence lengths, ${rh.count} sentences in ${rh.paras.length} paragraphs, ${flat.length} flat">${bars}</div>
+    <div class="rlegend">Each bar a sentence, grouped by paragraph. Lines at ${RH_SHORT} and ${RH_LONG} words. Click a bar to find it.</div>`:''}</div>`}
+/* Draws the caret's sentence in full ink among the bars, so the writer can see where they are. */
+function markRhythm(){const g=$('#voiceGauge');if(!g)return;const c=editor.selectionStart;let on=null;
+  for(const b of g.querySelectorAll('.rhy i'))if(+b.dataset.s<=c&&c<=+b.dataset.e){on=b;break}
+  g.querySelectorAll('.rhy i.cur').forEach(b=>{if(b!==on)b.classList.remove('cur')});if(on)on.classList.add('cur')}
 /* Zombie noun chips, one per word, at most 16, strong ones first.
    Each names the verb inside the noun. A click selects the noun in the draft. */
 function zchips(z){const seen=new Set();const u=z.slice().sort((p,q)=>(q.strong-p.strong)).filter(x=>{const k=x.w.toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).slice(0,16);
@@ -4601,7 +4656,7 @@ const FS_OK=typeof window.showDirectoryPicker==='function';
 /* The hidden back room inside the writer's folder.
    The dot keeps it out of the file list and out of Obsidian's view. */
 const SIDE='.pointfirst';
-const PF_VERSION='1.7.0';
+const PF_VERSION='1.8.0';
 /* Tiny key-value store in IndexedDB.
    Holds what localStorage cannot: the folder handle, and browser copies of word lists.
    A failed read comes back empty, never an error. */
@@ -6017,6 +6072,9 @@ function wordsInit(){
   
     /* Voice checks: a click on a hit selects that text in the draft. */
     $('#voiceChecks').addEventListener('click',e=>{const h=e.target.closest('.hit[data-s],.op[data-s]');if(h)selectInDraft(+h.dataset.s,+h.dataset.e)});
+    /* Rhythm bars: a click selects that sentence; the caret's sentence is drawn in full ink. */
+    $('#voiceGauge').addEventListener('click',e=>{const b=e.target.closest('.rhy i[data-s]');if(b)selectInDraft(+b.dataset.s,+b.dataset.e)});
+    editor.addEventListener('select',markRhythm);
 }
 
 /* ===== shell: three rooms (Library, Write, Revise), one palette =====
