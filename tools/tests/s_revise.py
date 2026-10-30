@@ -54,19 +54,19 @@ async def suite(c):
     check('R2 the caption says what a runway is and counts them', 'holds before the verb' in cap and '1 very long' in cap, cap)
     check('R2 the lens button names it', (await a.ev("$('#lensBtn').textContent")) == 'Lens: Runway', await a.ev("$('#lensBtn').textContent"))
 
-    # R3 Voice: Long runways replaces Hard sentences
-    names = await a.ev("[...document.querySelectorAll('#voiceChecks .check-name')].map(x=>x.textContent)")
+    # R3 Reader: Long runways replaces Hard sentences
+    names = await a.ev("[...document.querySelectorAll('#readChecks .check-name')].map(x=>x.textContent)")
     check('R3 Long runways is listed, Hard sentences is gone', 'Long runways' in names and 'Hard sentences' not in names, names)
-    chips = await a.ev("(()=>{const c=[...document.querySelectorAll('#voiceChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Long runways');return [...c.querySelectorAll('.hit')].map(h=>h.textContent)})()")
+    chips = await a.ev("(()=>{const c=[...document.querySelectorAll('#readChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Long runways');return [...c.querySelectorAll('.hit')].map(h=>h.textContent)})()")
     check('R3 its chips name the longest first, with the count', chips and chips[0].startswith('Robert E Simanek') and chips[0].rstrip().split(' ')[-1].isdigit(), chips)
     check('R3 a verb phrase as subject has its own chip, and is not called long', any(x == 'Being born to wealthy parents bound…' for x in chips) and not any(x.startswith('Being born') and x.rstrip().split(' ')[-1].isdigit() for x in chips), chips)
-    await a.ev("(()=>{const c=[...document.querySelectorAll('#voiceChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Long runways');c.querySelector('.hit').click()})()")
+    await a.ev("(()=>{const c=[...document.querySelectorAll('#readChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Long runways');c.querySelector('.hit').click()})()")
     await a.wait(300)
     sel = await a.ev("editor.value.slice(editor.selectionStart,editor.selectionEnd)")
     check('R3 a chip selects the runway in the draft', sel.startswith('Robert E. Simanek') and sel.endswith('Korean War'), sel[-40:])
 
     # R4 the skim test: openings and endings, shared words underlined, headings break the chain
-    rows = await a.ev("[...document.querySelectorAll('#voiceChecks .skim .op')].map(r=>({t:r.textContent,u:[...r.querySelectorAll('u')].map(u=>u.textContent),p:r.classList.contains('para')}))")
+    rows = await a.ev("[...document.querySelectorAll('#readChecks .skim .op')].map(r=>({t:r.textContent,u:[...r.querySelectorAll('u')].map(u=>u.textContent),p:r.classList.contains('para')}))")
     check('R4 one line per sentence', len(rows) == 8, [r['t'][:30] for r in rows])
     r1 = next((r for r in rows if r['t'].startswith('The grade')), None)
     r2 = next((r for r in rows if r['t'].startswith('Structure is')), None)
@@ -77,9 +77,9 @@ async def suite(c):
     check('R4 across a heading nothing is linked', r3 and not r3['u'], r3)
     check('R4 a short sentence shows once, without a gap', r3 and '…' not in r3['t'], r3)
     check('R4 paragraphs sit apart', r3 and r3['p'] and r2 and not r2['p'], rows)
-    count = await a.ev("(()=>{const c=[...document.querySelectorAll('#voiceChecks .check')].find(x=>x.querySelector('.check-name').textContent==='The skim test');return c.querySelector('.check-count').textContent})()")
+    count = await a.ev("(()=>{const c=[...document.querySelectorAll('#readChecks .check')].find(x=>x.querySelector('.check-name').textContent==='The skim test');return c.querySelector('.check-count').textContent})()")
     check('R4 the count is sentences', count == '8 sentences', count)
-    await a.ev("document.querySelectorAll('#voiceChecks .skim .op')[5].click()"); await a.wait(300)
+    await a.ev("document.querySelectorAll('#readChecks .skim .op')[5].click()"); await a.wait(300)
     sel = await a.ev("editor.value.slice(editor.selectionStart,editor.selectionEnd)")
     check('R4 a click on a line selects that sentence', sel == 'Structure is what a reader holds in his head while he waits for the verb.', sel)
 
@@ -97,7 +97,7 @@ async def suite(c):
     await a.fs('write', 'edge.md', ESSAY('Edge', EDGE, 'eeee22'))
     await a.lib(); await a.open('Edge'); await a.settle()
     await a.ev("setRoom('revise')"); await a.ev("setLens('runway')"); await a.wait(500)
-    rows = await a.ev("[...document.querySelectorAll('#voiceChecks .skim .op')].map(r=>r.textContent)")
+    rows = await a.ev("[...document.querySelectorAll('#readChecks .skim .op')].map(r=>r.textContent)")
     check('R7 a list marker is not part of an opening', any(r.startswith('A list item') for r in rows), rows)
     check('R7 a quote marker is not part of an opening', any(r.startswith('A quoted paragraph') for r in rows), rows)
     check('R7 notes, code and table rows are not sentences', not any(('note' in r.lower()) or ('compiler' in r) or ('cell' in r) for r in rows), rows)

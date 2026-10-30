@@ -182,7 +182,7 @@ async def suite(c):
     marks = await a.ev("[...document.querySelectorAll('#editor mark.rw-h,#editor mark.rw-v')].map(m=>m.textContent)")
     check('RW3 the lens shades the sure runway', any(m.startswith('The committee') for m in marks), marks)
     check('RW3 the lens leaves the doubtful one plain', not any('arguments she makes' in m for m in marks), marks)
-    chips = await a.ev("(()=>{const c=[...document.querySelectorAll('#voiceChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Long runways');return c?[...c.querySelectorAll('.hit')].map(h=>h.textContent):[]})()")
+    chips = await a.ev("(()=>{const c=[...document.querySelectorAll('#readChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Long runways');return c?[...c.querySelectorAll('.hit')].map(h=>h.textContent):[]})()")
     check('RW3 Long runways lists the sure one', any(x.startswith('The committee') for x in chips), chips)
     check('RW3 Long runways leaves out the doubtful one', not any(x.startswith('The arguments') for x in chips), chips)
 
