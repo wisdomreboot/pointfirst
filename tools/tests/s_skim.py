@@ -50,7 +50,8 @@ async def suite(c):
     check('S3 a long sentence keeps its first words', any(k.startswith('A sentence starts to mean') for k in kept), kept[:10])
     check('S3 and its last words, not its middle', any(k.endswith('meets its verb.') for k in kept) and not any('something when its subject' in k for k in kept), kept[:10])
     links = await a.ev("[...document.querySelectorAll('#editor .sk-link')].map(x=>x.textContent)")
-    check('S3 a word an ending shares with the next opening is underlined in both', links.count('problem.') + links.count('problem') >= 2, links)
+    check('S3 a word an ending shares with the next opening is underlined in both', 'jump.' in links and 'jump' in links, links)
+    check('S3 a sentence ending in a contraction stands alone', any(k == "It isn't." for k in kept), kept[:10])
     cap = await a.ev("$('#lensbar').textContent")
     check('S3 the caption counts sentences', cap.split('.')[0].endswith('sentences') and 'underlined in both' in cap, cap[:120])
 

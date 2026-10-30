@@ -66,8 +66,10 @@ async def suite(c):
     check('T7 bullets are not words', await a.ev("countWords('- one\\n- two\\n---')") == 2, await a.ev("countWords('- one\\n- two\\n---')"))
     n = await a.ev("countWords('| a cat | the dog |\\n|---|---|\\n| one | two |')")
     check('T7 table words count, its marks do not', n == 6, n)
-    k = await a.ev("splitSentences(maskProse('| a cat sat | the dog ran |\\n|---|---|\\n| one fish | two fish |\\nNext line here.')).length")
-    check('T7 each row reads as its own sentence in Revise', k == 3, k)
+    # Revise reads sentences the skim test's way: a table row is not a sentence, and none runs on
+    # into the line after the table.
+    k = await a.ev("analyze('| a cat sat | the dog ran |\\n|---|---|\\n| one fish | two fish |\\nNext line here.',mode).sents.map(r=>r.open.join(' '))")
+    check('T7 table rows are not sentences, and the line after a table stands alone', k == ['Next line here.'], k)
 
     # T8 Publish turns tables into HTML tables
     await a.ev("openPublish('html')"); await a.wait(400)
