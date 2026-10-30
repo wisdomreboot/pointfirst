@@ -31,7 +31,8 @@ Everything runs in your browser. There is no server, no account and no cookies. 
 - **Publish** as Markdown or HTML.
 - **Notes:** write `%% a note to yourself %%` anywhere, as in Obsidian. Notes stay in the file, sit shaded on the page, and are left out of the word count, the checks, the ownership meter and Publish.
 - **Tables:** a table shows as a table and opens to its Markdown when the cursor goes in. Tab moves between cells, Enter adds a row. The file keeps it exactly as typed.
-- **Smart punctuation:** `...` becomes `…` and quotes curl as you type, but never inside code or a link's address. Backspace straight after puts back what you typed. Two hyphens can become an em dash if you turn that on.
+- **Smart punctuation:** `...` becomes `…`, quotes curl and `--` becomes an em dash as you type, but never inside code or a link's address. Backspace straight after puts back what you typed. Revise still marks every em dash, under Tells.
+- **Moving paragraphs:** Alt Up and Alt Down move the paragraph you are in, or a list item with its sub-items. Pasted words stay pasted when they move.
 
 ## Keyboard
 
@@ -39,7 +40,7 @@ Ctrl on Windows and Linux, Cmd on a Mac. Where Obsidian, Ghost, Word and Google 
 
 | Keys | Does |
 |---|---|
-| Ctrl P | Command palette: every command and every essay |
+| Ctrl P | Command palette: every command and every essay. Type insert, format, stage, go to, theme, lens or marks to see each family |
 | Ctrl O | Open an essay by name |
 | Ctrl S | Save (Point First also saves as you write) |
 | Ctrl ? | Every shortcut, in one list |
@@ -47,6 +48,7 @@ Ctrl on Windows and Linux, Cmd on a Mac. Where Obsidian, Ghost, Word and Google 
 | Ctrl K | Link: selected words become `[words]()`, ready for the address |
 | Paste an address over selected words | Link them |
 | Ctrl / | Add a note, turn the selection into one, or remove a note's markers |
+| Alt Up, Alt Down | Move the paragraph you are in, or every paragraph the selection touches; in a list, the item and its sub-items |
 | Ctrl F | Find (in the Library, find an essay) |
 | Ctrl H, or Cmd Option F on a Mac | Replace |
 | Enter, Ctrl G or F3 | Next match; add Shift for the previous one |
@@ -57,7 +59,7 @@ Ctrl on Windows and Linux, Cmd on a Mac. Where Obsidian, Ghost, Word and Google 
 | Enter in the title | Go to the page; Up on the page's first line goes back |
 | Alt W | Look up the word at the cursor |
 | Alt Shift W | Open the Words tab |
-| `*` `_` `~` `` ` `` or `[` with text selected | Wrap the selection; `[` makes it a link |
+| `*` `_` `~` `^` `` ` `` or `[` with text selected | Wrap the selection: `~` subscript, twice strikethrough; `^` superscript; `[` a link |
 | Enter in a list | Continue the list; on an empty item, end it |
 | Tab, Shift Tab in a list | Indent, outdent |
 | Esc | Close whatever is open |

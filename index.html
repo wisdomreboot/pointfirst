@@ -6,7 +6,7 @@
      scripts hashed below, and Point First may connect only to its own address and its
      page-view counter. After editing an inline script, run  python3 tools/csp.py index.html
      (or the app will stop running). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nkOR9cGMsk3kM7bvMdix8che5BxvCtJ0soZkFoBjclo=' 'sha256-aijZWJUa+M/T+YvI5Ex0SN++ta+X7X6WbHxYW9SpTI8=' 'sha256-2H0pU7xu3Mu/oTaDn7qZOTLLvdD5LgD1ZGcndMkfz0Y='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pointfirst.goatcounter.com; connect-src 'self' https://pointfirst.goatcounter.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nkOR9cGMsk3kM7bvMdix8che5BxvCtJ0soZkFoBjclo=' 'sha256-aijZWJUa+M/T+YvI5Ex0SN++ta+X7X6WbHxYW9SpTI8=' 'sha256-kiUl7WKW7UqTUP4Dv0w52zFlkb6qGUvKGMrjnHvP3s0='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pointfirst.goatcounter.com; connect-src 'self' https://pointfirst.goatcounter.com; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Point First: a writing desk that never writes for you</title>
 <meta name="description" content="Point First is a free writing desk that coaches while you write and never writes for you. Your essays stay as plain Markdown files in your own folder.">
 <meta name="author" content="Jonathan du Toit">
@@ -458,6 +458,9 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 #editor .cm-em{font-style:italic}
 #editor .cm-strike{text-decoration:line-through;text-decoration-color:var(--faint);color:var(--ink-soft)}
 #editor .cm-hl{background:var(--note);border-radius:2px}
+/* Superscript and subscript sit above and below the line without stretching it. */
+#editor .cm-sup,#editor .cm-sub{font-size:.72em;position:relative}
+#editor .cm-sup{top:-.5em}#editor .cm-sub{top:.28em}
 #editor .cm-code{font-family:var(--mono);font-size:.82em;background:var(--panel);border-radius:4px;padding:.1em .2em}
 #editor .cm-link{color:var(--accent-ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,var(--accent-ink) 45%,transparent)}
 #editor .cm-url{font-family:var(--mono);font-size:.72em;color:var(--faint)}
@@ -4120,6 +4123,9 @@ async function saveStarter(kind){const st=STARTERS[kind];if(!st)return;
   catch(e){toast('Could not save '+st[0]+': '+(e&&e.message||e),4200)}}
 function starterButtons(root){root.querySelectorAll('[data-starter]').forEach(b=>b.onclick=()=>saveStarter(b.dataset.starter))}
 
+/* Superscript and subscript: ^th^ and ~2~, no spaces inside. A footnote's [^1] and a wiki link's
+   [[note#^block]] are not superscript; strikethrough's ~~ is not subscript. */
+const SUP_RE=/\^([^\s^\[\]]+)\^/g,SUB_RE=/(?<![~\\])~([^\s~]+)~(?!~)/g;
 /* ===== the page: CodeMirror under a textarea's names =====
    The draft is plain Markdown in a CodeMirror editor. The rest of the script talks to
    `editor` as it once talked to a textarea: value, selectionStart and selectionEnd,
@@ -4157,8 +4163,10 @@ const ED=(()=>{
     const tree=ensureSyntaxTree(st,view.viewport.to,50)||syntaxTree(st);
     for(const {from,to} of view.visibleRanges){
       for(let p=from;p<=to;){const ln=doc.lineAt(p);if(!ln.text.trim())out.push(lineDeco('cm-blank').range(ln.from));p=ln.to+1}
+      const raw=[];/* code and web addresses, where ^ and ~ are only characters */
       tree.iterate({from,to,enter:n=>{
         const name=n.name;let m;
+        if(name==='InlineCode'||name==='FencedCode'||name==='CodeBlock'||name==='URL'||name==='HTMLTag'||name==='HTMLBlock')raw.push([n.from,n.to]);
         if((m=name.match(/^ATXHeading(\d)$/))){
           const ln=doc.lineAt(n.from);out.push(lineDeco('cm-h cm-h'+m[1]).range(ln.from));
           const hm=n.node.getChild('HeaderMark');
@@ -4202,6 +4210,11 @@ const ED=(()=>{
       while((mm=nre.exec(text))){const a=from+mm.index,b=a+mm[0].length;out.push(mark('pf-note').range(a,b));out.push(MK.range(a,a+2));out.push(MK.range(b-2,b))}
       const hre=/==(?=\S)([^=\n]*?\S)==/g;
       while((mm=hre.exec(text))){const a=from+mm.index,b=a+mm[0].length;out.push(mark('cm-hl').range(a,b));const on=touches(a,b);showOr(a,a+2,on);showOr(b-2,b,on)}
+      /* ^superscript^ and ~subscript~, as Ghost and Pandoc write them: no spaces inside. A footnote's
+         [^1], strikethrough's ~~ and anything in code or an address are left alone. */
+      for(const [re,cls] of [[SUP_RE,'cm-sup'],[SUB_RE,'cm-sub']]){re.lastIndex=0;
+        while((mm=re.exec(text))){const a=from+mm.index,b=a+mm[0].length;if(raw.some(r=>r[0]<b&&r[1]>a))continue;
+          out.push(mark(cls).range(a,b));const on=touches(a,b);showOr(a,a+1,on);showOr(b-1,b,on)}}
     }
     return Decoration.set(out,true)}
   const preview=ViewPlugin.fromClass(class{
@@ -4269,7 +4282,8 @@ const ED=(()=>{
   /* --- events: what the script listens for --- */
   const L={input:[],select:[]};
   function exts(){return[md,preview,tables,OV.field,FD.field,FL.field,history(),drawSelection(),EditorView.lineWrapping,forward,
-    keymap.of([{key:'ArrowDown',run:v=>arrowIntoTable(v,true)},{key:'ArrowUp',run:v=>arrowIntoTable(v,false)},...standardKeymap,...historyKeymap]),
+    keymap.of([{key:'ArrowDown',run:v=>arrowIntoTable(v,true)},{key:'ArrowUp',run:v=>arrowIntoTable(v,false)},
+      {key:'Alt-ArrowUp',run:()=>moveBlock(-1)},{key:'Alt-ArrowDown',run:()=>moveBlock(1)},...standardKeymap,...historyKeymap]),
     placeholder('Start writing. In Revise, the coach reads along and never touches a word.'),
     EditorView.contentAttributes.of({spellcheck:'true',autocorrect:'on',autocapitalize:'sentences','aria-label':'Essay body'}),
     EditorState.allowMultipleSelections.of(false),
@@ -4505,7 +4519,7 @@ const FS_OK=typeof window.showDirectoryPicker==='function';
 /* The hidden back room inside the writer's folder.
    The dot keeps it out of the file list and out of Obsidian's view. */
 const SIDE='.pointfirst';
-const PF_VERSION='1.9.0';
+const PF_VERSION='1.10.0';
 /* Tiny key-value store in IndexedDB.
    Holds what localStorage cannot: the folder handle, and browser copies of word lists.
    A failed read comes back empty, never an error. */
@@ -5670,20 +5684,21 @@ function toggleNote(){if(room==='library'||xray)return;const v=editor.value,s=ed
 /* The "N notes" chip beside the word count. Hidden when there are none. */
 function updNoteStat(){const el=$('#notestat');if(!el)return;const n=noteRanges(editor.value).length;el.hidden=!n;el.textContent=n+(n===1?' note':' notes')}
 /* Wrap the selection in a marker, selection kept inside so a second press doubles it:
-   one star is italic, two is bold; one tilde then two is strikethrough. */
+   one star is italic, two is bold; one tilde is subscript, two strikethrough; a caret is superscript. */
 function wrapSel(ch){let s=editor.selectionStart,e=editor.selectionEnd;if(s===e)return false;
   const raw=editor.value.slice(s,e);s+=raw.length-raw.trimStart().length;e-=raw.length-raw.trimEnd().length;
   if(s>=e)return false;/* wrap the word, leave any selected spaces outside the markers */
   const sel=editor.value.slice(s,e);mdEdit(s,e,ch+sel+ch,s+ch.length,s+ch.length+sel.length);return true}
-/* Ctrl or Cmd + B and I: bold or italic on the selection, or off if it already is.
-   With nothing selected, opens an empty pair with the caret inside, ready to type. */
+/* Ctrl or Cmd + B and I, and Format in the palette: bold, italic, strikethrough, highlight,
+   superscript or subscript on the selection, or off if it already is. With nothing selected,
+   opens an empty pair with the caret inside, ready to type. */
 function toggleWrap(ch){const v=editor.value;let s=editor.selectionStart,e=editor.selectionEnd;
   if(s===e){mdEdit(s,s,ch+ch,s+ch.length);return}
   const raw=v.slice(s,e);s+=raw.length-raw.trimStart().length;e-=raw.length-raw.trimEnd().length;if(s>=e)return;
   const n=ch.length,inner=v.slice(s,e);
-  const wrapped=v.slice(s-n,s)===ch&&v.slice(e,e+n)===ch&&!(n===1&&v.slice(s-2,s)==='**'&&v.slice(e,e+2)==='**');
+  const dbl=ch+ch,wrapped=v.slice(s-n,s)===ch&&v.slice(e,e+n)===ch&&!(n===1&&v.slice(s-2,s)===dbl&&v.slice(e,e+2)===dbl);
   if(wrapped){mdEdit(s-n,e+n,inner,s-n,e-n);return}
-  if(inner.length>2*n&&inner.startsWith(ch)&&inner.endsWith(ch)&&!(n===1&&inner.startsWith('**'))){const t=inner.slice(n,-n);mdEdit(s,e,t,s,s+t.length);return}
+  if(inner.length>2*n&&inner.startsWith(ch)&&inner.endsWith(ch)&&!(n===1&&inner.startsWith(dbl))){const t=inner.slice(n,-n);mdEdit(s,e,t,s,s+t.length);return}
   mdEdit(s,e,ch+inner+ch,s+n,e+n)}
 /* A web address on its own: https://, http://, mailto: or www. */
 const URL_ONLY=/^(?:https?:\/\/|mailto:|www\.)\S+$/i;
@@ -5792,15 +5807,133 @@ function mdTab(out){if(tableTab(out))return true;const s=editor.selectionStart,a
   if(out){const m=editor.value.slice(a).match(/^( {1,2}|\t)/);if(!m)return true;const n=m[1].length;mdEdit(a,a+n,'',Math.max(a,s-n));}
   else mdEdit(a,a,'  ',s+2);
   return true}
+/* ===== inserting blocks =====
+   Several small edits as one step to undo. Every character left alone keeps its typed or pasted
+   mark; the new ones are markup, counted as typed. Forward only still stops a delete. */
+function editMany(edits,sel){syncFlags();const v=editor.value,fl=flags.length===v.length?flags:new Array(v.length).fill(0);
+  edits=edits.slice().sort((x,y)=>x.from-y.from);let nv='',nf=[],p=0;
+  for(const d of edits){nv+=v.slice(p,d.from);nf=nf.concat(fl.slice(p,d.from));nv+=d.insert;for(let i=0;i<d.insert.length;i++)nf.push(0);p=d.to}
+  nv+=v.slice(p);nf=nf.concat(fl.slice(p));
+  const oF=flags,oP=prevValue;flags=nf;prevValue=nv;
+  ED.view.dispatch({changes:edits.map(d=>({from:d.from,to:d.to,insert:d.insert})),selection:sel,userEvent:'format',scrollIntoView:true});
+  if(editor.value!==nv){flags=oF;prevValue=oP;return false}return true}
+/* Where a position lands after a set of edits. */
+function mapThrough(edits,pos){let d=0;for(const x of edits){if(x.to<pos||(x.from===pos&&x.to===pos))d+=x.insert.length-(x.to-x.from);else if(x.from<pos)return x.from+d}return pos+d}
+/* The lines a selection covers, or the whole paragraph the cursor is in. */
+function blockLines(){const v=editor.value,ss=editor.selectionStart,se=editor.selectionEnd,L=mvLines(v),id=mvBlocks(L);
+  const lineOf=pos=>{let lo=0,hi=L.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(L[m].s<=pos)lo=m;else hi=m-1}return lo};
+  let a=lineOf(ss),b=lineOf(se);if(se>ss&&b>a&&se===L[b].s)b--;
+  if(ss===se&&id[a]>=0){while(a>0&&id[a-1]===id[a])a--;while(b+1<L.length&&id[b+1]===id[b])b++}
+  return{L,id,a,b,ss,se}}
+/* Insert blockquote: the paragraph the cursor is in, or every line the selection touches, becomes a
+   quote, and a quote stops being one. On an empty line, a fresh quote to type into. */
+function insertQuote(){if(room==='library'||xray)return;editor.focus();const B=blockLines(),{L,a,b}=B;
+  if(a===b&&!L[a].t.trim()){mdEdit(L[a].s,L[a].e,'> ',L[a].s+2);return}
+  const lines=L.slice(a,b+1),quoted=lines.every(l=>!l.t.trim()||/^\s*>/.test(l.t)),edits=[];
+  for(const l of lines){if(quoted){const m=l.t.match(/^(\s*)> ?/);if(m)edits.push({from:l.s+m[1].length,to:l.s+m[0].length,insert:''})}
+    else edits.push({from:l.s,to:l.s,insert:l.t.trim()?'> ':'>'})}
+  editMany(edits,{anchor:mapThrough(edits,B.ss),head:mapThrough(edits,B.se)})}
+/* A new block after the paragraph the cursor is in, a blank line either side, or right here on an
+   empty line. The cursor lands at caret within it. */
+function insertBlock(text,caret){if(room==='library'||xray)return;editor.focus();const B=blockLines(),{L,b}=B;
+  if(B.ss===B.se&&!L[b].t.trim()){const pre=b>0&&L[b-1].t.trim()?'\n':'',post=b+1<L.length&&L[b+1].t.trim()?'\n':'';
+    mdEdit(L[b].s,L[b].e,pre+text+post,L[b].s+pre.length+caret);return}
+  const at=L[b].e;mdEdit(at,at,'\n\n'+text,at+2+caret)}
+/* Insert code block: the selected lines inside a fence, or an empty fence to type into. */
+function insertCode(){if(room==='library'||xray)return;editor.focus();const B=blockLines(),{L,a,b}=B;
+  if(B.ss===B.se){insertBlock('```\n\n```',4);return}
+  const pre=a>0&&L[a-1].t.trim()?'\n':'',post=b+1<L.length&&L[b+1].t.trim()?'\n':'';
+  const edits=[{from:L[a].s,to:L[a].s,insert:pre+'```\n'},{from:L[b].e,to:L[b].e,insert:'\n```'+post}];
+  editMany(edits,{anchor:mapThrough(edits,L[a].s),head:mapThrough(edits,L[b].e)})}
+/* Insert section break: * * * on a line of its own, safe in Obsidian, Ghost and GitHub. */
+function insertBreak(){insertBlock('* * *',5)}
+/* ===== moving paragraphs =====
+   Alt+Up and Alt+Down move the paragraph the cursor is in past the one before or after it. The
+   blank lines between them stay where they were, so the spacing never changes. A selection moves
+   every paragraph it touches, together. A heading is a paragraph of its own; a code block or a
+   note keeps the blank lines inside it. In a list, the item moves past its neighbour at the same
+   depth, its own sub-items with it, and a numbered list keeps counting up. At the top or the end
+   nothing moves. Typed and pasted marks travel with the words, and Forward only blocks a move,
+   as it blocks any delete. */
+const MV_ITEM=/^([ \t]*)([-*+]|\d+[.)])(?=[ \t]|$)/;
+/* Each line's place in the draft: start, end (before its line break) and text. */
+function mvLines(v){const L=[];let p=0;for(const t of v.split('\n')){L.push({s:p,e:p+t.length,t});p+=t.length+1}return L}
+/* Which paragraph each line belongs to, numbered from 0, or -1 for a blank line. A heading stands
+   alone, and so does a code block; a code block or a note runs on across blank lines inside it. */
+function mvBlocks(L){const id=new Array(L.length).fill(-1);let b=-1,fence='',note=false,fresh=true;
+  for(let i=0;i<L.length;i++){const t=L[i].t;
+    if(fence){id[i]=b;if(t.trim().startsWith(fence))fence='',fresh=true;continue}
+    if(note){id[i]=b;if(((t.match(/%%/g)||[]).length%2)===1)note=false,fresh=false;continue}
+    if(!t.trim()){fresh=true;continue}
+    const f=t.match(/^\s{0,3}(```|~~~)/),h=/^\s{0,3}#{1,6}(\s|$)/.test(t);
+    if(fresh||f||h)b++;id[i]=b;fresh=!!h;
+    if(f){fence=f[1];fresh=false}else if(((t.match(/%%/g)||[]).length%2)===1)note=true}
+  return id}
+/* A list item's depth: its indent, a tab counting as four spaces. */
+const mvDepth=t=>{const m=t.match(MV_ITEM);return m?m[1].replace(/\t/g,'    ').length:-1};
+/* The list item that line i sits in: its first line and its last, sub-items and run-on lines
+   included. Null when line i is not in a list item. */
+function mvItem(L,id,i){let j=i;while(j>=0&&id[j]===id[i]&&mvDepth(L[j].t)<0)j--;
+  if(j<0||id[j]!==id[i])return null;const d=mvDepth(L[j].t);let e=j;
+  while(e+1<L.length&&id[e+1]===id[j]){const dd=mvDepth(L[e+1].t);if(dd>=0&&dd<=d)break;e++}
+  return{a:j,b:e,d}}
+/* Works out a move without making it: the span of the draft that changes, the pieces of the old
+   text that fill it in their new order (a piece may carry new text, a list number), and where the
+   selection goes. Null when nothing can move. */
+function planMove(v,ss,se,dir){const L=mvLines(v),id=mvBlocks(L);
+  const lineOf=pos=>{let lo=0,hi=L.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(L[m].s<=pos)lo=m;else hi=m-1}return lo};
+  let a=lineOf(ss),b=lineOf(se);if(se>ss&&b>a&&se===L[b].s)b--;/* a selection ending at a line's start leaves that line */
+  const piece=(x,y,unit)=>({s:x,e:y,unit});
+  /* In a list: the items from the one at a to the one holding b, at a's depth. */
+  const ia=mvItem(L,id,a);
+  if(ia&&id[b]===id[a]){let kb=-1;for(let k=b;k>=ia.a;k--){const dk=mvDepth(L[k].t);if(dk>=0&&dk<ia.d)break;if(dk===ia.d){kb=k;break}}
+    const ib=kb>=0?mvItem(L,id,kb):null;
+    if(ib&&ib.b>=b){const u={a:ia.a,b:ib.b,d:ia.d};let o=null;
+      if(dir<0){for(let k=u.a-1;k>=0&&id[k]===id[u.a];k--){const dk=mvDepth(L[k].t);if(dk>=0&&dk<u.d)break;if(dk===u.d){o=mvItem(L,id,k);break}}}
+      else if(u.b+1<L.length&&id[u.b+1]===id[u.a]&&mvDepth(L[u.b+1].t)===u.d)o=mvItem(L,id,u.b+1);
+      if(!o)return null;
+      const up=dir<0,first=up?o:u,second=up?u:o;/* in the old text, first sits above second */
+      const P=[piece(L[second.a].s,L[second.b].e,up),piece(L[second.a].s-1,L[second.a].s,false),piece(L[first.a].s,L[first.b].e,!up)];
+      /* a numbered list keeps counting up: the two heads trade numbers */
+      const nf=L[first.a].t.match(MV_ITEM),ns=L[second.a].t.match(MV_ITEM);
+      if(nf&&ns&&/\d/.test(nf[2])&&/\d/.test(ns[2])){const nA=nf[2].match(/\d+/)[0],nB=ns[2].match(/\d+/)[0];
+        const cut=(pc,line,m,num)=>{const at=line.s+m[1].length,len=m[2].match(/\d+/)[0].length;return[piece(pc.s,at,pc.unit),{s:at,e:at+len,unit:pc.unit,text:num},piece(at+len,pc.e,pc.unit)]};
+        P.splice(0,1,...cut(P[0],L[second.a],ns,nA));P.splice(P.length-1,1,...cut(P[P.length-1],L[first.a],nf,nB))}
+      return mvFinish(v,L[first.a].s,L[second.b].e,P,ss,se)}}
+  /* Paragraphs: every one the selection touches, past the next one over. */
+  while(a<=b&&id[a]<0)a++;while(b>=a&&id[b]<0)b--;if(a>b)return null;
+  let ua=a,ub=b;while(ua>0&&id[ua-1]===id[a])ua--;while(ub+1<L.length&&id[ub+1]===id[b])ub++;
+  if(dir<0){let j=ua-1;while(j>=0&&id[j]<0)j--;if(j<0)return null;let k=j;while(k>0&&id[k-1]===id[j])k--;
+    return mvFinish(v,L[k].s,L[ub].e,[piece(L[ua].s,L[ub].e,true),piece(L[j].e,L[ua].s,false),piece(L[k].s,L[j].e,false)],ss,se)}
+  let j=ub+1;while(j<L.length&&id[j]<0)j++;if(j>=L.length)return null;let k=j;while(k+1<L.length&&id[k+1]===id[j])k++;
+  return mvFinish(v,L[ua].s,L[k].e,[piece(L[j].s,L[k].e,false),piece(L[ub].e,L[j].s,false),piece(L[ua].s,L[ub].e,true)],ss,se)}
+/* Lays the pieces end to end and carries the selection along with the piece it was in. */
+function mvFinish(v,from,to,P,ss,se){let text='',at=from;const map=[];
+  for(const p of P){const t=p.text!=null?p.text:v.slice(p.s,p.e);map.push({p,at,len:t.length});text+=t;at+=t.length}
+  const carry=pos=>{for(const m of map)if(m.p.unit&&pos>=m.p.s&&pos<=m.p.e)return m.at+Math.min(pos-m.p.s,m.len);
+    const u=map.filter(m=>m.p.unit);return pos<u[0].p.s?u[0].at:u[u.length-1].at+u[u.length-1].len};
+  return{from,to,text,P,anchor:carry(ss),head:carry(se)}}
+/* Makes the move: one step to undo, the writer's own edit, marks carried with the words. */
+function moveBlock(dir){if(room==='library'||xray)return false;
+  if(room==='write'&&fx.fwd){fwdNudge('Forward only: paragraphs stay put while drafting. Move them in Revise.');return true}
+  syncFlags();const v=editor.value,m=planMove(v,editor.selectionStart,editor.selectionEnd,dir);if(!m)return true;
+  const nv=v.slice(0,m.from)+m.text+v.slice(m.to);
+  const fl=flags.length===v.length?flags:new Array(v.length).fill(0);
+  const mid=[];for(const p of m.P){if(p.text!=null)for(let i=0;i<p.text.length;i++)mid.push(fl[p.s]||0);else for(let i=p.s;i<p.e;i++)mid.push(fl[i])}
+  const oldFlags=flags,oldPrev=prevValue;flags=fl.slice(0,m.from).concat(mid,fl.slice(m.to));prevValue=nv;
+  ED.view.dispatch({changes:{from:m.from,to:m.to,insert:m.text},selection:{anchor:m.anchor,head:m.head},userEvent:'move.line',scrollIntoView:true});
+  if(editor.value!==nv){flags=oldFlags;prevValue=oldPrev}
+  return true}
 /* ===== smart punctuation =====
-   As you type: three full stops become an ellipsis, straight quotes curl the right way,
-   and, only if you turn it on, two hyphens become an em dash (Point First's own lexicon
-   questions em dashes, so that one starts off). Never inside code, a link's address or an
-   HTML tag. Backspace straight after a change puts back what you typed. */
-const SMART_DEF={on:true,dash:false};
-function smartPrefs(){const v=store.get('ww:smart',SMART_DEF);return{on:v&&v.on!==false,dash:!!(v&&v.dash)}}
+   As you type: three full stops become an ellipsis, straight quotes curl the right way, and two
+   hyphens become an em dash. Whether to use the dash is the writer's call; Revise still marks
+   every em dash under Tells. Never inside code, a link's address or an HTML tag. A line that
+   starts with hyphens stays a rule. Backspace straight after a change puts back what you typed.
+   One switch turns all of it off. */
+const SMART_DEF={on:true};
+function smartPrefs(){const v=store.get('ww:smart',SMART_DEF);return{on:v&&v.on!==false}}
 function setSmart(k,val){const v=Object.assign({},smartPrefs());v[k]=val;store.set('ww:smart',v);if(typeof scheduleSettings==='function')scheduleSettings();
-  toast(k==='on'?(val?'Smart punctuation on: ... becomes …, and quotes curl.':'Smart punctuation off. What you type stays as typed.'):(val?'Two hyphens now become an em dash.':'Two hyphens stay as two hyphens.'),3000)}
+  toast(val?'Smart punctuation on: ... becomes …, quotes curl, and -- becomes —.':'Smart punctuation off. What you type stays as typed.',3000)}
 let lastSmart=null;
 /* Whether the cursor sits where punctuation must stay literal. */
 function smartBlocked(v,s){const ls=v.lastIndexOf('\n',s-1)+1,line=v.slice(ls,s);
@@ -5816,7 +5949,7 @@ function smartKey(e){if(e.isComposing)return false;const k=e.key;if(k!=='"'&&k!=
   if(k==='.'){if(v.slice(s-2,s)!=='..'||v[s-3]==='.')return false;from=s-2;ins='…';orig='...'}
   else if(k==='"')ins=opens?'“':'”';
   else if(k==="'")ins=(/[\p{L}\p{N}]/u.test(prev))?'’':(opens?'‘':'’');
-  else if(k==='-'){if(!P.dash||prev!=='-'||v[s-2]==='-')return false;const ls=v.lastIndexOf('\n',s-1)+1;if(!v.slice(ls,s-1).trim())return false;/* --- at a line start stays a rule */
+  else if(k==='-'){if(prev!=='-'||v[s-2]==='-')return false;const ls=v.lastIndexOf('\n',s-1)+1;if(!v.slice(ls,s-1).trim())return false;/* --- at a line start stays a rule */
     from=s-1;ins='—';orig='--'}
   e.preventDefault();mdEdit(from,s,ins,from+ins.length);lastSmart={at:from+ins.length,ins,orig};return true}
 /* Backspace right after a change restores the literal characters. */
@@ -5827,7 +5960,7 @@ editor.addEventListener('mousedown',()=>{lastSmart=null});
 editor.addEventListener('keydown',e=>{if(Q.open||e.defaultPrevented||e.metaKey||e.ctrlKey||e.altKey||e.isComposing||e.keyCode===229)return;
   if(smartUndo(e))return;if(e.key!=='Shift')lastSmart=null;
   if(smartKey(e))return;
-  const WRAP='*_`~';
+  const WRAP='*_`~^';
   if(WRAP.includes(e.key)&&editor.selectionStart!==editor.selectionEnd){e.preventDefault();wrapSel(e.key);return}
   if(e.key==='['&&editor.selectionStart!==editor.selectionEnd){e.preventDefault();makeLink();return}
   if(e.key==='Escape'){escAt=Date.now();return}
@@ -5947,23 +6080,27 @@ function shortcutGroups(){const M=MOD,A=ALT,S='Shift';
   const word=isMac?A:M;
   return[
   {title:'Format',rows:[
+    {d:'Insert or format anything, by name',k:[[M,'P']],n:'Type insert or format and every one is listed: link, note, table, blockquote, code block, section break; bold, italic, strikethrough, highlight, superscript, subscript.'},
     {id:'bold',d:'Bold',k:[[M,'B']],n:'With nothing selected, opens ** ** with the cursor inside.'},
     {id:'italic',d:'Italic',k:[[M,'I']],n:'Press again to take it off.'},
     {id:'link',d:'Link',k:[[M,'K']],n:'Selected words become [words](), the cursor ready for the address. A selected address goes the other way.'},
     {d:'Link by pasting',k:[[M,'V']],n:'Paste an address over selected words and they become a link.'},
     {id:'note',d:'Note to yourself',k:[[M,'/']],n:'Makes %% a note %%. Notes stay in the file and never publish.'},
-    {id:'wrap',d:'Wrap a selection',typed:true,k:[['*'],['_'],['`'],['~'],['[']],n:'Select words, then type the mark. * twice makes bold, ~ twice strikethrough, [ a link.'}]},
+    {id:'wrap',d:'Wrap a selection',typed:true,k:[['*'],['_'],['`'],['~'],['^'],['[']],n:'Select words, then type the mark. * twice makes bold; ~ subscript, twice strikethrough; ^ superscript; [ a link.'}]},
   {title:'Markdown as you type',rows:[
     {d:'Heading',typed:true,k:[['# '],['## '],['### ']],n:'At the start of a line. More hashes, smaller heading.'},
     {d:'Bold, italic',typed:true,k:[['**bold**'],['*italic*']]},
+    {d:'Strikethrough',typed:true,k:[['~~words~~']]},
+    {d:'Superscript, subscript',typed:true,k:[['29^th^'],['H~2~O']],n:'No spaces inside. Ghost shows them; Obsidian and GitHub show the marks.'},
     {d:'List',typed:true,k:[['- '],['1. ']],n:'Enter carries the list on. Enter on an empty item ends it.'},
     {d:'Task',typed:true,k:[['- [ ] ']]},
     {d:'Quote',typed:true,k:[['> ']]},
     {d:'Link',typed:true,k:[['[words](https://…)']],n:'The address hides when the cursor leaves the link.'},
     {d:'Code',typed:true,k:[['`code`']]},
+    {d:'Code block',typed:true,k:[['```']],n:'On a line of its own, before the code and after it.'},
     {d:'Highlight',typed:true,k:[['==words==']]},
     {d:'Table',typed:true,k:[['| a | b |'],['|---|---|']],n:'A heading row, then a line of dashes. Or choose Insert table in the palette.'},
-    {d:'Scene break',typed:true,k:[['* * *']],n:'On a line of its own, with a blank line above. Safe in Obsidian, Ghost and GitHub.'},
+    {d:'Scene break',typed:true,k:[['* * *'],['---']],n:'On a line of its own, with a blank line above. Straight under text, --- turns that text into a heading instead.'},
     {d:'Note',typed:true,k:[['%% note %%']]}]},
   {title:'Lists',rows:[
     {d:'Next item',k:[['Enter']],n:'Inside a list, the next bullet or number appears.'},
@@ -5979,8 +6116,10 @@ function shortcutGroups(){const M=MOD,A=ALT,S='Shift';
     {d:'Ellipsis',typed:true,k:[['...']],n:'Becomes …'},
     {d:'Curly quotes',typed:true,k:[['"'],["'"]],n:'Curl the right way, and ’ in words like it’s.'},
     {d:'Put back what you typed',k:[['Backspace']],n:'Straight after one of these changes.'},
-    {d:'Em dash',typed:true,k:[['--']],n:'Only if you turn it on in the palette. Off by default.'}]},
+    {d:'Em dash',typed:true,k:[['--']],n:'Becomes —. Revise still marks em dashes, under Tells.'}]},
   {title:'Edit',rows:[
+    {id:'moveup',d:'Move a paragraph up',k:[[A,'↑']],n:'A selection moves every paragraph it touches. In a list, the item moves with its sub-items.'},
+    {id:'movedown',d:'Move a paragraph down',k:[[A,'↓']]},
     {d:'Undo',k:[[M,'Z']]},
     {d:'Redo',k:redo},
     {d:'Select all',k:[[M,'A']]},
@@ -6403,19 +6542,25 @@ function paletteCommands(){const C=[];const add=(label,group,run,keys)=>C.push({
   
     /* Lens and coach commands need Revise. rv moves there quietly. */
     const rv=()=>{if(room!=='revise')setRoom('revise',true)};
-  add('Library','Go to',()=>setRoom('library'),keyHint('library'));add('Write','Go to',()=>setRoom('write'),keyHint('write'));add('Revise','Go to',()=>setRoom('revise'),keyHint('revise'));
+  add('Go to Library','Go to',()=>setRoom('library'),keyHint('library'));add('Go to Write','Go to',()=>setRoom('write'),keyHint('write'));add('Go to Revise','Go to',()=>setRoom('revise'),keyHint('revise'));
+  if(room!=='library')add('Go to a note','Go to',()=>openPal('notes'));
   add('Keyboard shortcuts','Point First',()=>openKeys(),keyHint('keys'));
   add('Open an essay','Essay',()=>openPal('open'),keyHint('open'));
-  add('Bold','Format',()=>{if(room==='library')return;editor.focus();toggleWrap('**')},keyHint('bold'));add('Italic','Format',()=>{if(room==='library')return;editor.focus();toggleWrap('*')},keyHint('italic'));
-  add('Link','Format',()=>{if(room==='library')return;editor.focus();makeLink()},keyHint('link'));
-  add('Insert table','Format',()=>insertTable());
-  add('New essay','Essay',()=>newEssay(),room==='library'?keyHint('new'):'');add('Save','Essay',()=>saveCommand(),keyHint('save'));add('Copy as Markdown','Essay',()=>$('#copyBtn').click());
+  add('New essay','Essay',()=>newEssay(),room==='library'?keyHint('new'):'');add('Save','Essay',()=>saveCommand(),keyHint('save'));
   add('History of this essay','Essay',()=>openHistory());
-  if(room!=='library'){add('Add a note','Notes',()=>toggleNote(),keyHint('note'));add('Go to a note','Notes',()=>openPal('notes'))}
+  
+    /* On the page, by one word. Insert: every block or mark the page can take.
+       Format: what wraps the words you select. Move: a paragraph up or down. */
+    if(room!=='library'){const ed=f=>()=>{if(xray)return;editor.focus();f()};
+    add('Insert link','Insert',ed(makeLink),keyHint('link'));add('Insert note','Insert',ed(toggleNote),keyHint('note'));
+    add('Insert table','Insert',()=>insertTable());add('Insert blockquote','Insert',()=>insertQuote());
+    add('Insert code block','Insert',()=>insertCode());add('Insert section break','Insert',()=>insertBreak());
+    [['Bold','**','bold'],['Italic','*','italic'],['Strikethrough','~~'],['Highlight','=='],['Superscript','^'],['Subscript','~']].forEach(([l,m,k])=>add('Format: '+l,'Format',ed(()=>toggleWrap(m)),k?keyHint(k):''));
+    add('Move paragraph up','Move',ed(()=>moveBlock(-1)),keyHint('moveup'));add('Move paragraph down','Move',ed(()=>moveBlock(1)),keyHint('movedown'))}
   
     /* Stage and target for the open essay. */
-    STAGES.forEach(([k,l])=>add('Move to '+l,'Stage',()=>setStage(curEntry(),k)));
-  add('Set word target','Stage',()=>palPrompt('Word target for this essay, for example 1800','target'));add('Archive this essay','Stage',()=>setStage(curEntry(),'archived'));
+    STAGES.forEach(([k,l])=>add('Stage: '+l,'Stage',()=>setStage(curEntry(),k)));
+  add('Stage: Archived','Stage',()=>setStage(curEntry(),'archived'));add('Set word target','Stage',()=>palPrompt('Word target for this essay, for example 1800','target'));
   
     /* Lenses: what the backdrop shows under the words. */
     Object.entries(LENSES).forEach(([k,l])=>add('Lens: '+l,'Lens',()=>{rv();setLens(k)}));
@@ -6427,8 +6572,8 @@ function paletteCommands(){const C=[];const add=(label,group,run,keys)=>C.push({
   
     /* Words and the coach panes. */
     add('Look up the word at the cursor','Words',()=>{if(room==='library')setRoom('write',true);editor.focus();openQuick()},keyHint('quick'));
-  add('Open Words','Words',()=>{rv();openWordsTab(true)},keyHint('words'));
-  [['Reader','tab-read'],['Voice','tab-voice'],['Words','tab-words']].forEach(([l,id])=>add('Coach: '+l,'Coach',()=>{rv();$('#'+id).click()}));
+  [['Reader','tab-read'],['Voice','tab-voice']].forEach(([l,id])=>add('Coach: '+l,'Coach',()=>{rv();$('#'+id).click()}));
+  add('Coach: Words','Coach',()=>{rv();openWordsTab(true)},keyHint('words'));
   add('Voice: personal','Coach',()=>setMode('personal'));add('Voice: impersonal','Coach',()=>setMode('impersonal'));
   
     /* View, publishing, and Write focus modes. */
@@ -6439,14 +6584,13 @@ function paletteCommands(){const C=[];const add=(label,group,run,keys)=>C.push({
   add('About Point First','Point First',()=>toast('Point First '+PF_VERSION+'. The folder holds your work; this file is just the desk.',4000));
   [['off','Dim: off'],['sentence','Dim: sentence'],['paragraph','Dim: paragraph']].forEach(([k,l])=>add(l,'Write',()=>{fx.dim=k;saveFx();if(room!=='write')setRoom('write')}));
   add(fx.type?'Typewriter: off':'Typewriter: on','Write',()=>{fx.type=!fx.type;saveFx()});
-  {const P=smartPrefs();add(P.on?'Smart punctuation: off':'Smart punctuation: on','Write',()=>setSmart('on',!P.on));
-   if(P.on)add(P.dash?'Two hyphens to em dash: off':'Two hyphens to em dash: on','Write',()=>setSmart('dash',!P.dash))}
+  {const P=smartPrefs();add(P.on?'Smart punctuation: off':'Smart punctuation: on','Write',()=>setSmart('on',!P.on))}
   add(fx.fwd?'Forward only: off':'Forward only: on','Write',()=>{fx.fwd=!fx.fwd;saveFx();if(fx.fwd&&room!=='write')setRoom('write')});
   
     /* Folder. */
     add(dir?'Change folder':'Connect folder','Folder',async()=>{if(await pickFolder())setRoom('library')});
   if(dirState==='prompt')add('Reconnect folder','Folder',async()=>{if(await reconnect())setRoom('library')});
-  add('Check folder resources','Folder',()=>loadResources(true));
+  add('Check folder for word lists','Folder',()=>loadResources(true));
   return C}
 /* Opens the palette: commands and essays, or essays only in open mode.
    Loads the Library in the background when needed, then refreshes the list. */
@@ -6459,8 +6603,9 @@ function closePal(){$('#pal').hidden=true;palMode='cmd'}
    Enter sets it. Empty clears it. */
 function palPrompt(label,kind){palMode='prompt';palKind=kind;$('#pal').hidden=false;const i=$('#palIn');i.value=kind==='target'?String(curTarget()||''):'';i.placeholder=label;
   $('#palList').innerHTML=`<p class="pal-msg">${esc(label)}. Enter sets it; an empty value clears it.</p>`;i.focus();i.select()}
-/* Fills the palette list. A query ranks essays and commands together;
-   essays win ties. Empty: recent commands, five essays, then the rest. Max 80. */
+/* Fills the palette list. A query ranks essays and commands together; only what matches is
+   listed, and essays win ties. Empty: recent commands, five essays, then the rest. Max 80.
+   A command whose name already starts with its group (Insert link) shows no group beside it. */
 function renderPal(){if(palMode==='prompt')return;const q=$('#palIn').value.trim();
   if(palMode==='notes'){const N=noteRanges(editor.value).map((n,k)=>({label:n.text||'(empty note)',group:'Note '+(k+1),run:()=>selectInDraft(n.s,n.e),note:true}));
     palItems=(q?N.map(c=>({c,s:fuzzy(q,c.label)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>x.c):N).slice(0,80);palIdx=0;
@@ -6469,11 +6614,11 @@ function renderPal(){if(palMode==='prompt')return;const q=$('#palIn').value.trim
     $('#palList').querySelectorAll('.pi').forEach(el=>{el.onmousedown=e=>{e.preventDefault();runPal(+el.dataset.i)}});return}
   const essays=essayCmds(),cmds=palMode==='open'?[]:paletteCommands(),pool=essays.concat(cmds);
   let list;
-  if(q){list=pool.map(c=>({c,s:fuzzy(q,c.label)+(c.essay?1:0)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>x.c)}
+  if(q){list=pool.map(c=>{const f=fuzzy(q,c.label);return{c,s:f>0?f+(c.essay?1:0):0}}).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>x.c)}
   else if(palMode==='open')list=essays;
   else{const rec=palRecent.map(l=>cmds.find(c=>c.label===l)).filter(Boolean);list=[...rec,...essays.slice(0,5),...cmds.filter(c=>!rec.includes(c))]}
   palItems=list.slice(0,80);palIdx=0;
-  $('#palList').innerHTML=palItems.length?palItems.map((c,i)=>`<div class="pi${i===palIdx?' on':''}" data-i="${i}" role="option" aria-selected="${i===palIdx}"><span class="pl">${esc(c.label)}</span><span class="pg">${esc(c.essay?(c.hint?c.hint+' essay':'Essay'):c.group)}</span>${c.keys?`<kbd>${esc(c.keys)}</kbd>`:''}</div>`).join('')
+  $('#palList').innerHTML=palItems.length?palItems.map((c,i)=>`<div class="pi${i===palIdx?' on':''}" data-i="${i}" role="option" aria-selected="${i===palIdx}"><span class="pl">${esc(c.label)}</span><span class="pg">${esc(c.essay?(c.hint?c.hint+' essay':'Essay'):c.label.toLowerCase().startsWith(c.group.toLowerCase())?'':c.group)}</span>${c.keys?`<kbd>${esc(c.keys)}</kbd>`:''}</div>`).join('')
     :`<p class="pal-msg">${palMode==='open'&&dirState!=='ready'?'Connect a folder to open essays by name.':'Nothing matches.'}</p>`;
   $('#palList').querySelectorAll('.pi').forEach(el=>{el.onmousedown=e=>{e.preventDefault();runPal(+el.dataset.i)}})}
 /* Moves the highlight, wrapping at the ends, and keeps it in view. */
@@ -6773,6 +6918,7 @@ function inl(t,st){const codes=[],tags=[];t=t.replace(/`([^`]+)`/g,(m,c)=>{codes
   t=t.replace(/\*\*\*([^*]+)\*\*\*/g,'<strong><em>$1</em></strong>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/(^|[^\w])__([^_]+)__(?!\w)/g,'$1<strong>$2</strong>');
   t=t.replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\*)/g,'$1<em>$2</em>').replace(/(^|[^_\w/])_([^_\s][^_]*?)_(?!\w)/g,'$1<em>$2</em>');
   t=t.replace(/~~([^~]+)~~/g,'<s>$1</s>');
+  t=t.replace(SUB_RE,'<sub>$1</sub>').replace(SUP_RE,'<sup>$1</sup>');
   return t.replace(/\u0001(\d+)\u0001/g,(m,k)=>tags[+k]).replace(/\u0000(\d+)\u0000/g,(m,k)=>'<code>'+esc(codes[+k])+'</code>')}
 /* Gathers what Publish shows: title, subtitle, HTML body, clean Markdown, notes.
    Subtitle comes from frontmatter: subtitle, excerpt or description. Footnotes go last. */
@@ -6781,7 +6927,8 @@ function buildPub(){const fmS=cur?cur.fm:newFm;const title=(doctitle.value||'').
   const prep=prepForWeb(editor.value);const r=md2html(prep.md);let html=r.body;
   if(r.st.fnOrder.length){html+='\n<hr>\n<ol class="footnotes">'+r.st.fnOrder.map(id=>`<li id="fn-${esc(id)}">${r.st.fnDefs[id]!=null?inl(r.st.fnDefs[id],{fnOrder:[],fnDefs:{}}):'(missing note)'} <a href="#fnref-${esc(id)}">↩</a></li>`).join('')+'</ol>'}
   const plain=prep.md.replace(/^\s+|\s+$/g,'');
-  return{title,sub,html,md:plain,notes:prep.notes,fns:r.st.fnOrder.length}}
+  const ss=(html.match(/<sup>(?!<a href="#fn-)|<sub>/g)||[]).length;
+  return{title,sub,html,md:plain,notes:prep.notes,fns:r.st.fnOrder.length,ss}}
 /* Where the writer last published, Ghost or Substack, and the post being shown. */
 let pubTo=(f=>f==='html'?'html':'md')(store.get('ww:pubTo','md')),pubData=null;
 /* Opens Publish. Rebuilds from the draft every time, so the copy is never stale. */
@@ -6805,6 +6952,7 @@ function paintPub(){const d=pubData,m=pubTo==='md';
     const notes=[...d.notes];
   notes.push(m?'This is your Markdown, unchanged. Paste it into a Ghost Markdown card, or keep the file. Substack does not read Markdown, so use HTML for Substack.':'Converted from your Markdown. Paste into Ghost or Substack and the formatting holds.');
   if(d.sub)notes.push('Ghost calls the subtitle an excerpt.');
+  if(d.ss)notes.push(m?`${d.ss} superscript or subscript mark${d.ss>1?'s stay':' stays'} as ^ ^ or ~ ~. A Ghost Markdown card renders them; Substack does not.`:`${d.ss} superscript or subscript mark${d.ss>1?'s come':' comes'} through as real superscript and subscript.`);
   if(d.fns)notes.push(m?`${d.fns} footnote${d.fns>1?'s stay':' stays'} as [^1] markers. A Ghost Markdown card renders them; Substack does not.`:`${d.fns} footnote${d.fns>1?'s come':' comes'} through as numbered links, with the notes at the end.`);
   if(cur&&stageOf(cur.fm)!=='ready'&&stageOf(cur.fm)!=='published')notes.unshift(`This essay is at ${STAGE_NAME[stageOf(cur.fm)]||'no stage'}, not Ready.`);
   const step=(n,label,hint,btns)=>`<li><div class="ps-n">${n}</div><div class="ps-t"><b>${label}</b><span>${hint}</span><div class="ps-b">${btns}</div></div></li>`;
