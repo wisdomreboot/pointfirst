@@ -2,6 +2,17 @@
 
 The version number is shown in the command palette under "About Point First". It steps up with each build; the date is when it was cut.
 
+## 1.11.0 (2026-10-31)
+
+Tab and Shift+Tab, on any line
+- Tab moves every line you are on, or have selected, one step right; Shift+Tab one step back. Before, they only worked in lists and tables, and did nothing in a paragraph.
+- Prose steps by an em space. Markdown has no paragraph indent: a tab or four spaces at the start of a paragraph make it a code block in a Ghost Markdown card, Obsidian and GitHub. An em space shows as an indent everywhere and stays prose, and Publish keeps it.
+- A list item nests by two spaces, as before. Code in a fence steps two spaces. In a quote, the indent goes after the >. Headings, rules and fence lines stay where they are, and in a table Tab still moves between cells.
+- On an empty line, Tab starts an indented paragraph. Shift+Tab takes off an em space, a tab or spaces. Each indent is one step to undo. Esc, then Tab, still leaves the page.
+
+The indent trap
+- Slips now marks a paragraph that starts with a tab or four spaces, since Markdown reads it as code. Shift+Tab takes the indent out, and Tab puts in an em space. A list's own continuation and code in a fence are left alone.
+
 ## 1.10.0 (2026-10-31)
 
 Moving paragraphs

@@ -200,4 +200,65 @@ async def suite(c):
     check('E15 the shortcuts list has the moves, strikethrough, superscript and code blocks',
           all(x in rows for x in ['Move a paragraph up', 'Move a paragraph down', 'Strikethrough', 'Superscript, subscript', 'Code block', 'Insert or format anything, by name']), rows)
 
+    # E16 Tab moves the line right, Shift+Tab back: prose by an em space, which stays prose in Markdown
+    E = ' '
+    await put('Pelicans float.\n\nWe only moved here.\n\nThird one.')
+    await caret('only'); await kb.press('Tab'); await a.wait(150)
+    v = await a.ev("editor.value")
+    check('E16 Tab indents the paragraph the cursor is in, wherever the cursor is', v == 'Pelicans float.\n\n' + E + 'We only moved here.\n\nThird one.', repr(v))
+    check('E16 the cursor stays with its word', await a.ev("editor.value.slice(editor.selectionStart,editor.selectionStart+4)") == 'only', '')
+    await kb.press('Tab'); await a.wait(100)
+    check('E16 Tab again steps further', (await a.ev("editor.value")).count(E) == 2, repr(await a.ev("editor.value")))
+    await kb.press('Shift+Tab'); await kb.press('Shift+Tab'); await kb.press('Shift+Tab'); await a.wait(150)
+    check('E16 Shift+Tab steps back, and stops at the margin', await a.ev("editor.value") == 'Pelicans float.\n\nWe only moved here.\n\nThird one.', repr(await a.ev("editor.value")))
+    await a.ev("editor.focus();editor.setSelectionRange(editor.value.indexOf('float'),editor.value.indexOf('Third')+2)")
+    await kb.press('Tab'); await a.wait(150)
+    v = await a.ev("editor.value")
+    check('E16 a selection indents every paragraph it touches, blank lines left alone', v == E + 'Pelicans float.\n\n' + E + 'We only moved here.\n\n' + E + 'Third one.', repr(v))
+    await kb.press('Control+z'); await a.wait(150)
+    check('E16 one step to undo', await a.ev("editor.value") == 'Pelicans float.\n\nWe only moved here.\n\nThird one.', repr(await a.ev("editor.value")))
+    html = await a.ev("(()=>{editor.value='"+E+"An indented paragraph.';return buildPub().html})()")
+    check('E16 Publish keeps the indent, as prose', html.startswith('<p>' + E + 'An indented'), html[:60])
+    md = await a.ev("ED.view.state.sliceDoc(0,1)")
+    tree = await a.ev("(()=>{let n=null;CM.syntaxTree(ED.view.state).iterate({enter:x=>{if(!n&&x.name!=='Document')n=x.name}});return n})()")
+    check('E16 and Markdown reads it as a paragraph, not code', tree == 'Paragraph', tree)
+
+    # E17 on an empty line, Tab starts an indented paragraph; Shift+Tab takes a tab off too
+    await put('First.\n\n')
+    await a.ev("editor.focus();editor.setSelectionRange(editor.value.length,editor.value.length)")
+    await kb.press('Tab'); await kb.type('Indented from the start.'); await a.wait(150)
+    check('E17 Tab on an empty line, then typing, makes an indented paragraph', (await a.ev("editor.value")).endswith('\n\n' + E + 'Indented from the start.'), repr(await a.ev("editor.value")))
+    await put('Before.\n\n\tPelicans float here.')
+    await caret('float'); await kb.press('Shift+Tab'); await a.wait(150)
+    check('E17 Shift+Tab takes a tab off the start of a paragraph', await a.ev("editor.value") == 'Before.\n\nPelicans float here.', repr(await a.ev("editor.value")))
+
+    # E18 lists nest by two spaces, code in a fence by two, quotes after the >, headings stay put
+    await put('- one\n- two\n\n```\nlet x = 1;\n```\n\n> A quote.\n\n## Heading')
+    await caret('two'); await kb.press('Tab'); await a.wait(100)
+    await caret('let x'); await kb.press('Tab'); await a.wait(100)
+    await caret('A quote'); await kb.press('Tab'); await a.wait(100)
+    await caret('Heading'); await kb.press('Tab'); await a.wait(150)
+    v = await a.ev("editor.value")
+    check('E18 a list item nests, code steps two spaces, a quote indents after the >, a heading stays', v == '- one\n  - two\n\n```\n  let x = 1;\n```\n\n> ' + E + 'A quote.\n\n## Heading', repr(v))
+    await caret('two'); await kb.press('Shift+Tab'); await a.wait(100)
+    check('E18 Shift+Tab brings a list item back', (await a.ev("editor.value")).startswith('- one\n- two\n'), repr(await a.ev("editor.value")))
+
+    # E19 Esc, then Tab, still leaves the page, for the keyboard
+    await put('Stay here.')
+    await caret('here'); await kb.press('Escape'); await kb.press('Tab'); await a.wait(150)
+    check('E19 Esc then Tab leaves the page, and changes nothing', (await a.ev("editor.hasFocus")) is False and (await a.ev("editor.value")) == 'Stay here.', await a.ev("document.activeElement&&document.activeElement.id"))
+
+    # E20 the indent trap: a paragraph that starts with a tab or four spaces is code in Markdown
+    await put('Opening.\n\n\tPelicans float on the swell.\n\n    Four spaces too.\n\n- a list\n\n    its own continuation\n\n```\n    code stays code\n```\n\n' + E + 'An em space is fine.')
+    await a.wait(300)
+    traps = await a.ev("hits.filter(h=>h.cat===-10).map(h=>editor.value.slice(h.s,h.e))")
+    check('E20 a tab or four spaces at a paragraph start is an indent trap', traps == ['\tPelicans', '    Four'], traps)
+    row = await a.ev("(()=>{const r=[...document.querySelectorAll('#readChecks .check')].find(x=>x.querySelector('.check-name').textContent==='Slips');return [r.querySelector('.check-count').textContent,r.querySelector('.pip').className]})()")
+    check('E20 Slips counts them, and needs work', row == ['2', 'pip crit'], row)
+    cap = await a.ev("(()=>{setMarkFam('slip');return $('#lensbar').textContent})()")
+    check('E20 Marks: Slips names them', cap.startswith('2 indent traps.') and 'an indent that turns a paragraph into code' in cap, cap[:120])
+    await a.ev("setMarkFam('all')")
+    rows = await a.ev("shortcutGroups().flatMap(g=>g.rows).map(r=>r.d)")
+    check('E20 the shortcuts list has Indent and Outdent', 'Indent' in rows and 'Outdent' in rows and 'Indent an item' not in rows, rows)
+
 go(suite)

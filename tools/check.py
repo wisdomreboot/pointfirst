@@ -9,7 +9,7 @@ never counts locally, and never sends anything from after the # in the address.
 
 Exit code 0 means every check passed.
 """
-import base64, functools, hashlib, http.server, json, os, re, socket, socketserver, sys, threading, time
+import base64, functools, hashlib, http.server, json, os, re, socket, socketserver, sys, threading
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, ".."))
@@ -66,7 +66,7 @@ with sync_playwright() as p:
     errs, counted, sent = [], {}, []
     problems_of(pg, errs, counted)
     pg.on("request", lambda r: sent.append(r.url) if "goatcounter.com" in r.url else None)
-    pg.goto("http://127.0.0.1:%d/index.html" % PORT); pg.wait_for_load_state("load"); time.sleep(1.5)
+    pg.goto("http://127.0.0.1:%d/index.html" % PORT); pg.wait_for_load_state("load"); pg.wait_for_timeout(1500)
     expect("boots cleanly under the security policy", errs, [], "no error and no policy refusal on load")
     expect("no page view is counted from a local address", [counted.get("skipped"), sent], ["localhost", []], "test runs and local copies must never reach the live count")
     ctx.close(); b.close()
@@ -75,7 +75,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(); ctx = b.new_context(); pg = ctx.new_page()
     errs, counted = [], {}
     problems_of(pg, errs, counted)
-    pg.goto("file://" + PAGE); pg.wait_for_load_state("load"); time.sleep(1.2)
+    pg.goto("file://" + PAGE); pg.wait_for_load_state("load"); pg.wait_for_timeout(1200)
     expect("runs from disk without errors, uncounted", [errs, counted.get("skipped")], [[], "localfile"], "the downloaded file needs nothing else and counts nothing")
     ctx.close(); b.close()
 
@@ -89,10 +89,12 @@ with sync_playwright() as p:
         sent.append(route.request.url); route.fulfill(status=204, body="")
     pg.route(re.compile(r"^https://pointfirst\.goatcounter\.com/"), stub)
     pg.goto("http://pointfirst.test:%d/index.html#private-part-must-not-leave" % PORT); pg.wait_for_load_state("load")
+    # Wait with Playwright, not time.sleep: the sync API only hands a request to the stub while
+    # one of its own calls is running, so a count sent a moment after load would go unseen.
     for _ in range(40):
         if sent: break
-        time.sleep(0.25)
-    time.sleep(0.5)
+        pg.wait_for_timeout(250)
+    pg.wait_for_timeout(500)
     expect("a page view is counted once on a real address", len(sent), 1, "the counter runs under the policy and sends one count per page load")
     expect("the count never carries the address after #", [u for u in sent if "private-part" in u or "%23" in u or "#" in u], [], "nothing after # may leave the page")
     expect("the counter causes no errors or policy refusals", errs, [], "the counter must run cleanly with the policy on")

@@ -61,10 +61,14 @@ Ctrl on Windows and Linux, Cmd on a Mac. Where Obsidian, Ghost, Word and Google 
 | Alt Shift W | Open the Words tab |
 | `*` `_` `~` `^` `` ` `` or `[` with text selected | Wrap the selection: `~` subscript, twice strikethrough; `^` superscript; `[` a link |
 | Enter in a list | Continue the list; on an empty item, end it |
-| Tab, Shift Tab in a list | Indent, outdent |
+| Tab, Shift Tab | Indent or outdent every line you are on or have selected: prose by an em space, a list item by a level, code by two spaces. In a table, the next or previous cell |
 | Esc | Close whatever is open |
 
 Ctrl N can't be used for a new essay: Chrome keeps it for a new window.
+
+## Indents
+
+Markdown has no paragraph indent. A tab or four spaces at the start of a paragraph make it a code block in a Ghost Markdown card, Obsidian and GitHub, so Tab in Point First indents prose with an em space, which shows as an indent everywhere and stays prose. Revise marks a paragraph that starts with a tab or four spaces under Slips.
 
 ## Section breaks
 
